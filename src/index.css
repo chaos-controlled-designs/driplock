@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #FDF8F5;
+    color: #2D1B35;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-50;
+    background-color: #E8847A;
+    color: white;
+    box-shadow: 0 0 20px rgba(232,132,122,0.3);
+  }
+  .btn-secondary {
+    @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
+    background-color: white;
+    color: #2D1B35;
+    border: 1px solid rgba(45,27,53,0.2);
+  }
+  .btn-gold {
+    @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
+    background-color: #C9A96E;
+    color: white;
+  }
+  .card {
+    background-color: #F7F3EE;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 15px rgba(45,27,53,0.08);
+    border: 1px solid rgba(45,27,53,0.05);
+  }
+  .input {
+    @apply w-full py-3 px-4 rounded-xl text-sm font-medium transition-all;
+    background-color: white;
+    border: 1px solid rgba(45,27,53,0.2);
+    color: #2D1B35;
+    outline: none;
+  }
+  .input:focus {
+    border-color: #E8847A;
+    box-shadow: 0 0 0 2px rgba(232,132,122,0.2);
+  }
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-widest mb-2;
+    color: rgba(45,27,53,0.6);
+  }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E8847A; border-radius: 99px; }
