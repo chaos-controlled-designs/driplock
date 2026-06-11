@@ -331,8 +331,8 @@ export function LockIn() {
 
         {/* Form card */}
         <div style={{
-          background: '#fff', borderRadius: 26, padding: '24px 20px',
-          boxShadow: '0 4px 28px rgba(255,193,184,0.09)', border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 14,
+          background: '#fff', borderRadius: 28, padding: '28px 22px',
+          boxShadow: '0 4px 28px rgba(255,193,184,0.09)', border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
         }}>
           <ColorSelect value={color} onChange={setColor} />
           <SilhouetteGrid value={silhouette} onChange={setSilhouette} />
@@ -340,7 +340,7 @@ export function LockIn() {
 
         {/* Squad section */}
         <div style={{
-          background: '#fff', borderRadius: 26, padding: '18px 20px 20px',
+          background: '#fff', borderRadius: 28, padding: '22px 22px 24px',
           boxShadow: '0 4px 28px rgba(255,193,184,0.09)', border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -422,7 +422,7 @@ export function LockIn() {
           onClick={handleLock}
           disabled={loading || !hasInput}
           style={{
-            width: '100%', padding: '17px', borderRadius: 20, border: 'none',
+            width: '100%', padding: '18px', borderRadius: 22, border: 'none',
             background: hasInput
               ? `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`
               : 'rgba(63,42,42,0.08)',

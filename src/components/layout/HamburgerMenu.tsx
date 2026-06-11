@@ -28,7 +28,7 @@ function NavItem({ item, onNavigate }: { item: typeof PRIMARY_ITEMS[0]; onNaviga
     <button
       type="button"
       onClick={() => onNavigate(item.path)}
-      className="flex items-center gap-3.5 px-2 py-2.5 rounded-2xl w-full text-left active:scale-[0.97] transition-all hover:bg-blush/60 group"
+      className="flex items-center gap-3.5 px-3 py-3 rounded-2xl w-full text-left active:scale-[0.97] transition-all hover:bg-blush/60 group"
     >
       <div className={`w-10 h-10 ${item.bg} rounded-2xl flex items-center justify-center flex-shrink-0`}>
         <item.Icon size={17} className="text-plum/70"/>

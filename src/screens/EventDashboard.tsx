@@ -142,14 +142,14 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/lock')}
-            className="w-full bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-4 flex items-center gap-4 active:scale-[0.98] transition-all text-left"
+            className="w-full bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-5 flex items-center gap-4 active:scale-[0.98] transition-all text-left"
           >
-            <div className="w-12 h-12 rounded-2xl bg-primary/25 flex items-center justify-center flex-shrink-0">
-              <Lock size={22} className="text-plum"/>
+            <div className="w-14 h-14 rounded-3xl bg-primary/25 flex items-center justify-center flex-shrink-0">
+              <Lock size={24} className="text-plum"/>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-plum text-sm leading-tight mb-0.5">Lock In My Look</p>
-              <p className="text-plum/50 text-xs">Check for dupes · Claim your unique look</p>
+              <p className="font-bold text-plum text-base leading-tight mb-1">Lock In My Look</p>
+              <p className="text-plum/50 text-xs leading-relaxed">Check for dupes · Claim your unique look</p>
             </div>
             <ChevronRight size={16} className="text-plum/35 flex-shrink-0"/>
           </button>
@@ -157,18 +157,18 @@ export function EventDashboard() {
       </div>
 
       {/* ── Cream content sheet — slides up with rounded top ── */}
-      <div className="bg-cream rounded-t-3xl -mt-5 px-4 pt-5 flex flex-col gap-3">
+      <div className="bg-cream rounded-t-3xl -mt-5 px-4 pt-6 flex flex-col gap-4">
 
         {/* Stats — single unified card */}
         <div className="bg-white rounded-3xl shadow-soft border border-primary/10 flex overflow-hidden">
-          <div className="flex-1 text-center py-5">
-            <p className="text-4xl font-bold text-primary leading-none mb-1.5">{lockCount}</p>
+          <div className="flex-1 text-center py-6">
+            <p className="text-5xl font-bold text-primary leading-none mb-2">{lockCount}</p>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Looks Locked</p>
           </div>
-          <div className="w-px bg-plum/6 my-4"/>
-          <div className="flex-1 text-center py-5 flex flex-col items-center justify-center gap-1.5">
-            <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center">
-              <Users size={18} className="text-primary"/>
+          <div className="w-px bg-plum/6 my-5"/>
+          <div className="flex-1 text-center py-6 flex flex-col items-center justify-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-blush flex items-center justify-center">
+              <Users size={20} className="text-primary"/>
             </div>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Your School</p>
           </div>
@@ -179,27 +179,27 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/vault')}
-            className="bg-white rounded-2xl shadow-soft border border-primary/10 flex flex-col items-center gap-2.5 py-6 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-7 active:scale-[0.97] transition-all"
           >
-            <div className="w-11 h-11 rounded-2xl bg-blush flex items-center justify-center">
-              <ShoppingBag size={20} className="text-plum/60"/>
+            <div className="w-12 h-12 rounded-2xl bg-blush flex items-center justify-center">
+              <ShoppingBag size={22} className="text-plum/60"/>
             </div>
             <span className="text-plum font-semibold text-sm">Browse Vault</span>
           </button>
           <button
             type="button"
             onClick={() => navigate('/new-listing')}
-            className="bg-white rounded-2xl shadow-soft border border-primary/10 flex flex-col items-center gap-2.5 py-6 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-7 active:scale-[0.97] transition-all"
           >
-            <div className="w-11 h-11 rounded-2xl bg-sage flex items-center justify-center">
-              <Plus size={20} className="text-plum/60"/>
+            <div className="w-12 h-12 rounded-2xl bg-sage flex items-center justify-center">
+              <Plus size={22} className="text-plum/60"/>
             </div>
             <span className="text-plum font-semibold text-sm">List a Dress</span>
           </button>
         </div>
 
         {/* Safety note */}
-        <div className="bg-sage/50 rounded-2xl px-4 py-3 flex items-center gap-3">
+        <div className="bg-sage/50 rounded-3xl px-5 py-4 flex items-center gap-3">
           <Shield size={14} className="text-plum/45 flex-shrink-0"/>
           <p className="text-plum/55 text-xs leading-relaxed">
             Buddy system for meetups · Never share your address · Stay safe
@@ -208,11 +208,11 @@ export function EventDashboard() {
 
         {/* Recently locked */}
         <div className="pb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
-              <Lock size={11} className="text-primary"/>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center">
+              <Lock size={12} className="text-primary"/>
             </div>
-            <h3 className="font-display text-sm font-semibold text-plum">Recently Locked</h3>
+            <h3 className="font-display text-base font-semibold text-plum">Recently Locked</h3>
           </div>
 
           {recentLocks.length === 0 ? (
@@ -233,7 +233,7 @@ export function EventDashboard() {
           ) : (
             <div className="bg-white rounded-3xl shadow-soft border border-primary/10 overflow-hidden divide-y divide-plum/4">
               {recentLocks.map((lock) => (
-                <div key={lock.id} className="flex items-center gap-3.5 px-5 py-4">
+                <div key={lock.id} className="flex items-center gap-3.5 px-5 py-5">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 font-bold text-plum text-sm">
                     {lock.profiles?.username?.slice(0, 2).toUpperCase() ?? '??'}
                   </div>

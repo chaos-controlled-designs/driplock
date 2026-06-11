@@ -96,9 +96,9 @@ export function Vault() {
     <div className="min-h-screen bg-cream pb-28">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-7 pb-5">
-        <h2 className="font-display text-2xl font-bold text-plum mb-0.5">The Vault</h2>
-        <p className="text-plum/50 text-xs font-medium mb-4">Shop prom dresses from girls near you</p>
+      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-6">
+        <h2 className="font-display text-2xl font-bold text-plum mb-1">The Vault</h2>
+        <p className="text-plum/50 text-xs font-medium mb-5">Shop prom dresses from girls near you</p>
 
         <div className="relative flex gap-2">
           <div className="relative flex-1">
@@ -114,7 +114,7 @@ export function Vault() {
           <button
             type="button"
             aria-label="Filters"
-            className="w-11 h-11 bg-white/80 rounded-xl flex items-center justify-center flex-shrink-0 border border-primary/20"
+            className="w-11 h-11 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 border border-primary/20"
           >
             <SlidersHorizontal size={16} className="text-plum/60"/>
           </button>
@@ -122,7 +122,7 @@ export function Vault() {
       </div>
 
       {/* Filter pills */}
-      <div className="flex gap-2 overflow-x-auto px-4 py-3.5 no-scrollbar">
+      <div className="flex gap-2.5 overflow-x-auto px-4 py-4 no-scrollbar">
         {FILTERS.map(f => (
           <button
             key={f}
@@ -153,14 +153,14 @@ export function Vault() {
             <p className="text-plum/45 text-xs">Try a different filter or search term</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {filtered.map(listing => {
               const isFav = favorites.has(listing.id);
               return (
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className="bg-white rounded-3xl overflow-hidden shadow-soft border border-primary/8 active:scale-[0.97] transition-all cursor-pointer"
+                  className="bg-white rounded-3xl overflow-hidden shadow-medium border border-primary/8 active:scale-[0.97] transition-all cursor-pointer"
                 >
                   {/* Full-bleed photo — taller aspect */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender relative overflow-hidden">
@@ -205,15 +205,15 @@ export function Vault() {
                     </div>
                   </div>
 
-                  {/* Compact info — photo stays the star */}
-                  <div className="p-3.5">
-                    <p className="font-semibold text-plum text-[13px] leading-snug line-clamp-1 mb-1">
+                  {/* Info — compact but breathable */}
+                  <div className="p-4">
+                    <p className="font-semibold text-plum text-[13px] leading-snug line-clamp-1 mb-1.5">
                       {listing.title}
                     </p>
                     {listing.designer && (
                       <p className="text-plum/35 text-[10px] mb-1 truncate">{listing.designer}</p>
                     )}
-                    <div className="flex items-end justify-between mt-0.5">
+                    <div className="flex items-center justify-between mt-2">
                       <p className="text-plum/35 text-[10px]">Size {listing.dress_size}</p>
                       <p className="font-bold text-sm text-primary">{formatPrice(listing)}</p>
                     </div>

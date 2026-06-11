@@ -15,6 +15,10 @@ export default {
         sage:     '#c8f0e8',  // light seafoam surface
         gold:     '#C9A96E',  // warm gold
       },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
       fontFamily: {
         sans:    ['Inter', 'system-ui', 'sans-serif'],
         display: ['Playfair Display', 'Georgia', 'serif'],
