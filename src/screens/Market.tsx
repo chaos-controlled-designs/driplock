@@ -43,7 +43,7 @@ export function Market() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-400 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 animate-pulse"/>
     </div>
   );
 
@@ -51,13 +51,13 @@ export function Market() {
     <div className="min-h-screen bg-cream pb-24">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-6">
+      <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold text-plum mb-1">My Listings</h2>
-            <p className="text-plum/60 text-sm">{listings.length} dress{listings.length !== 1 ? 'es' : ''} listed</p>
+            <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In 💸</h2>
+            <p className="text-plum/50 text-sm">{listings.length} dress{listings.length !== 1 ? 'es' : ''} listed</p>
           </div>
-          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-2xl text-sm font-semibold shadow-glow">
+          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-violet-500 text-white px-4 py-2 rounded-2xl text-sm font-semibold shadow-glow">
             <Plus size={16}/> Add
           </button>
         </div>
@@ -66,9 +66,9 @@ export function Market() {
       <div className="px-4 pt-4">
 
         {/* Earnings banner */}
-        <div className="card bg-gradient-to-r from-gold/20 to-blush mb-5">
-          <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings</p>
-          <p className="font-display text-2xl font-bold text-plum mb-0.5">
+        <div className="rounded-3xl p-4 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">
+          <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings 💸</p>
+          <p className="font-display text-3xl font-bold text-plum mb-0.5">
             ${listings.reduce((sum, l) => sum + (l.rental_price_cents ?? l.price_cents ?? 0) / 100, 0).toFixed(0)}
           </p>
           <p className="text-plum/50 text-xs">across {listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
@@ -84,9 +84,9 @@ export function Market() {
         ) : (
           <div className="flex flex-col gap-3">
             {listings.map(listing => (
-              <div key={listing.id} className="card flex gap-3">
+              <div key={listing.id} className="bg-white rounded-3xl border border-primary/10 shadow-soft flex gap-3 p-3">
                 {/* Photo */}
-                <div className="w-16 h-20 rounded-xl bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-20 h-24 rounded-2xl bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {listing.photo_urls.length > 0 ? (
                     <img src={listing.photo_urls[0]} alt={listing.title} className="w-full h-full object-cover"/>
                   ) : (

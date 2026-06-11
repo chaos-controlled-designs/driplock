@@ -2,9 +2,17 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Heart, Truck } from 'lucide-react';
+import { Search, Heart, Truck, Sparkles } from 'lucide-react';
 
 const FILTERS = ['All', 'Rent', 'Buy', 'Ships', 'Local'];
+
+const STORIES = [
+  { emoji: '👑', label: 'Prom' },
+  { emoji: '🌟', label: 'Homecoming' },
+  { emoji: '✨', label: 'Cocktail' },
+  { emoji: '💖', label: 'New Tags' },
+  { emoji: '💸', label: 'Under $50' },
+];
 
 interface WishItem {
   listing_id: string;
@@ -76,7 +84,7 @@ export function Vault() {
   };
 
   const formatPrice = (l: Listing) => {
-    if (l.listing_type === 'rent' && l.rental_price_cents) return `$${(l.rental_price_cents/100).toFixed(0)}/weekend`;
+    if (l.listing_type === 'rent' && l.rental_price_cents) return `$${(l.rental_price_cents/100).toFixed(0)}/wknd`;
     if (l.listing_type === 'sell' && l.price_cents) return `$${(l.price_cents/100).toFixed(0)}`;
     if (l.listing_type === 'both') {
       const parts = [];
@@ -89,45 +97,68 @@ export function Vault() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-400 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 animate-pulse"/>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-cream pb-24">
-      <div className="bg-gradient-to-br from-lavender to-blush px-5 pt-6 pb-6">
-        <h2 className="font-display text-2xl font-bold text-plum mb-1">The Vault 👗</h2>
-        <p className="text-plum/60 text-sm">Shop dresses from girls across the country</p>
-      </div>
 
-      <div className="px-4 pt-4">
-        <div className="relative mb-3">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-plum/30"/>
+      {/* Header */}
+      <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-plum">The Vault</h2>
+            <p className="text-plum/50 text-xs font-medium">Dresses from girls near you ✨</p>
+          </div>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center shadow-glow">
+            <Sparkles size={15} color="white"/>
+          </div>
+        </div>
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-plum/30"/>
           <input
             type="text"
-            placeholder="Search by color, designer, style..."
+            placeholder="Search color, designer, style..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input pl-9"
           />
         </div>
+      </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-          {FILTERS.map(f => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setActiveFilter(f)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                activeFilter === f ? 'bg-primary text-white shadow-glow' : 'bg-ivory text-plum/60'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+      {/* Stories / Browse-by row */}
+      <div className="flex gap-4 overflow-x-auto px-4 pt-3 pb-1 no-scrollbar">
+        {STORIES.map(s => (
+          <button key={s.label} type="button" className="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center text-2xl border-2 border-white shadow-soft">
+              {s.emoji}
+            </div>
+            <span className="text-[10px] font-semibold text-plum/60 whitespace-nowrap">{s.label}</span>
+          </button>
+        ))}
+      </div>
 
-        <p className="text-plum/40 text-xs font-medium mb-4">{filtered.length} dresses available</p>
+      {/* Filter pills */}
+      <div className="flex gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
+        {FILTERS.map(f => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setActiveFilter(f)}
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              activeFilter === f
+                ? 'bg-gradient-to-r from-primary to-violet-500 text-white shadow-glow'
+                : 'bg-white text-plum/60 border border-primary/20'
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4">
+        <p className="text-plum/40 text-xs font-medium mb-3">{filtered.length} dresses available</p>
 
         {filtered.length === 0 ? (
           <div className="card text-center py-10">
@@ -143,8 +174,9 @@ export function Vault() {
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className="card text-left active:scale-95 transition-all p-0 overflow-hidden cursor-pointer"
+                  className="bg-white rounded-3xl overflow-hidden shadow-soft border border-primary/10 active:scale-95 transition-all cursor-pointer"
                 >
+                  {/* Image */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender flex items-center justify-center relative">
                     {listing.photo_urls?.length > 0 ? (
                       <img src={listing.photo_urls[0]} alt={listing.title} className="w-full h-full object-cover"/>
@@ -152,34 +184,35 @@ export function Vault() {
                       <span className="text-4xl">👗</span>
                     )}
                     {listing.ships && (
-                      <div className="absolute top-2 left-2 bg-white/90 rounded-full px-2 py-0.5 flex items-center gap-1">
-                        <Truck size={10} className="text-primary"/>
-                        <span className="text-[9px] font-semibold text-plum">Ships</span>
+                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 shadow-soft">
+                        <Truck size={9} className="text-primary"/>
+                        <span className="text-[9px] font-bold text-plum">Ships</span>
                       </div>
                     )}
                     <button
                       type="button"
                       onClick={(e) => toggleFavorite(e, listing.id)}
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center transition-all active:scale-95"
+                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-95 shadow-soft"
                     >
-                      <Heart size={13} color="#E8847A" fill={isFav ? '#E8847A' : 'none'}/>
+                      <Heart size={13} fill={isFav ? '#ec4899' : 'none'} color={isFav ? '#ec4899' : '#2D1B3540'}/>
                     </button>
-                  </div>
-
-                  <div className="p-3">
-                    <p className="font-semibold text-plum text-xs leading-tight mb-1 line-clamp-2">{listing.title}</p>
-                    {listing.designer && <p className="text-plum/40 text-[10px] mb-1">{listing.designer}</p>}
-                    <p className="text-plum/50 text-[10px] mb-2">Size {listing.dress_size}</p>
-                    <p className="text-primary font-bold text-xs">{formatPrice(listing)}</p>
-                    <div className="flex gap-1 mt-2">
-                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                    <div className="absolute bottom-2 left-2">
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                         listing.listing_type === 'rent' ? 'bg-lavender text-plum' :
                         listing.listing_type === 'sell' ? 'bg-sage text-plum' : 'bg-blush text-plum'
                       }`}>
                         {listing.listing_type === 'both' ? 'Rent or Buy' : listing.listing_type === 'rent' ? 'Rent' : 'Buy'}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3">
+                    <p className="font-semibold text-plum text-xs leading-tight mb-0.5 line-clamp-1">{listing.title}</p>
+                    {listing.designer && <p className="text-plum/40 text-[10px]">{listing.designer}</p>}
+                    <p className="text-plum/40 text-[10px] mb-1.5">Size {listing.dress_size}</p>
+                    <p className="font-bold text-xs text-primary">{formatPrice(listing)}</p>
                   </div>
                 </div>
               );

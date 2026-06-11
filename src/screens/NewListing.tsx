@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ChevronDown, ArrowLeft, Camera } from 'lucide-react';
+import { ChevronDown, ArrowLeft, Camera, ImagePlus } from 'lucide-react';
 
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
 
@@ -25,8 +25,11 @@ const CONDITIONS = [
 const CATEGORIES = [
   { value: 'prom',       label: '👑 Prom' },
   { value: 'homecoming', label: '🌟 Homecoming' },
-  { value: 'cocktail',   label: '✨ Cocktail / Formal' },
+  { value: 'cocktail',   label: '✨ Cocktail' },
 ];
+
+const ACTIVE_PILL = 'bg-gradient-to-r from-primary to-violet-500 text-white border-transparent shadow-glow';
+const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 
 export function NewListing() {
   const navigate = useNavigate();
@@ -93,7 +96,7 @@ export function NewListing() {
 
   if (success) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-      <div className="text-6xl mb-4">🎉</div>
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-4xl mb-5 shadow-glow">🎉</div>
       <h2 className="font-display text-2xl font-bold text-plum mb-2">Listing Posted!</h2>
       <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across the country in The Vault.</p>
       <button type="button" onClick={() => navigate('/market')} className="btn-primary mb-3">View My Listings</button>
@@ -126,17 +129,24 @@ export function NewListing() {
           </div>
         )}
 
-        {/* Photos */}
+        {/* Photo Upload — Hero */}
         <div>
-          <label className="label">Photos (coming soon)</label>
+          <label className="label">Photos</label>
+          <div className="w-full aspect-[4/3] bg-gradient-to-br from-blush via-cream to-lavender rounded-3xl flex flex-col items-center justify-center mb-2.5 border-2 border-dashed border-primary/25">
+            <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center mb-2.5 shadow-soft">
+              <Camera size={28} className="text-primary/70"/>
+            </div>
+            <p className="text-plum/60 text-sm font-semibold">Add your best photo</p>
+            <p className="text-plum/35 text-xs mt-0.5">Great photos = way more interest! 📸</p>
+          </div>
           <div className="flex gap-2">
-            {[0,1,2,3].map(i => (
-              <div key={i} className="flex-1 aspect-square bg-ivory rounded-2xl border border-plum/10 flex items-center justify-center">
-                <Camera size={i===0?20:14} className="text-plum/20"/>
+            {[0,1,2].map(i => (
+              <div key={i} className="flex-1 aspect-square bg-blush/60 rounded-2xl border-2 border-dashed border-primary/20 flex items-center justify-center">
+                <ImagePlus size={14} className="text-primary/30"/>
               </div>
             ))}
           </div>
-          <p className="text-plum/40 text-[10px] mt-1">Photo upload coming soon — add up to 4 photos</p>
+          <p className="text-primary/50 text-[10px] mt-1.5 text-center font-medium">Photo upload coming in next update ✨</p>
         </div>
 
         {/* Title */}
@@ -157,8 +167,8 @@ export function NewListing() {
           <div className="grid grid-cols-3 gap-2">
             {CATEGORIES.map(c => (
               <button type="button" key={c.value} onClick={() => setCategory(c.value)}
-                className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all ${
-                  category === c.value ? 'bg-primary text-white border-primary' : 'bg-white text-plum border-plum/10'
+                className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                  category === c.value ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {c.label}
               </button>
@@ -170,7 +180,7 @@ export function NewListing() {
         <div>
           <label className="label">Designer</label>
           <div className="relative mb-2">
-            <select value={designer} onChange={e => setDesigner(e.target.value)} className="input appearance-none pr-10">
+            <select aria-label="Designer" value={designer} onChange={e => setDesigner(e.target.value)} className="input appearance-none pr-10">
               <option value="">Select designer (optional)</option>
               {POPULAR_DESIGNERS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -196,7 +206,7 @@ export function NewListing() {
           <div className="flex-1">
             <label className="label">Silhouette</label>
             <div className="relative">
-              <select value={silhouette} onChange={e => setSilhouette(e.target.value)} className="input appearance-none pr-8">
+              <select aria-label="Silhouette" value={silhouette} onChange={e => setSilhouette(e.target.value)} className="input appearance-none pr-8">
                 <option value="">Select</option>
                 {SILHOUETTES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -212,7 +222,7 @@ export function NewListing() {
             {DRESS_SIZES.map(s => (
               <button type="button" key={s} onClick={() => setDressSize(s)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                  dressSize === s ? 'bg-primary text-white border-primary' : 'bg-white text-plum border-plum/10'
+                  dressSize === s ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {s}
               </button>
@@ -250,7 +260,7 @@ export function NewListing() {
             {CONDITIONS.map(c => (
               <button type="button" key={c.value} onClick={() => setCondition(c.value)}
                 className={`py-3 px-4 rounded-xl text-left text-xs font-medium border transition-all ${
-                  condition === c.value ? 'bg-primary/10 border-primary text-plum' : 'bg-white border-plum/10 text-plum/70'
+                  condition === c.value ? 'bg-primary/10 border-primary text-plum' : 'bg-white border-primary/15 text-plum/70'
                 }`}>
                 {c.label}
               </button>
@@ -268,8 +278,8 @@ export function NewListing() {
               { value: 'both', label: 'Rent & Sell' },
             ].map(t => (
               <button type="button" key={t.value} onClick={() => setListingType(t.value)}
-                className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all ${
-                  listingType === t.value ? 'bg-primary text-white border-primary' : 'bg-white text-plum border-plum/10'
+                className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                  listingType === t.value ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {t.label}
               </button>
