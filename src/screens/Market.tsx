@@ -43,7 +43,7 @@ export function Market() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-300 animate-pulse"/>
     </div>
   );
 
@@ -57,7 +57,7 @@ export function Market() {
             <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In 💸</h2>
             <p className="text-plum/50 text-sm">{listings.length} dress{listings.length !== 1 ? 'es' : ''} listed</p>
           </div>
-          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-violet-500 text-white px-4 py-2 rounded-2xl text-sm font-semibold shadow-glow">
+          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-violet-300 text-white px-4 py-2 rounded-2xl text-sm font-semibold shadow-glow">
             <Plus size={16}/> Add
           </button>
         </div>

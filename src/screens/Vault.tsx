@@ -97,7 +97,7 @@ export function Vault() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-300 animate-pulse"/>
     </div>
   );
 
@@ -111,7 +111,7 @@ export function Vault() {
             <h2 className="font-display text-2xl font-bold text-plum">The Vault</h2>
             <p className="text-plum/50 text-xs font-medium">Dresses from girls near you ✨</p>
           </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center shadow-glow">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-violet-300 flex items-center justify-center shadow-glow">
             <Sparkles size={15} color="white"/>
           </div>
         </div>
@@ -148,7 +148,7 @@ export function Vault() {
             onClick={() => setActiveFilter(f)}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               activeFilter === f
-                ? 'bg-gradient-to-r from-primary to-violet-500 text-white shadow-glow'
+                ? 'bg-gradient-to-r from-primary to-violet-300 text-white shadow-glow'
                 : 'bg-white text-plum/60 border border-primary/20'
             }`}
           >
@@ -195,7 +195,7 @@ export function Vault() {
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                       className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-95 shadow-soft"
                     >
-                      <Heart size={13} fill={isFav ? '#ec4899' : 'none'} color={isFav ? '#ec4899' : '#2D1B3540'}/>
+                      <Heart size={13} fill={isFav ? '#d4679a' : 'none'} color={isFav ? '#d4679a' : '#37415140'}/>
                     </button>
                     <div className="absolute bottom-2 left-2">
                       <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${

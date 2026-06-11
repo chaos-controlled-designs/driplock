@@ -11,7 +11,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
     ?? '??';
 
   return (
-    <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-40 bg-cream/90 backdrop-blur-sm border-b border-plum/5 px-4 py-3 flex items-center justify-between">
+    <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-40 bg-white/90 backdrop-blur-sm border-b border-primary/15 px-4 py-3 flex items-center justify-between">
       <button
         type="button"
         aria-label="Open menu"
@@ -22,7 +22,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       </button>
 
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-rose-400 flex items-center justify-center shadow-glow">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-violet-300 flex items-center justify-center shadow-glow">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
             <rect x="5" y="11" width="14" height="10" rx="3"/>
             <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
@@ -38,7 +38,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         type="button"
         aria-label="Open settings"
         onClick={() => navigate('/settings')}
-        className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-rose-400 flex items-center justify-center shadow-glow text-white text-xs font-bold"
+        className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-violet-300 flex items-center justify-center shadow-glow text-plum text-xs font-bold"
       >
         {initials}
       </button>

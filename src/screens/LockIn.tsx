@@ -19,9 +19,9 @@ const COLORS = [
   'Emerald', 'Sage Green', 'Mint', 'Sky Blue', 'Yellow', 'Orange', 'Other',
 ];
 
-const PRIMARY   = '#E8847A';
-const PRIMARY_L = '#f87171';
-const PLUM      = '#2D1B35';
+const PRIMARY   = '#f8a8c2';
+const PRIMARY_L = '#c4b5fd';
+const PLUM      = '#374151';
 
 interface PeerLock {
   user_id: string;
@@ -60,12 +60,12 @@ function SelectField({
             width: '100%', appearance: 'none', padding: '12px 40px 12px 16px',
             borderRadius: 14,
             border: value ? `2px solid ${PRIMARY}` : '2px solid #e5e7eb',
-            background: value ? '#FDF0EE' : '#fff',
+            background: value ? '#fde8f0' : '#fff',
             fontSize: 14, fontWeight: value ? 600 : 400,
-            color: value ? PLUM : 'rgba(45,27,53,0.35)',
+            color: value ? PLUM : 'rgba(55,65,81,0.35)',
             cursor: 'pointer', outline: 'none',
             transition: 'border-color 0.2s, background 0.2s',
-            boxShadow: value ? '0 0 0 3px rgba(232,132,122,0.15)' : 'none',
+            boxShadow: value ? '0 0 0 3px rgba(248,168,194,0.15)' : 'none',
           }}
         >
           <option value="">{placeholder}</option>
@@ -100,9 +100,9 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
                 fontWeight: 700,
                 border: sel ? `2px solid ${PRIMARY}` : '2px solid #f0ebe8',
                 background: sel ? PRIMARY : '#fff',
-                color: sel ? '#fff' : 'rgba(45,27,53,0.7)',
+                color: sel ? PLUM : 'rgba(55,65,81,0.65)',
                 cursor: 'pointer', transition: 'all 0.18s ease',
-                boxShadow: sel ? '0 4px 14px rgba(232,132,122,0.4)' : '0 1px 3px rgba(0,0,0,0.06)',
+                boxShadow: sel ? '0 4px 14px rgba(248,168,194,0.4)' : '0 1px 3px rgba(0,0,0,0.06)',
                 transform: sel ? 'scale(1.04)' : 'scale(1)',
               }}
             >
@@ -187,7 +187,7 @@ export function LockIn() {
   // ── success screen ────────────────────────────────────────────────────────
   if (locked) return (
     <div style={{
-      minHeight: '100vh', background: 'linear-gradient(160deg, #FDF8F5 0%, #FDF0EE 100%)',
+      minHeight: '100vh', background: 'linear-gradient(160deg, #fdf4f8 0%, #fde8f0 100%)',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', padding: '32px 20px', textAlign: 'center',
     }}>
@@ -195,7 +195,7 @@ export function LockIn() {
         width: 80, height: 80, borderRadius: '50%',
         background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 20, boxShadow: '0 8px 32px rgba(232,132,122,0.4)', fontSize: 36,
+        marginBottom: 20, boxShadow: '0 8px 32px rgba(248,168,194,0.4)', fontSize: 36,
       }}>✓</div>
       <h2 style={{ fontSize: 26, fontWeight: 800, color: PLUM, margin: '0 0 6px' }}>
         Look Locked! 🎀
@@ -206,8 +206,8 @@ export function LockIn() {
       <div style={{
         background: '#fff', borderRadius: 20, padding: '18px 24px',
         width: '100%', maxWidth: 360, marginBottom: 14,
-        border: '1.5px solid rgba(232,132,122,0.2)', textAlign: 'left',
-        boxShadow: '0 4px 24px rgba(232,132,122,0.08)',
+        border: '1.5px solid rgba(248,168,194,0.2)', textAlign: 'left',
+        boxShadow: '0 4px 24px rgba(248,168,194,0.08)',
       }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: PRIMARY, textTransform: 'uppercase', marginBottom: 6 }}>
           Your locked look
@@ -228,14 +228,14 @@ export function LockIn() {
       <button type="button" onClick={() => navigate('/event')} style={{
         padding: '14px 32px', borderRadius: 14, fontSize: 14, fontWeight: 700,
         background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
-        color: '#fff', border: 'none', cursor: 'pointer',
-        boxShadow: '0 6px 20px rgba(232,132,122,0.4)', marginBottom: 12,
+        color: PLUM, border: 'none', cursor: 'pointer',
+        boxShadow: '0 6px 20px rgba(248,168,194,0.45)', marginBottom: 12,
         width: '100%', maxWidth: 360,
       }}>Back to Dashboard</button>
       <button type="button" onClick={() => { setLocked(false); setColor(''); setSilhouette(''); }} style={{
         padding: '12px 32px', borderRadius: 14, fontSize: 14, fontWeight: 700,
         background: '#fff', color: PRIMARY,
-        border: '2px solid rgba(232,132,122,0.25)', cursor: 'pointer',
+        border: '2px solid rgba(248,168,194,0.25)', cursor: 'pointer',
         width: '100%', maxWidth: 360,
       }}>Lock Another Look</button>
     </div>
@@ -243,7 +243,7 @@ export function LockIn() {
 
   // ── main screen ───────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#FDF8F5' }}>
+    <div style={{ minHeight: '100vh', background: '#fdf4f8' }}>
 
       {/* header */}
       <div style={{
@@ -269,14 +269,14 @@ export function LockIn() {
         <div style={{
           background: '#fff', borderRadius: 20, padding: '14px 16px', marginBottom: 16,
           display: 'flex', gap: 12, alignItems: 'flex-start',
-          boxShadow: '0 4px 24px rgba(232,132,122,0.08)', border: '1.5px solid rgba(232,132,122,0.15)',
+          boxShadow: '0 4px 24px rgba(248,168,194,0.08)', border: '1.5px solid rgba(248,168,194,0.15)',
         }}>
-          <div style={{ background: 'rgba(232,132,122,0.12)', borderRadius: 10, padding: 7, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ background: 'rgba(248,168,194,0.12)', borderRadius: 10, padding: 7, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <Shield size={16} color={PRIMARY} />
           </div>
           <div>
             <div style={{ fontWeight: 700, color: PLUM, fontSize: 12, marginBottom: 2 }}>100% Private</div>
-            <div style={{ fontSize: 11, color: 'rgba(45,27,53,0.5)', lineHeight: 1.6 }}>
+            <div style={{ fontSize: 11, color: 'rgba(55,65,81,0.5)', lineHeight: 1.6 }}>
               Your picks are only used to check for dupes. Nobody sees what you selected.
             </div>
           </div>
@@ -315,7 +315,7 @@ export function LockIn() {
         {/* form card */}
         <div style={{
           background: '#fff', borderRadius: 24, padding: '22px 18px',
-          boxShadow: '0 4px 32px rgba(232,132,122,0.08)', border: '1.5px solid rgba(232,132,122,0.15)', marginBottom: 16,
+          boxShadow: '0 4px 32px rgba(248,168,194,0.08)', border: '1.5px solid rgba(248,168,194,0.15)', marginBottom: 16,
         }}>
           <SelectField label="Dress Color" value={color} onChange={setColor} options={COLORS} placeholder="Select your color" />
           <SilhouetteGrid value={silhouette} onChange={setSilhouette} />
@@ -324,7 +324,7 @@ export function LockIn() {
         {/* who's locked in */}
         <div style={{
           background: '#fff', borderRadius: 24, padding: '18px 18px 20px',
-          boxShadow: '0 4px 32px rgba(232,132,122,0.08)', border: '1.5px solid rgba(232,132,122,0.15)', marginBottom: 20,
+          boxShadow: '0 4px 32px rgba(248,168,194,0.08)', border: '1.5px solid rgba(248,168,194,0.15)', marginBottom: 20,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
             <div style={{
@@ -334,14 +334,14 @@ export function LockIn() {
             }}>VS</div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 13, color: PLUM }}>Your Squad</div>
-              <div style={{ fontSize: 11, color: 'rgba(45,27,53,0.4)' }}>
+              <div style={{ fontSize: 11, color: 'rgba(55,65,81,0.4)' }}>
                 {peers.length === 0 ? 'No one locked in yet — be first!' : `${peers.length} girl${peers.length > 1 ? 's' : ''} locked in`}
               </div>
             </div>
           </div>
 
           {peers.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '16px 0', color: 'rgba(45,27,53,0.35)', fontSize: 13 }}>
+            <div style={{ textAlign: 'center', padding: '16px 0', color: 'rgba(55,65,81,0.35)', fontSize: 13 }}>
               🔒 Be the first to lock in!
             </div>
           ) : (
@@ -349,7 +349,7 @@ export function LockIn() {
               {peers.map(peer => (
                 <div key={peer.user_id} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
-                  background: 'rgba(232,132,122,0.06)', border: '1.5px solid rgba(232,132,122,0.18)',
+                  background: 'rgba(248,168,194,0.06)', border: '1.5px solid rgba(248,168,194,0.18)',
                   borderRadius: 14, padding: '10px 14px',
                 }}>
                   <div style={{
@@ -373,9 +373,9 @@ export function LockIn() {
         {/* selection summary */}
         {hasInput && (
           <div style={{
-            background: 'linear-gradient(135deg, #FDF0EE, #F5D5CF)',
+            background: 'linear-gradient(135deg, #fde8f0, #f3e8ff)',
             borderRadius: 18, padding: '14px 18px', marginBottom: 16,
-            border: '1.5px solid rgba(232,132,122,0.3)',
+            border: '1.5px solid rgba(248,168,194,0.3)',
           }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: PRIMARY, textTransform: 'uppercase', marginBottom: 4 }}>
               Your selection
@@ -392,9 +392,9 @@ export function LockIn() {
           style={{
             width: '100%', padding: '16px', borderRadius: 16, border: 'none',
             background: hasInput ? `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})` : '#e5e7eb',
-            color: hasInput ? '#fff' : 'rgba(45,27,53,0.35)',
+            color: hasInput ? PLUM : 'rgba(55,65,81,0.35)',
             fontSize: 15, fontWeight: 800, cursor: hasInput ? 'pointer' : 'not-allowed',
-            boxShadow: hasInput ? '0 8px 24px rgba(232,132,122,0.45)' : 'none',
+            boxShadow: hasInput ? '0 8px 24px rgba(248,168,194,0.45)' : 'none',
             transition: 'all 0.2s ease',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             opacity: loading ? 0.7 : 1,

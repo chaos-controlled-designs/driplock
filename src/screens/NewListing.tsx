@@ -28,7 +28,7 @@ const CATEGORIES = [
   { value: 'cocktail',   label: '✨ Cocktail' },
 ];
 
-const ACTIVE_PILL = 'bg-gradient-to-r from-primary to-violet-500 text-white border-transparent shadow-glow';
+const ACTIVE_PILL = 'bg-gradient-to-r from-primary to-violet-300 text-white border-transparent shadow-glow';
 const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 
 export function NewListing() {
@@ -96,7 +96,7 @@ export function NewListing() {
 
   if (success) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-4xl mb-5 shadow-glow">🎉</div>
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-violet-300 flex items-center justify-center text-4xl mb-5 shadow-glow">🎉</div>
       <h2 className="font-display text-2xl font-bold text-plum mb-2">Listing Posted!</h2>
       <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across the country in The Vault.</p>
       <button type="button" onClick={() => navigate('/market')} className="btn-primary mb-3">View My Listings</button>
