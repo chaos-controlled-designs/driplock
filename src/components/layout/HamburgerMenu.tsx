@@ -13,7 +13,7 @@ const items = [
   { path: '/event',     label: 'Event Dashboard', Icon: Calendar,      bg: 'bg-blush' },
   { path: '/lock',      label: 'Lock In My Look',  Icon: Lock,          bg: 'bg-lavender' },
   { path: '/vault',     label: 'The Vault',        Icon: ShoppingBag,   bg: 'bg-sage' },
-  { path: '/market',    label: 'Market',            Icon: Store,         bg: 'bg-blush' },
+  { path: '/market',    label: 'Cash In',           Icon: Store,         bg: 'bg-blush' },
   { path: '/chats',     label: 'Chats',             Icon: MessageCircle, bg: 'bg-lavender' },
   { path: '/favorites', label: 'My Favorites',      Icon: Heart,         bg: 'bg-blush' },
   { path: '/settings',  label: 'Settings & Profile', Icon: User,          bg: 'bg-sage' },
