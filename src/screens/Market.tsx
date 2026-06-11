@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ShoppingBag } from 'lucide-react';
 
 export function Market() {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export function Market() {
       <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In 💸</h2>
+            <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In</h2>
             <p className="text-plum/50 text-sm">{listings.length} dress{listings.length !== 1 ? 'es' : ''} listed</p>
           </div>
           <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-lavender text-plum px-4 py-2 rounded-2xl text-sm font-semibold shadow-soft">
@@ -67,7 +67,7 @@ export function Market() {
 
         {/* Earnings banner */}
         <div className="rounded-3xl p-4 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">
-          <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings 💸</p>
+          <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings</p>
           <p className="font-display text-3xl font-bold text-plum mb-0.5">
             ${listings.reduce((sum, l) => sum + (l.rental_price_cents ?? l.price_cents ?? 0) / 100, 0).toFixed(0)}
           </p>
@@ -76,7 +76,9 @@ export function Market() {
 
         {listings.length === 0 ? (
           <div className="card text-center py-10">
-            <div className="text-5xl mb-4">👗</div>
+            <div className="w-14 h-14 rounded-full bg-blush flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag size={26} className="text-primary"/>
+            </div>
             <h3 className="font-display text-lg font-semibold text-plum mb-2">No listings yet</h3>
             <p className="text-plum/50 text-sm mb-6">List last year's dress and earn cash back on your closet!</p>
             <button type="button" onClick={() => navigate('/new-listing')} className="btn-primary">List My First Dress</button>
@@ -90,7 +92,7 @@ export function Market() {
                   {listing.photo_urls.length > 0 ? (
                     <img src={listing.photo_urls[0]} alt={listing.title} className="w-full h-full object-cover"/>
                   ) : (
-                    <span className="text-2xl">👗</span>
+                    <ShoppingBag size={24} className="text-primary/40"/>
                   )}
                 </div>
 

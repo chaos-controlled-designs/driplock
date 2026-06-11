@@ -2,17 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Heart, Truck, Sparkles } from 'lucide-react';
+import { Search, Heart, Truck, ShoppingBag } from 'lucide-react';
 
 const FILTERS = ['All', 'Rent', 'Buy', 'Ships', 'Local'];
-
-const STORIES = [
-  { emoji: '👑', label: 'Prom' },
-  { emoji: '🌟', label: 'Homecoming' },
-  { emoji: '✨', label: 'Cocktail' },
-  { emoji: '💖', label: 'New Tags' },
-  { emoji: '💸', label: 'Under $50' },
-];
 
 interface WishItem {
   listing_id: string;
@@ -74,8 +66,7 @@ export function Vault() {
     e.stopPropagation();
     if (!user) return;
     if (favorites.has(listingId)) {
-      await supabase.from('wishlists').delete()
-        .eq('user_id', user.id).eq('listing_id', listingId);
+      await supabase.from('wishlists').delete().eq('user_id', user.id).eq('listing_id', listingId);
       setFavorites(prev => { const n = new Set(prev); n.delete(listingId); return n; });
     } else {
       await supabase.from('wishlists').insert({ user_id: user.id, listing_id: listingId });
@@ -84,12 +75,12 @@ export function Vault() {
   };
 
   const formatPrice = (l: Listing) => {
-    if (l.listing_type === 'rent' && l.rental_price_cents) return `$${(l.rental_price_cents/100).toFixed(0)}/wknd`;
-    if (l.listing_type === 'sell' && l.price_cents) return `$${(l.price_cents/100).toFixed(0)}`;
+    if (l.listing_type === 'rent' && l.rental_price_cents) return `$${(l.rental_price_cents / 100).toFixed(0)}/wknd`;
+    if (l.listing_type === 'sell' && l.price_cents) return `$${(l.price_cents / 100).toFixed(0)}`;
     if (l.listing_type === 'both') {
       const parts = [];
-      if (l.rental_price_cents) parts.push(`Rent $${(l.rental_price_cents/100).toFixed(0)}`);
-      if (l.price_cents) parts.push(`Buy $${(l.price_cents/100).toFixed(0)}`);
+      if (l.rental_price_cents) parts.push(`Rent $${(l.rental_price_cents / 100).toFixed(0)}`);
+      if (l.price_cents) parts.push(`Buy $${(l.price_cents / 100).toFixed(0)}`);
       return parts.join(' · ');
     }
     return 'Price TBD';
@@ -105,38 +96,19 @@ export function Vault() {
     <div className="min-h-screen bg-cream pb-24">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-plum">The Vault</h2>
-            <p className="text-plum/50 text-xs font-medium">Dresses from girls near you ✨</p>
-          </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-glow">
-            <Sparkles size={15} color="white"/>
-          </div>
-        </div>
+      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-5">
+        <h2 className="font-display text-2xl font-bold text-plum mb-0.5">The Vault</h2>
+        <p className="text-plum/50 text-xs font-medium mb-3">Shop dresses from girls near you</p>
         <div className="relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-plum/30"/>
           <input
             type="text"
-            placeholder="Search color, designer, style..."
+            placeholder="Search by color, designer, style..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input pl-9"
           />
         </div>
-      </div>
-
-      {/* Stories / Browse-by row */}
-      <div className="flex gap-4 overflow-x-auto px-4 pt-3 pb-1 no-scrollbar">
-        {STORIES.map(s => (
-          <button key={s.label} type="button" className="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center text-2xl border-2 border-white shadow-soft">
-              {s.emoji}
-            </div>
-            <span className="text-[10px] font-semibold text-plum/60 whitespace-nowrap">{s.label}</span>
-          </button>
-        ))}
       </div>
 
       {/* Filter pills */}
@@ -162,7 +134,9 @@ export function Vault() {
 
         {filtered.length === 0 ? (
           <div className="card text-center py-10">
-            <div className="text-4xl mb-3">👗</div>
+            <div className="w-12 h-12 rounded-full bg-blush flex items-center justify-center mx-auto mb-3">
+              <ShoppingBag size={22} className="text-primary"/>
+            </div>
             <p className="font-semibold text-plum text-sm mb-1">No dresses found</p>
             <p className="text-plum/50 text-xs">Try a different filter or search term</p>
           </div>
@@ -181,10 +155,10 @@ export function Vault() {
                     {listing.photo_urls?.length > 0 ? (
                       <img src={listing.photo_urls[0]} alt={listing.title} className="w-full h-full object-cover"/>
                     ) : (
-                      <span className="text-4xl">👗</span>
+                      <ShoppingBag size={32} className="text-primary/40"/>
                     )}
                     {listing.ships && (
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 shadow-soft">
+                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1">
                         <Truck size={9} className="text-primary"/>
                         <span className="text-[9px] font-bold text-plum">Ships</span>
                       </div>
@@ -193,14 +167,14 @@ export function Vault() {
                       type="button"
                       onClick={(e) => toggleFavorite(e, listing.id)}
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-95 shadow-soft"
+                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-95"
                     >
-                      <Heart size={13} fill={isFav ? '#d4679a' : 'none'} color={isFav ? '#d4679a' : '#37415140'}/>
+                      <Heart size={13} fill={isFav ? '#f8a8c2' : 'none'} color={isFav ? '#f8a8c2' : '#37415145'}/>
                     </button>
                     <div className="absolute bottom-2 left-2">
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                        listing.listing_type === 'rent' ? 'bg-lavender text-plum' :
-                        listing.listing_type === 'sell' ? 'bg-sage text-plum' : 'bg-blush text-plum'
+                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                        listing.listing_type === 'rent' ? 'bg-lavender/80 text-plum' :
+                        listing.listing_type === 'sell' ? 'bg-sage text-plum' : 'bg-rose/80 text-plum'
                       }`}>
                         {listing.listing_type === 'both' ? 'Rent or Buy' : listing.listing_type === 'rent' ? 'Rent' : 'Buy'}
                       </span>

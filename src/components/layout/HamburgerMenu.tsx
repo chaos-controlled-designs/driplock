@@ -41,7 +41,7 @@ export function HamburgerMenu({ isOpen, onClose, onNavigate }: Props) {
         {/* Header */}
         <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-12 pb-6 flex items-start justify-between">
           <div>
-            <p className="font-display text-xl font-bold text-plum">DripLock 👗</p>
+            <p className="font-display text-xl font-bold text-plum">DripLock</p>
             {profile && (
               <>
                 <p className="text-plum text-sm font-semibold mt-1">@{profile.username}</p>

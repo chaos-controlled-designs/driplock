@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ChevronDown, ArrowLeft, Camera, ImagePlus } from 'lucide-react';
+import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag } from 'lucide-react';
 
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
 
@@ -15,17 +15,17 @@ const POPULAR_DESIGNERS = [
 ];
 
 const CONDITIONS = [
-  { value: 'new_with_tags',    label: '🏷️ New with tags — never worn' },
-  { value: 'new_without_tags', label: '✨ New without tags — worn once' },
-  { value: 'like_new',         label: '💫 Like new — excellent condition' },
-  { value: 'good',             label: '👍 Good — minor signs of wear' },
-  { value: 'fair',             label: '🔧 Fair — visible wear, priced accordingly' },
+  { value: 'new_with_tags',    label: 'New with tags — never worn' },
+  { value: 'new_without_tags', label: 'New without tags — worn once' },
+  { value: 'like_new',         label: 'Like new — excellent condition' },
+  { value: 'good',             label: 'Good — minor signs of wear' },
+  { value: 'fair',             label: 'Fair — visible wear, priced accordingly' },
 ];
 
 const CATEGORIES = [
-  { value: 'prom',       label: '👑 Prom' },
-  { value: 'homecoming', label: '🌟 Homecoming' },
-  { value: 'cocktail',   label: '✨ Cocktail' },
+  { value: 'prom',       label: 'Prom' },
+  { value: 'homecoming', label: 'Homecoming' },
+  { value: 'cocktail',   label: 'Cocktail' },
 ];
 
 const ACTIVE_PILL = 'bg-gradient-to-r from-primary to-lavender text-plum border-transparent shadow-soft';
@@ -96,7 +96,9 @@ export function NewListing() {
 
   if (success) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center text-4xl mb-5 shadow-glow">🎉</div>
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-5 shadow-glow">
+        <ShoppingBag size={36} className="text-plum"/>
+      </div>
       <h2 className="font-display text-2xl font-bold text-plum mb-2">Listing Posted!</h2>
       <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across the country in The Vault.</p>
       <button type="button" onClick={() => navigate('/market')} className="btn-primary mb-3">View My Listings</button>
@@ -117,7 +119,7 @@ export function NewListing() {
         >
           <ArrowLeft size={16}/> Back
         </button>
-        <h2 className="font-display text-2xl font-bold text-plum mb-1">List Your Dress ✨</h2>
+        <h2 className="font-display text-2xl font-bold text-plum mb-1">List Your Dress</h2>
         <p className="text-plum/60 text-sm">Earn cash on your closet — safe, simple, girl-to-girl</p>
       </div>
 
@@ -137,7 +139,7 @@ export function NewListing() {
               <Camera size={28} className="text-primary/70"/>
             </div>
             <p className="text-plum/60 text-sm font-semibold">Add your best photo</p>
-            <p className="text-plum/35 text-xs mt-0.5">Great photos = way more interest! 📸</p>
+            <p className="text-plum/35 text-xs mt-0.5">Great photos = way more interest!</p>
           </div>
           <div className="flex gap-2">
             {[0,1,2].map(i => (
@@ -146,7 +148,7 @@ export function NewListing() {
               </div>
             ))}
           </div>
-          <p className="text-primary/50 text-[10px] mt-1.5 text-center font-medium">Photo upload coming in next update ✨</p>
+          <p className="text-primary/50 text-[10px] mt-1.5 text-center font-medium">Photo upload coming in next update</p>
         </div>
 
         {/* Title */}
@@ -323,14 +325,14 @@ export function NewListing() {
             <label className="card flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={ships} onChange={e => setShips(e.target.checked)} className="accent-primary w-4 h-4"/>
               <div>
-                <p className="font-semibold text-plum text-sm">📦 Ship Nationwide</p>
+                <p className="font-semibold text-plum text-sm">Ship Nationwide</p>
                 <p className="text-plum/50 text-xs">$2.99 shipping fee added at checkout · address protected</p>
               </div>
             </label>
             <label className="card flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={localMeetup} onChange={e => setLocalMeetup(e.target.checked)} className="accent-primary w-4 h-4"/>
               <div>
-                <p className="font-semibold text-plum text-sm">📍 Local Meetup</p>
+                <p className="font-semibold text-plum text-sm">Local Meetup</p>
                 <p className="text-plum/50 text-xs">Buddy system required · public place only</p>
               </div>
             </label>
@@ -350,7 +352,7 @@ export function NewListing() {
         </div>
 
         <button type="button" onClick={handleSubmit} disabled={loading} className="btn-primary">
-          {loading ? 'Posting...' : '✨ Post My Listing'}
+          {loading ? 'Posting...' : 'Post My Listing'}
         </button>
 
       </div>
