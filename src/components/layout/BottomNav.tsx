@@ -34,7 +34,7 @@ export function BottomNav({
                 ? 'bg-plum scale-110'
                 : 'bg-gradient-to-br from-primary to-lavender'
             }`}>
-              <Lock size={22} color={isActive ? 'white' : '#3f2a2f'} />
+              <Lock size={22} color={isActive ? 'white' : '#3f2a2a'} />
             </div>
             <span className={`text-[10px] font-semibold mt-1 ${isActive ? 'text-plum' : 'text-plum/40'}`}>
               {tab.label}
@@ -52,7 +52,7 @@ export function BottomNav({
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
               isActive ? 'bg-gradient-to-br from-blush to-lavender' : ''
             }`}>
-              {tab.Icon && <tab.Icon size={18} color={isActive ? '#c06882' : 'rgba(63,42,47,0.30)'} />}
+              {tab.Icon && <tab.Icon size={18} color={isActive ? '#d06050' : 'rgba(63,42,42,0.28)'} />}
             </div>
             <span className={`text-[10px] font-semibold ${isActive ? 'text-primary' : 'text-plum/40'}`}>
               {tab.label}

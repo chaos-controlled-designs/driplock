@@ -65,7 +65,7 @@ export function ChatRoom() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-400 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse"/>
     </div>
   );
 
@@ -77,7 +77,7 @@ export function ChatRoom() {
         <button type="button" aria-label="Go back to chats" onClick={() => navigate('/chats')} className="w-9 h-9 rounded-full bg-ivory flex items-center justify-center shadow-soft">
           <ArrowLeft size={16} className="text-plum"/>
         </button>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center font-bold text-primary text-sm">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center font-bold text-plum text-sm">
           {otherUsername.slice(0,2).toUpperCase()}
         </div>
         <div>
@@ -89,14 +89,14 @@ export function ChatRoom() {
       {/* Safety banner */}
       <div className="bg-sage/30 px-4 py-2 flex items-center gap-2 flex-shrink-0">
         <Shield size={12} className="text-plum/40"/>
-        <p className="text-plum/50 text-[10px]">Never share personal info. Buddy system for meetups. Stay safe! 💕</p>
+        <p className="text-plum/50 text-[10px]">Never share personal info. Buddy system for meetups. Stay safe!</p>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-auto px-4 py-4 flex flex-col gap-3">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-plum/40 text-sm">Start the conversation! 👋</p>
+            <p className="text-plum/40 text-sm">Start the conversation!</p>
           </div>
         )}
         {messages.map(msg => {
@@ -105,11 +105,11 @@ export function ChatRoom() {
             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
                 isMe
-                  ? 'bg-gradient-to-r from-primary to-rose-400 text-white rounded-br-sm'
+                  ? 'bg-gradient-to-r from-primary to-lavender text-plum rounded-br-sm'
                   : 'bg-ivory text-plum rounded-bl-sm shadow-soft'
               }`}>
                 <p className="text-sm leading-relaxed">{msg.content}</p>
-                <p className={`text-[10px] mt-1 ${isMe ? 'text-white/60' : 'text-plum/30'}`}>
+                <p className={`text-[10px] mt-1 ${isMe ? 'text-plum/50' : 'text-plum/30'}`}>
                   {formatTime(msg.created_at)}
                 </p>
               </div>
@@ -134,9 +134,9 @@ export function ChatRoom() {
           aria-label="Send message"
           onClick={send}
           disabled={!text.trim()}
-          className="w-11 h-11 rounded-xl bg-gradient-to-r from-primary to-rose-400 flex items-center justify-center shadow-glow disabled:opacity-40 flex-shrink-0"
+          className="w-11 h-11 rounded-xl bg-gradient-to-r from-primary to-lavender flex items-center justify-center shadow-glow disabled:opacity-40 flex-shrink-0"
         >
-          <Send size={16} color="white"/>
+          <Send size={16} color="#3f2a2a"/>
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -8,11 +9,11 @@ export function Landing() {
 
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8 text-center">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-rose-400 flex items-center justify-center mb-6 shadow-glow">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-6 shadow-glow">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3f2a2a" strokeWidth="1.8" strokeLinecap="round">
             <rect x="5" y="11" width="14" height="10" rx="3"/>
             <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-            <circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/>
+            <circle cx="12" cy="16" r="1.5" fill="#3f2a2a" stroke="none"/>
           </svg>
         </div>
 
@@ -65,7 +66,7 @@ export function Landing() {
         </div>
 
         <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-soft">
-          <span className="text-xl">🛡️</span>
+          <Shield size={18} className="text-primary flex-shrink-0 mt-0.5"/>
           <div>
             <p className="font-semibold text-plum text-xs mb-0.5">Built for your safety</p>
             <p className="text-plum/50 text-xs leading-relaxed">No real names shown. No addresses shared. Buddy system required for meetups. You're always in control.</p>

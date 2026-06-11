@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Shield } from 'lucide-react';
 
 interface ConversationData {
   id: string;
@@ -62,20 +62,20 @@ export function Chats() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-400 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse"/>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-cream pb-24">
       <div className="bg-gradient-to-br from-lavender to-blush px-5 pt-6 pb-6">
-        <h2 className="font-display text-2xl font-bold text-plum mb-1">Messages 💬</h2>
+        <h2 className="font-display text-2xl font-bold text-plum mb-1">Messages</h2>
         <p className="text-plum/60 text-sm">Keep all conversations inside DripLock</p>
       </div>
 
       <div className="px-4 pt-4">
-        <div className="bg-sage/40 rounded-2xl p-3 flex gap-2 mb-4">
-          <span>🛡️</span>
+        <div className="bg-sage/40 rounded-2xl p-3 flex gap-2 items-start mb-4">
+          <Shield size={14} className="text-plum/50 flex-shrink-0 mt-0.5"/>
           <p className="text-plum/70 text-xs leading-relaxed">Never share personal contact info. All safe communication stays here.</p>
         </div>
 
@@ -90,7 +90,7 @@ export function Chats() {
           <div className="flex flex-col gap-2">
             {convos.map(c => (
               <button type="button" key={c.id} onClick={() => navigate(`/chat/${c.id}`)} className="card flex items-center gap-3 text-left active:scale-95 transition-all">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 font-bold text-primary text-sm">
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 font-bold text-plum text-sm">
                   {c.otherUsername.slice(0,2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

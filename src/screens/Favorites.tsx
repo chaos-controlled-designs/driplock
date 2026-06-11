@@ -73,7 +73,7 @@ export function Favorites() {
           <ArrowLeft size={16}/> Back
         </button>
         <div className="flex items-center gap-2">
-          <Heart size={22} color="#d4789a" fill="#d4789a"/>
+          <Heart size={22} color="#ff9e8e" fill="#ff9e8e"/>
           <h2 className="font-display text-2xl font-bold text-plum">My Favorites</h2>
         </div>
         <p className="text-plum/50 text-sm mt-1">
@@ -84,7 +84,7 @@ export function Favorites() {
       <div className="px-4 pt-4">
         {listings.length === 0 ? (
           <div className="card text-center py-12">
-            <Heart size={48} color="rgba(63,42,47,0.15)" className="mx-auto mb-4"/>
+            <Heart size={48} color="rgba(63,42,42,0.15)" className="mx-auto mb-4"/>
             <h3 className="font-display text-lg font-semibold text-plum mb-2">No favorites yet</h3>
             <p className="text-plum/50 text-sm mb-6">
               Tap the heart on any dress in The Vault to save it here!
@@ -118,7 +118,7 @@ export function Favorites() {
                     aria-label="Remove from favorites"
                     className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center active:scale-95 transition-all border-none cursor-pointer"
                   >
-                    <Heart size={14} color="#d4789a" fill="#d4789a"/>
+                    <Heart size={14} color="#ff9e8e" fill="#ff9e8e"/>
                   </button>
                 </div>
                 <div onClick={() => navigate(`/listing/${listing.id}`)} className="p-3">

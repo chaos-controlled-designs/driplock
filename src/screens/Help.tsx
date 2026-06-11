@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Users, MapPin, Lock, EyeOff, MessageCircle, Flag, Shield } from 'lucide-react';
 
 const FAQS = [
   {
@@ -41,6 +41,15 @@ const FAQS = [
   },
 ];
 
+const SAFETY_RULES = [
+  { Icon: Users,         title: 'Buddy System',        desc: 'Always bring a friend to in-person meetups. Never go alone.' },
+  { Icon: MapPin,        title: 'Public Places Only',   desc: 'Meet at a mall, coffee shop, or other public location.' },
+  { Icon: EyeOff,        title: 'No Home Addresses',    desc: 'Never share your home address. Use in-app shipping.' },
+  { Icon: Lock,          title: 'Username Only',        desc: 'Your real name is never shown to other users.' },
+  { Icon: MessageCircle, title: 'Stay in the App',      desc: 'Never move conversations to personal social media or texting.' },
+  { Icon: Flag,          title: 'Report Bad Behavior',  desc: 'Use the report button if anything feels unsafe or wrong.' },
+];
+
 export function Help() {
   const navigate = useNavigate();
   const [open, setOpen] = useState<number | null>(null);
@@ -48,30 +57,26 @@ export function Help() {
   return (
     <div className="min-h-screen bg-cream pb-10">
 
-      {/* Header */}
       <div className="bg-gradient-to-br from-sage to-blush px-5 pt-12 pb-8">
         <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 text-plum/60 text-sm font-medium mb-4">
           <ArrowLeft size={16}/> Back
         </button>
-        <h2 className="font-display text-2xl font-bold text-plum mb-1">Safety & Help 🛡️</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <Shield size={20} className="text-plum/70"/>
+          <h2 className="font-display text-2xl font-bold text-plum">Safety & Help</h2>
+        </div>
         <p className="text-plum/60 text-sm">Everything you need to use DripLock safely</p>
       </div>
 
       <div className="px-4 pt-4">
 
-        {/* Safety rules */}
         <h3 className="font-display text-lg font-semibold text-plum mb-3">Safety Rules</h3>
         <div className="flex flex-col gap-2 mb-6">
-          {[
-            { icon: '👯', title: 'Buddy System', desc: 'Always bring a friend to in-person meetups. Never go alone.' },
-            { icon: '📍', title: 'Public Places Only', desc: 'Meet at a mall, coffee shop, or other public location.' },
-            { icon: '🚫', title: 'No Home Addresses', desc: 'Never share your home address. Use in-app shipping.' },
-            { icon: '🔒', title: 'Username Only', desc: 'Your real name is never shown to other users.' },
-            { icon: '💬', title: 'Stay in the App', desc: 'Never move conversations to personal social media or texting.' },
-            { icon: '🚨', title: 'Report Bad Behavior', desc: 'Use the report button if anything feels unsafe or wrong.' },
-          ].map(r => (
-            <div key={r.title} className="card flex gap-3">
-              <span className="text-xl">{r.icon}</span>
+          {SAFETY_RULES.map(r => (
+            <div key={r.title} className="card flex gap-3 items-start">
+              <div className="w-8 h-8 rounded-lg bg-sage/50 flex items-center justify-center flex-shrink-0">
+                <r.Icon size={16} className="text-plum/60"/>
+              </div>
               <div>
                 <p className="font-semibold text-plum text-sm">{r.title}</p>
                 <p className="text-plum/50 text-xs mt-0.5">{r.desc}</p>
@@ -80,7 +85,6 @@ export function Help() {
           ))}
         </div>
 
-        {/* FAQ */}
         <h3 className="font-display text-lg font-semibold text-plum mb-3">FAQ</h3>
         <div className="flex flex-col gap-2 mb-6">
           {FAQS.map((faq, i) => (
@@ -102,10 +106,9 @@ export function Help() {
           ))}
         </div>
 
-        {/* Contact */}
         <div className="card text-center">
           <p className="font-semibold text-plum text-sm mb-1">Still need help?</p>
-          <p className="text-plum/50 text-xs mb-3">We're here for you 💕</p>
+          <p className="text-plum/50 text-xs mb-3">We're here for you</p>
           <a href="mailto:support@driplock.app" className="text-primary font-semibold text-sm underline">
             support@driplock.app
           </a>

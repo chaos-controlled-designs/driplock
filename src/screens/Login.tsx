@@ -33,7 +33,7 @@ export function Login() {
       <button type="button" onClick={() => navigate('/')} className="text-plum/50 text-sm font-medium mb-8 text-left">← Back</button>
 
       <div className="mb-10">
-        <h1 className="font-display text-3xl font-bold text-plum mb-1">Welcome Back 💫</h1>
+        <h1 className="font-display text-3xl font-bold text-plum mb-1">Welcome Back</h1>
         <p className="text-plum/50 text-sm">Sign in to your DripLock account</p>
       </div>
 
