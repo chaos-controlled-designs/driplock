@@ -97,7 +97,7 @@ export function Vault() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-300 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse"/>
     </div>
   );
 
@@ -111,7 +111,7 @@ export function Vault() {
             <h2 className="font-display text-2xl font-bold text-plum">The Vault</h2>
             <p className="text-plum/50 text-xs font-medium">Dresses from girls near you ✨</p>
           </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-violet-300 flex items-center justify-center shadow-glow">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-glow">
             <Sparkles size={15} color="white"/>
           </div>
         </div>
@@ -148,7 +148,7 @@ export function Vault() {
             onClick={() => setActiveFilter(f)}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               activeFilter === f
-                ? 'bg-gradient-to-r from-primary to-violet-300 text-white shadow-glow'
+                ? 'bg-gradient-to-r from-primary to-lavender text-plum shadow-soft'
                 : 'bg-white text-plum/60 border border-primary/20'
             }`}
           >

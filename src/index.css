@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,15 +16,15 @@
 @layer components {
   .btn-primary {
     @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-50;
-    background: linear-gradient(135deg, #f8a8c2 0%, #c4b5fd 100%);
+    background: linear-gradient(135deg, #f8c7d9 0%, #d1c4f0 100%);
     color: #374151;
-    box-shadow: 0 4px 20px rgba(248,168,194,0.45);
+    box-shadow: 0 4px 20px rgba(248,199,217,0.45);
   }
   .btn-secondary {
     @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
     background-color: white;
     color: #374151;
-    border: 1.5px solid rgba(248,168,194,0.35);
+    border: 1.5px solid rgba(248,199,217,0.40);
   }
   .btn-gold {
     @apply w-full py-4 rounded-2xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
@@ -35,19 +35,19 @@
     background-color: white;
     border-radius: 20px;
     padding: 16px;
-    box-shadow: 0 2px 16px rgba(248,168,194,0.10);
-    border: 1px solid rgba(248,168,194,0.15);
+    box-shadow: 0 2px 16px rgba(248,199,217,0.12);
+    border: 1px solid rgba(248,199,217,0.20);
   }
   .input {
     @apply w-full py-3 px-4 rounded-xl text-sm font-medium transition-all;
     background-color: white;
-    border: 1.5px solid rgba(248,168,194,0.30);
+    border: 1.5px solid rgba(248,199,217,0.35);
     color: #374151;
     outline: none;
   }
   .input:focus {
-    border-color: #f8a8c2;
-    box-shadow: 0 0 0 3px rgba(248,168,194,0.18);
+    border-color: #f8c7d9;
+    box-shadow: 0 0 0 3px rgba(248,199,217,0.20);
   }
   .label {
     @apply block text-xs font-semibold uppercase tracking-widest mb-2;
@@ -59,4 +59,4 @@
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #f8a8c2; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #f8c7d9; border-radius: 99px; }

@@ -32,9 +32,9 @@ export function BottomNav({
             <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-glow transition-all ${
               isActive
                 ? 'bg-plum scale-110'
-                : 'bg-gradient-to-br from-primary to-violet-300'
+                : 'bg-gradient-to-br from-primary to-lavender'
             }`}>
-              <Lock size={22} color="white" />
+              <Lock size={22} color={isActive ? 'white' : '#374151'} />
             </div>
             <span className={`text-[10px] font-semibold mt-1 ${isActive ? 'text-plum' : 'text-plum/40'}`}>
               {tab.label}

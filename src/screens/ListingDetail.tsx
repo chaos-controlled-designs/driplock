@@ -52,7 +52,7 @@ export function ListingDetail() {
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-300 animate-pulse"/>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse"/>
     </div>
   );
 
@@ -229,7 +229,7 @@ export function ListingDetail() {
             <button
               type="button"
               onClick={() => setShowSafety(true)}
-              className="w-full bg-gradient-to-r from-primary to-violet-300 text-white font-semibold py-4 rounded-2xl shadow-glow flex items-center justify-center gap-2 active:scale-95 transition-all mb-3"
+              className="w-full bg-gradient-to-r from-primary to-lavender text-plum font-semibold py-4 rounded-2xl shadow-soft flex items-center justify-center gap-2 active:scale-95 transition-all mb-3"
             >
               <MessageCircle size={18}/>
               Message Seller
