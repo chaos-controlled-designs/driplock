@@ -23,10 +23,10 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
 
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-glow">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3f2a2f" strokeWidth="2.5" strokeLinecap="round">
             <rect x="5" y="11" width="14" height="10" rx="3"/>
             <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-            <circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/>
+            <circle cx="12" cy="16" r="1.5" fill="#3f2a2f" stroke="none"/>
           </svg>
         </div>
         <span className="font-display text-xl font-bold text-plum">

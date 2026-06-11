@@ -169,7 +169,7 @@ export function Vault() {
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                       className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-95"
                     >
-                      <Heart size={13} fill={isFav ? '#f8a8c2' : 'none'} color={isFav ? '#f8a8c2' : '#37415145'}/>
+                      <Heart size={13} fill={isFav ? '#d4789a' : 'none'} color={isFav ? '#d4789a' : 'rgba(63,42,47,0.25)'}/>
                     </button>
                     <div className="absolute bottom-2 left-2">
                       <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield, ShoppingBag } from 'lucide-react';
 
 export function ListingDetail() {
   const { id } = useParams();
@@ -72,7 +72,7 @@ export function ListingDetail() {
           {listing.photo_urls.length > 0 ? (
             <img src={listing.photo_urls[photoIndex]} alt={listing.title} className="w-full h-full object-cover"/>
           ) : (
-            <span className="text-8xl">👗</span>
+            <ShoppingBag size={64} className="text-primary/30"/>
           )}
         </div>
 
