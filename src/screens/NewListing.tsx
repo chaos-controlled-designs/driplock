@@ -1,19 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag } from 'lucide-react';
+import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star } from 'lucide-react';
 
+const MAX_PHOTOS = 6;
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
-
 const SILHOUETTES = ['A-Line','Ball Gown','Mermaid','Trumpet','Sheath','Empire','Two-Piece'];
-
 const POPULAR_DESIGNERS = [
   'Sherri Hill','Jovani','Portia & Scarlett','La Femme',
   'Faviana','Mac Duggal','Ellie Wilde','Terani Couture',
-  'Ashley Lauren','Madison James','Other'
+  'Ashley Lauren','Madison James','Other',
 ];
-
 const CONDITIONS = [
   { value: 'new_with_tags',    label: 'New with tags — never worn' },
   { value: 'new_without_tags', label: 'New without tags — worn once' },
@@ -21,41 +19,71 @@ const CONDITIONS = [
   { value: 'good',             label: 'Good — minor signs of wear' },
   { value: 'fair',             label: 'Fair — visible wear, priced accordingly' },
 ];
-
 const CATEGORIES = [
   { value: 'prom',       label: 'Prom' },
   { value: 'homecoming', label: 'Homecoming' },
   { value: 'cocktail',   label: 'Cocktail' },
 ];
 
-const ACTIVE_PILL = 'bg-gradient-to-r from-primary to-lavender text-plum border-transparent shadow-soft';
+const ACTIVE_PILL  = 'bg-gradient-to-r from-primary to-lavender text-plum border-transparent shadow-soft';
 const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 
 export function NewListing() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const navigate  = useNavigate();
+  const { user }  = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [designer, setDesigner] = useState('');
+  // Photos
+  const [photos,   setPhotos]   = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  // Form fields
+  const [title,          setTitle]          = useState('');
+  const [description,    setDescription]    = useState('');
+  const [category,       setCategory]       = useState('');
+  const [designer,       setDesigner]       = useState('');
   const [customDesigner, setCustomDesigner] = useState('');
-  const [color, setColor] = useState('');
-  const [silhouette, setSilhouette] = useState('');
-  const [dressSize, setDressSize] = useState('');
-  const [bust, setBust] = useState('');
-  const [waist, setWaist] = useState('');
-  const [hips, setHips] = useState('');
-  const [condition, setCondition] = useState('');
-  const [listingType, setListingType] = useState('rent');
-  const [price, setPrice] = useState('');
-  const [rentalPrice, setRentalPrice] = useState('');
-  const [deposit, setDeposit] = useState('');
-  const [ships, setShips] = useState(false);
-  const [localMeetup, setLocalMeetup] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [color,          setColor]          = useState('');
+  const [silhouette,     setSilhouette]     = useState('');
+  const [dressSize,      setDressSize]      = useState('');
+  const [bust,           setBust]           = useState('');
+  const [waist,          setWaist]          = useState('');
+  const [hips,           setHips]           = useState('');
+  const [condition,      setCondition]      = useState('');
+  const [listingType,    setListingType]    = useState('rent');
+  const [price,          setPrice]          = useState('');
+  const [rentalPrice,    setRentalPrice]    = useState('');
+  const [deposit,        setDeposit]        = useState('');
+  const [ships,          setShips]          = useState(false);
+  const [localMeetup,    setLocalMeetup]    = useState(true);
+
+  const [loading,         setLoading]         = useState(false);
+  const [uploadProgress,  setUploadProgress]  = useState('');
+  const [error,           setError]           = useState('');
+  const [success,         setSuccess]         = useState(false);
+
+  // Revoke object URLs on unmount to avoid memory leaks
+  useEffect(() => {
+    return () => { previews.forEach(URL.revokeObjectURL); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const slots  = MAX_PHOTOS - photos.length;
+    const toAdd  = files.slice(0, slots);
+    if (!toAdd.length) return;
+
+    const newPreviews = toAdd.map(f => URL.createObjectURL(f));
+    setPhotos(prev => [...prev, ...toAdd]);
+    setPreviews(prev => [...prev, ...newPreviews]);
+    e.target.value = ''; // allow re-selecting same file
+  };
+
+  const removePhoto = (index: number) => {
+    URL.revokeObjectURL(previews[index]);
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
 
   const finalDesigner = designer === 'Other' ? customDesigner : designer;
 
@@ -66,46 +94,78 @@ export function NewListing() {
     if (!ships && !localMeetup) {
       setError('Please select at least one pickup option.'); return;
     }
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setUploadProgress('');
+
+    // Upload photos to Supabase Storage
+    const uploadedUrls: string[] = [];
+    if (photos.length > 0) {
+      for (let i = 0; i < photos.length; i++) {
+        setUploadProgress(`Uploading photo ${i + 1} of ${photos.length}…`);
+        const file = photos[i];
+        const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+        const path = `${user!.id}/${Date.now()}-${i}.${ext}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from('dress-photos')
+          .upload(path, file, { contentType: file.type, upsert: false });
+
+        if (uploadErr) {
+          setError(`Photo ${i + 1} upload failed: ${uploadErr.message}`);
+          setLoading(false); setUploadProgress('');
+          return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('dress-photos')
+          .getPublicUrl(path);
+
+        uploadedUrls.push(publicUrl);
+      }
+    }
+
+    setUploadProgress('Saving your listing…');
 
     const { error: err } = await supabase.from('listings').insert({
-      user_id: user!.id,
-      title: title.trim(),
-      description: description.trim() || null,
+      user_id:             user!.id,
+      title:               title.trim(),
+      description:         description.trim() || null,
       category,
-      designer: finalDesigner || null,
-      color: color || null,
-      silhouette: silhouette || null,
-      dress_size: dressSize,
-      bust_inches: bust ? parseInt(bust) : null,
-      waist_inches: waist ? parseInt(waist) : null,
-      hips_inches: hips ? parseInt(hips) : null,
+      designer:            finalDesigner || null,
+      color:               color || null,
+      silhouette:          silhouette || null,
+      dress_size:          dressSize,
+      bust_inches:         bust  ? parseInt(bust)  : null,
+      waist_inches:        waist ? parseInt(waist) : null,
+      hips_inches:         hips  ? parseInt(hips)  : null,
       condition,
-      listing_type: listingType,
-      price_cents: price ? Math.round(parseFloat(price) * 100) : null,
-      rental_price_cents: rentalPrice ? Math.round(parseFloat(rentalPrice) * 100) : null,
-      deposit_cents: deposit ? Math.round(parseFloat(deposit) * 100) : null,
+      listing_type:        listingType,
+      price_cents:         price       ? Math.round(parseFloat(price)       * 100) : null,
+      rental_price_cents:  rentalPrice ? Math.round(parseFloat(rentalPrice) * 100) : null,
+      deposit_cents:       deposit     ? Math.round(parseFloat(deposit)     * 100) : null,
       ships,
-      local_meetup: localMeetup,
-      photo_urls: [],
+      local_meetup:        localMeetup,
+      photo_urls:          uploadedUrls,
     });
 
+    setUploadProgress('');
     if (err) { setError(err.message); setLoading(false); return; }
     setSuccess(true); setLoading(false);
   };
 
+  // ── Success screen ──────────────────────────────────────────────
   if (success) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-5 shadow-glow">
         <ShoppingBag size={36} className="text-plum"/>
       </div>
       <h2 className="font-display text-2xl font-bold text-plum mb-2">Listing Posted!</h2>
-      <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across the country in The Vault.</p>
+      <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across your school in The Vault.</p>
       <button type="button" onClick={() => navigate('/market')} className="btn-primary mb-3">View My Listings</button>
-      <button type="button" onClick={() => navigate('/vault')} className="btn-secondary">Browse The Vault</button>
+      <button type="button" onClick={() => navigate('/vault')}  className="btn-secondary">Browse The Vault</button>
     </div>
   );
 
+  // ── Form ────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-cream pb-10">
 
@@ -123,7 +183,7 @@ export function NewListing() {
         <p className="text-plum/60 text-sm">Earn cash on your closet — safe, simple, girl-to-girl</p>
       </div>
 
-      <div className="px-4 pt-4 flex flex-col gap-4">
+      <div className="px-4 pt-4 flex flex-col gap-5">
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 text-xs font-medium">
@@ -131,27 +191,110 @@ export function NewListing() {
           </div>
         )}
 
-        {/* Photo Upload — Hero */}
+        {/* ── Photo Upload ─────────────────────────────────────── */}
         <div>
-          <label className="label">Photos</label>
-          <div className="w-full aspect-[4/3] bg-gradient-to-br from-blush via-cream to-lavender rounded-3xl flex flex-col items-center justify-center mb-2.5 border-2 border-dashed border-primary/25">
-            <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center mb-2.5 shadow-soft">
-              <Camera size={28} className="text-primary/70"/>
-            </div>
-            <p className="text-plum/60 text-sm font-semibold">Add your best photo</p>
-            <p className="text-plum/35 text-xs mt-0.5">Great photos = way more interest!</p>
+          <div className="flex items-center justify-between mb-2">
+            <label className="label mb-0">Photos</label>
+            <span className="text-plum/35 text-[10px] font-semibold">
+              {photos.length}/{MAX_PHOTOS} added
+            </span>
           </div>
-          <div className="flex gap-2">
-            {[0,1,2].map(i => (
-              <div key={i} className="flex-1 aspect-square bg-blush/60 rounded-2xl border-2 border-dashed border-primary/20 flex items-center justify-center">
-                <ImagePlus size={14} className="text-primary/30"/>
+
+          {/* Hidden file input — multiple, images only */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoSelect}
+          />
+
+          {photos.length === 0 ? (
+            /* Empty state — full tap-to-add area */
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[4/3] bg-gradient-to-br from-blush via-cream to-lavender rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-primary/25 active:scale-[0.98] transition-all"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mb-3 shadow-soft">
+                <Camera size={28} className="text-primary/70"/>
               </div>
-            ))}
-          </div>
-          <p className="text-primary/50 text-[10px] mt-1.5 text-center font-medium">Photo upload coming in next update</p>
+              <p className="text-plum/70 text-sm font-semibold">Add up to 6 photos</p>
+              <p className="text-plum/35 text-xs mt-1">Tap to browse your camera roll</p>
+              <p className="text-primary/50 text-[10px] mt-3 font-medium">Great photos = way more interest!</p>
+            </button>
+          ) : (
+            <div className="flex flex-col gap-3">
+
+              {/* Primary / cover photo */}
+              <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-medium">
+                <img
+                  src={previews[0]}
+                  alt="Cover photo"
+                  className="w-full h-full object-cover"
+                />
+                {/* Cover badge */}
+                <div className="absolute bottom-3 left-3 bg-plum/65 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+                  <Star size={10} fill="#ffd4c4" color="#ffd4c4"/>
+                  <span className="text-white text-[10px] font-bold tracking-wide">Cover</span>
+                </div>
+                {/* Remove button */}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(0)}
+                  aria-label="Remove cover photo"
+                  className="absolute top-2.5 right-2.5 w-8 h-8 bg-plum/65 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
+                >
+                  <X size={14} className="text-white"/>
+                </button>
+              </div>
+
+              {/* Additional photos + add button */}
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-0.5">
+                {previews.slice(1).map((url, idx) => (
+                  <div
+                    key={idx + 1}
+                    className="relative flex-shrink-0 w-[88px] h-[88px] rounded-2xl overflow-hidden shadow-soft"
+                  >
+                    <img
+                      src={url}
+                      alt={`Photo ${idx + 2}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx + 1)}
+                      aria-label={`Remove photo ${idx + 2}`}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-plum/65 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
+                    >
+                      <X size={11} className="text-white"/>
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more slot */}
+                {photos.length < MAX_PHOTOS && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Add more photos"
+                    className="flex-shrink-0 w-[88px] h-[88px] rounded-2xl border-2 border-dashed border-primary/30 bg-blush/50 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <ImagePlus size={20} className="text-primary/60"/>
+                    <span className="text-[9px] font-bold text-plum/45 uppercase tracking-wide">Add More</span>
+                  </button>
+                )}
+              </div>
+
+              <p className="text-plum/35 text-[10px] font-medium">
+                First photo is the cover. Tap <X size={9} className="inline"/> to remove any photo.
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Title */}
+        {/* ── Title ───────────────────────────────────────────── */}
         <div>
           <label className="label">Title <span className="text-primary">*</span></label>
           <input
@@ -163,7 +306,7 @@ export function NewListing() {
           />
         </div>
 
-        {/* Category */}
+        {/* ── Category ────────────────────────────────────────── */}
         <div>
           <label className="label">Category <span className="text-primary">*</span></label>
           <div className="grid grid-cols-3 gap-2">
@@ -178,7 +321,7 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Designer */}
+        {/* ── Designer ────────────────────────────────────────── */}
         <div>
           <label className="label">Designer</label>
           <div className="relative mb-2">
@@ -199,7 +342,7 @@ export function NewListing() {
           )}
         </div>
 
-        {/* Color + Silhouette */}
+        {/* ── Color + Silhouette ───────────────────────────────── */}
         <div className="flex gap-3">
           <div className="flex-1">
             <label className="label">Color</label>
@@ -217,7 +360,7 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Size */}
+        {/* ── Size ────────────────────────────────────────────── */}
         <div>
           <label className="label">Dress Size <span className="text-primary">*</span></label>
           <div className="flex flex-wrap gap-2">
@@ -232,7 +375,7 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Measurements */}
+        {/* ── Measurements ────────────────────────────────────── */}
         <div>
           <label className="label">Measurements (inches)</label>
           <div className="grid grid-cols-3 gap-2">
@@ -255,14 +398,16 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Condition */}
+        {/* ── Condition ───────────────────────────────────────── */}
         <div>
           <label className="label">Condition <span className="text-primary">*</span></label>
           <div className="flex flex-col gap-2">
             {CONDITIONS.map(c => (
               <button type="button" key={c.value} onClick={() => setCondition(c.value)}
                 className={`py-3 px-4 rounded-xl text-left text-xs font-medium border transition-all ${
-                  condition === c.value ? 'bg-primary/10 border-primary text-plum' : 'bg-white border-primary/15 text-plum/70'
+                  condition === c.value
+                    ? 'bg-primary/10 border-primary text-plum'
+                    : 'bg-white border-primary/15 text-plum/70'
                 }`}>
                 {c.label}
               </button>
@@ -270,7 +415,7 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Listing type */}
+        {/* ── Listing type ─────────────────────────────────────── */}
         <div>
           <label className="label">Listing Type <span className="text-primary">*</span></label>
           <div className="grid grid-cols-3 gap-2 mb-4">
@@ -318,19 +463,19 @@ export function NewListing() {
           )}
         </div>
 
-        {/* Pickup options */}
+        {/* ── Pickup options ───────────────────────────────────── */}
         <div>
           <label className="label">Pickup Options <span className="text-primary">*</span></label>
           <div className="flex flex-col gap-2">
             <label className="card flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={ships} onChange={e => setShips(e.target.checked)} className="accent-primary w-4 h-4"/>
+              <input type="checkbox" aria-label="Ship nationwide" checked={ships} onChange={e => setShips(e.target.checked)} className="accent-primary w-4 h-4"/>
               <div>
                 <p className="font-semibold text-plum text-sm">Ship Nationwide</p>
                 <p className="text-plum/50 text-xs">$2.99 shipping fee added at checkout · address protected</p>
               </div>
             </label>
             <label className="card flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={localMeetup} onChange={e => setLocalMeetup(e.target.checked)} className="accent-primary w-4 h-4"/>
+              <input type="checkbox" aria-label="Local meetup" checked={localMeetup} onChange={e => setLocalMeetup(e.target.checked)} className="accent-primary w-4 h-4"/>
               <div>
                 <p className="font-semibold text-plum text-sm">Local Meetup</p>
                 <p className="text-plum/50 text-xs">Buddy system required · public place only</p>
@@ -339,7 +484,7 @@ export function NewListing() {
           </div>
         </div>
 
-        {/* Description */}
+        {/* ── Description ─────────────────────────────────────── */}
         <div>
           <label className="label">Description (optional)</label>
           <textarea
@@ -351,8 +496,21 @@ export function NewListing() {
           />
         </div>
 
-        <button type="button" onClick={handleSubmit} disabled={loading} className="btn-primary">
-          {loading ? 'Posting...' : 'Post My Listing'}
+        {/* Upload progress */}
+        {uploadProgress && (
+          <div className="flex items-center gap-3 bg-blush rounded-2xl px-4 py-3">
+            <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin flex-shrink-0"/>
+            <p className="text-plum/70 text-xs font-medium">{uploadProgress}</p>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="btn-primary"
+        >
+          {loading ? 'Posting…' : `Post My Listing${photos.length > 0 ? ` · ${photos.length} photo${photos.length > 1 ? 's' : ''}` : ''}`}
         </button>
 
       </div>
