@@ -35,7 +35,7 @@ const PATH_TO_TAB: Record<string, Tab> = {
 function Spinner() {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-400 animate-pulse" />
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse" />
     </div>
   );
 }
