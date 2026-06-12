@@ -358,9 +358,12 @@ export function ListingDetail() {
                     {/* Line items */}
                     <div className="flex flex-col gap-2.5 mb-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-plum/60 text-sm">
-                          {checkoutType === 'rent' ? 'Rental price' : 'Dress price'}
-                        </span>
+                        <div>
+                          <p className="text-plum/60 text-sm">
+                            {checkoutType === 'rent' ? 'Rental price' : 'Dress price'}
+                          </p>
+                          <p className="text-plum/35 text-[10px]">From seller</p>
+                        </div>
                         <span className="text-plum font-semibold text-sm">
                           {formatPrice(dressCents)}{suffix}
                         </span>
@@ -384,7 +387,7 @@ export function ListingDetail() {
 
                     {/* Total */}
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-plum font-bold text-sm">Total you'll spend</span>
+                      <span className="text-plum font-bold text-sm">Total Due</span>
                       <span className="text-plum font-bold text-2xl">${total.toFixed(2)}</span>
                     </div>
 
