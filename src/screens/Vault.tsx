@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +19,7 @@ export function Vault() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const filtersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -114,15 +115,23 @@ export function Vault() {
           <button
             type="button"
             aria-label="Filters"
-            className="w-12 h-12 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 border border-primary/20"
+            onClick={() => filtersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+            className={`relative w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border transition-all active:scale-95 ${
+              activeFilter !== 'All'
+                ? 'bg-plum border-plum hover:bg-plum/90'
+                : 'bg-white/80 border-primary/20 hover:bg-blush/70 hover:border-primary/40'
+            }`}
           >
-            <SlidersHorizontal size={17} className="text-plum/60"/>
+            <SlidersHorizontal size={17} className={activeFilter !== 'All' ? 'text-white' : 'text-plum/60'}/>
+            {activeFilter !== 'All' && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"/>
+            )}
           </button>
         </div>
       </div>
 
       {/* Filter pills */}
-      <div className="flex gap-2.5 overflow-x-auto px-5 py-4 no-scrollbar">
+      <div ref={filtersRef} className="flex gap-2.5 overflow-x-auto px-5 py-4 no-scrollbar">
         {FILTERS.map(f => (
           <button
             key={f}
