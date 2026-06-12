@@ -96,7 +96,7 @@ export function Vault() {
     <div className="min-h-screen bg-cream pb-28">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-6">
+      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-6 rounded-b-[28px]">
         <h2 className="font-display text-2xl font-bold text-plum mb-1">The Vault</h2>
         <p className="text-plum/50 text-xs font-medium mb-5">Shop prom dresses from girls near you</p>
 
@@ -160,7 +160,7 @@ export function Vault() {
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className="bg-white rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all cursor-pointer"
+                  className="bg-white rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all duration-200 cursor-pointer hover:shadow-strong hover:-translate-y-1"
                 >
                   {/* Full-bleed photo — taller aspect */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender relative overflow-hidden">

@@ -220,6 +220,7 @@ export function LockIn() {
         background: 'linear-gradient(150deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
         padding: '44px 24px 56px',
         position: 'relative', overflow: 'hidden',
+        borderRadius: '0 0 28px 28px',
       }}>
         {/* Decorative circles */}
         <div style={{ position: 'absolute', top: -64, right: -64, width: 240, height: 240, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', pointerEvents: 'none' }}/>
@@ -232,6 +233,7 @@ export function LockIn() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(10px)',
           boxShadow: '0 8px 32px rgba(63,42,42,0.08)',
+          border: '1px solid rgba(255,255,255,0.50)',
           marginBottom: 18,
         }}>
           <Lock size={32} color={PLUM}/>

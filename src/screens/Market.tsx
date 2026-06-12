@@ -51,7 +51,7 @@ export function Market() {
     <div className="min-h-screen bg-cream pb-24">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-6">
+      <div className="bg-gradient-to-br from-blush via-cream to-lavender px-5 pt-6 pb-6 rounded-b-[28px]">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In</h2>

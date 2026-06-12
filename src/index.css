@@ -15,16 +15,23 @@
 
 @layer components {
   .btn-primary {
-    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-50;
+    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-50 hover:-translate-y-0.5;
     background: linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%);
     color: #3f2a2a;
     box-shadow: 0 4px 20px rgba(255,193,184,0.30);
   }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 8px 32px rgba(255,193,184,0.44);
+  }
   .btn-secondary {
-    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
+    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 hover:-translate-y-0.5;
     background-color: white;
     color: #3f2a2a;
     border: 1.5px solid rgba(255,193,184,0.35);
+  }
+  .btn-secondary:hover {
+    box-shadow: 0 4px 20px rgba(255,193,184,0.18);
+    border-color: rgba(255,193,184,0.55);
   }
   .btn-gold {
     @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
@@ -37,6 +44,11 @@
     padding: 22px 24px;
     box-shadow: 0 4px 24px rgba(255,193,184,0.14);
     border: none;
+    transition: all 0.2s ease;
+  }
+  .card:hover {
+    box-shadow: 0 8px 36px rgba(255,193,184,0.24);
+    transform: translateY(-2px);
   }
   .input {
     @apply w-full py-3.5 px-4 rounded-2xl text-sm font-medium transition-all;

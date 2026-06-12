@@ -103,7 +103,7 @@ export function EventDashboard() {
     <div className="min-h-screen bg-cream pb-28">
 
       {/* ── Gradient hero — compact, Lock In CTA lives inside it ── */}
-      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-10 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-10 relative overflow-hidden rounded-b-[28px]">
 
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/10 -translate-y-16 translate-x-16 pointer-events-none"/>
@@ -125,7 +125,7 @@ export function EventDashboard() {
 
           {/* Date pill */}
           {event?.date && (
-            <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2">
+            <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/40">
               <Calendar size={12} className="text-plum/55"/>
               <p className="text-plum font-semibold text-xs">{formatDate(event.date)}</p>
             </div>
@@ -142,9 +142,9 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/lock')}
-            className="w-full bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-5 flex items-center gap-4 active:scale-[0.98] transition-all text-left"
+            className="w-full bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-5 flex items-center gap-4 active:scale-[0.98] transition-all duration-200 text-left hover:bg-white/65 hover:border-white/80 hover:shadow-soft"
           >
-            <div className="w-14 h-14 rounded-3xl bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-soft">
+            <div className="w-14 h-14 rounded-3xl bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-soft ring-1 ring-white/50">
               <Lock size={26} className="text-plum"/>
             </div>
             <div className="flex-1 min-w-0">
@@ -178,7 +178,7 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/vault')}
-            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all duration-200 hover:shadow-strong hover:-translate-y-0.5"
           >
             <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
               <ShoppingBag size={24} className="text-plum/60"/>
@@ -188,7 +188,7 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/new-listing')}
-            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all duration-200 hover:shadow-strong hover:-translate-y-0.5"
           >
             <div className="w-14 h-14 rounded-3xl bg-sage flex items-center justify-center">
               <Plus size={24} className="text-plum/60"/>

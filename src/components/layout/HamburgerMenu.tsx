@@ -56,7 +56,7 @@ export function HamburgerMenu({ isOpen, onClose, onNavigate }: Props) {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Header with user info */}
-        <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-14 pb-7 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-14 pb-7 relative overflow-hidden rounded-b-[28px]">
           <div className="absolute top-0 right-0 w-28 h-28 rounded-full bg-white/10 -translate-y-10 translate-x-10"/>
 
           <div className="relative flex items-start justify-between">
