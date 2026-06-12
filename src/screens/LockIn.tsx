@@ -19,6 +19,24 @@ const COLORS = [
   'Emerald', 'Sage Green', 'Mint', 'Sky Blue', 'Yellow', 'Orange', 'Other',
 ];
 
+const NECKLINES = [
+  'Strapless', 'Sweetheart', 'V-Neck', 'Halter',
+  'Off-Shoulder', 'One-Shoulder', 'Square Neck', 'High Neck',
+  'Cowl Neck', 'Plunge',
+];
+
+const BACK_STYLES = [
+  'Full Back', 'Open Back', 'Backless', 'Keyhole',
+  'Lace-Up', 'Corset', 'Low Back', 'Sheer Back',
+];
+
+const LENGTHS = ['Floor Length', 'Tea Length', 'Knee Length', 'Midi', 'Mini'];
+
+const EMBELLISHMENTS = [
+  'Lace', 'Beading', 'Sequins', 'Ruffles', 'Slit',
+  'Floral', 'Appliqué', 'Feathers', 'Glitter', 'Plain / Minimal',
+];
+
 const PRIMARY   = '#ffc1b8';
 const PRIMARY_L = '#ffd4c4';
 const PLUM      = '#3f2a2a';
@@ -38,7 +56,7 @@ function getUsername(peer: PeerLock): string {
 function ColorSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <p className="label mb-3">Dress Color</p>
+      <p className="label mb-2.5">Dress Color <span style={{ color: PRIMARY, fontSize: 13 }}>*</span></p>
       <div style={{ position: 'relative' }}>
         <select
           title="Dress Color"
@@ -73,11 +91,11 @@ function ColorSelect({ value, onChange }: { value: string; onChange: (v: string)
   );
 }
 
-// ── 2-column silhouette grid — bigger, more tappable buttons ───
+// ── 2-column silhouette grid ────────────────────────────────────
 function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <p className="label mb-3">Silhouette</p>
+      <p className="label mb-2.5">Silhouette <span style={{ color: PRIMARY, fontSize: 13 }}>*</span></p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {SILHOUETTES.map(s => {
           const sel = value === s;
@@ -106,12 +124,111 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 
+// ── Single-select chip row ─────────────────────────────────────
+function ChipSelect({ label, value, onChange, options }: {
+  label: string; value: string; onChange: (v: string) => void; options: string[];
+}) {
+  return (
+    <div>
+      <p className="label mb-2.5">{label}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map(o => {
+          const sel = value === o;
+          return (
+            <button
+              type="button"
+              key={o}
+              onClick={() => onChange(sel ? '' : o)}
+              style={{
+                padding: '9px 16px', borderRadius: 50,
+                fontSize: 12.5, fontWeight: 600,
+                border: sel ? `2px solid ${PRIMARY}` : '1.5px solid rgba(255,193,184,0.38)',
+                background: sel ? PRIMARY : 'white',
+                color: sel ? PLUM : 'rgba(63,42,42,0.55)',
+                cursor: 'pointer', transition: 'all 0.15s ease',
+                boxShadow: sel ? '0 4px 14px rgba(255,193,184,0.42)' : '0 1px 3px rgba(0,0,0,0.04)',
+                transform: sel ? 'scale(1.03)' : 'scale(1)',
+              }}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Multi-select embellishment chips ───────────────────────────
+function MultiChipSelect({ label, value, onChange, options }: {
+  label: string; value: string[]; onChange: (v: string[]) => void; options: string[];
+}) {
+  const toggle = (o: string) =>
+    onChange(value.includes(o) ? value.filter(x => x !== o) : [...value, o]);
+  return (
+    <div>
+      <div className="flex items-baseline gap-2 mb-2.5">
+        <p className="label mb-0">{label}</p>
+        <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(63,42,42,0.38)', textTransform: 'none', letterSpacing: 0 }}>
+          select all that apply
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map(o => {
+          const sel = value.includes(o);
+          return (
+            <button
+              type="button"
+              key={o}
+              onClick={() => toggle(o)}
+              style={{
+                padding: '9px 16px', borderRadius: 50,
+                fontSize: 12.5, fontWeight: 600,
+                border: sel ? `2px solid ${PRIMARY}` : '1.5px solid rgba(255,193,184,0.38)',
+                background: sel ? PRIMARY : 'white',
+                color: sel ? PLUM : 'rgba(63,42,42,0.55)',
+                cursor: 'pointer', transition: 'all 0.15s ease',
+                boxShadow: sel ? '0 4px 14px rgba(255,193,184,0.42)' : '0 1px 3px rgba(0,0,0,0.04)',
+                transform: sel ? 'scale(1.02)' : 'scale(1)',
+              }}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Section header for optional cards ─────────────────────────
+function CardHeader({ title, badge }: { title: string; badge?: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-1">
+      <p className="font-bold text-plum text-sm">{title}</p>
+      {badge && (
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-plum/6 text-plum/40">
+          {badge}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function LockIn() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [color,      setColor]      = useState('');
-  const [silhouette, setSilhouette] = useState('');
+  // Required
+  const [color,          setColor]          = useState('');
+  const [silhouette,     setSilhouette]     = useState('');
+  // Optional new fields
+  const [designer,       setDesigner]       = useState('');
+  const [neckline,       setNeckline]       = useState('');
+  const [backStyle,      setBackStyle]      = useState('');
+  const [dressLength,    setDressLength]    = useState('');
+  const [embellishments, setEmbellishments] = useState<string[]>([]);
+  // UI
   const [loading,    setLoading]    = useState(false);
   const [locked,     setLocked]     = useState(false);
   const [error,      setError]      = useState('');
@@ -152,7 +269,15 @@ export function LockIn() {
 
   const saveLock = async () => {
     const { error: err } = await supabase.from('locks').insert({
-      user_id: user!.id, event_id: EVENT_ID, color, silhouette,
+      user_id:        user!.id,
+      event_id:       EVENT_ID,
+      color,
+      silhouette,
+      designer:       designer.trim()   || null,
+      neckline:       neckline          || null,
+      back_style:     backStyle         || null,
+      dress_length:   dressLength       || null,
+      embellishments: embellishments.length > 0 ? embellishments.join(', ') : null,
     });
     if (err) { setError(err.message); setLoading(false); return; }
     setLocked(true); setLoading(false);
@@ -172,6 +297,14 @@ export function LockIn() {
     }
   };
 
+  const resetForm = () => {
+    setLocked(false);
+    setColor(''); setSilhouette('');
+    setDesigner(''); setNeckline(''); setBackStyle(''); setDressLength('');
+    setEmbellishments([]);
+    setError(''); setDupeUsers([]);
+  };
+
   // ── Success screen ────────────────────────────────────────────
   if (locked) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
@@ -179,14 +312,51 @@ export function LockIn() {
         <CheckCircle2 size={44} className="text-plum"/>
       </div>
       <h2 className="font-display text-3xl font-bold text-plum mb-2">Look Locked!</h2>
-      <p className="text-plum/50 text-sm mb-8 leading-relaxed max-w-[280px]">
+      <p className="text-plum/50 text-sm mb-6 leading-relaxed max-w-[280px]">
         No dupes detected — your look is uniquely yours.
       </p>
+
+      {/* Locked look summary */}
       <div className="w-full max-w-sm bg-white rounded-3xl border border-primary/15 shadow-medium px-6 py-5 mb-4 text-left">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-2">Your Locked Look</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-3">Your Locked Look</p>
         <p className="font-display text-2xl font-bold text-plum">{color}</p>
-        <p className="text-plum/45 text-sm mt-1">{silhouette}</p>
+        <p className="text-plum/50 text-sm mt-0.5 mb-3">{silhouette}</p>
+        {(designer || neckline || backStyle || dressLength || embellishments.length > 0) && (
+          <div className="border-t border-primary/10 pt-3 grid grid-cols-2 gap-x-5 gap-y-2.5">
+            {designer && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-plum/30 mb-0.5">Designer</p>
+                <p className="text-plum/65 text-xs font-semibold">{designer}</p>
+              </div>
+            )}
+            {dressLength && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-plum/30 mb-0.5">Length</p>
+                <p className="text-plum/65 text-xs font-semibold">{dressLength}</p>
+              </div>
+            )}
+            {neckline && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-plum/30 mb-0.5">Neckline</p>
+                <p className="text-plum/65 text-xs font-semibold">{neckline}</p>
+              </div>
+            )}
+            {backStyle && (
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-plum/30 mb-0.5">Back</p>
+                <p className="text-plum/65 text-xs font-semibold">{backStyle}</p>
+              </div>
+            )}
+            {embellishments.length > 0 && (
+              <div className="col-span-2">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-plum/30 mb-0.5">Embellishments</p>
+                <p className="text-plum/65 text-xs font-semibold">{embellishments.join(' · ')}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
       <div className="w-full max-w-sm bg-sage/40 rounded-3xl border border-sage px-5 py-4 mb-8 flex items-start gap-3 text-left">
         <Shield size={16} className="text-plum/50 flex-shrink-0 mt-0.5"/>
         <div>
@@ -200,33 +370,27 @@ export function LockIn() {
         <button type="button" onClick={() => navigate('/event')} className="btn-primary mb-3">
           Back to Dashboard
         </button>
-        <button
-          type="button"
-          onClick={() => { setLocked(false); setColor(''); setSilhouette(''); }}
-          className="btn-secondary"
-        >
+        <button type="button" onClick={resetForm} className="btn-secondary">
           Lock Another Look
         </button>
       </div>
     </div>
   );
 
-  // ── Main screen ───────────────────────────────────────────────
+  // ── Main form ─────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: '#fff8f0' }}>
 
-      {/* ── Gradient hero — tall, airy, privacy pill embedded ── */}
+      {/* ── Gradient hero ── */}
       <div style={{
         background: 'linear-gradient(150deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
         padding: '44px 24px 56px',
         position: 'relative', overflow: 'hidden',
         borderRadius: '0 0 28px 28px',
       }}>
-        {/* Decorative circles */}
         <div style={{ position: 'absolute', top: -64, right: -64, width: 240, height: 240, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', pointerEvents: 'none' }}/>
         <div style={{ position: 'absolute', bottom: -44, left: -32, width: 150, height: 150, borderRadius: '50%', background: 'rgba(255,255,255,0.09)', pointerEvents: 'none' }}/>
 
-        {/* Frosted glass lock icon */}
         <div style={{
           width: 72, height: 72, borderRadius: 24,
           background: 'rgba(255,255,255,0.45)',
@@ -246,7 +410,6 @@ export function LockIn() {
           Real-time dupe check with your squad
         </p>
 
-        {/* Privacy pill — embedded in hero, no separate card */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 7,
           background: 'rgba(255,255,255,0.50)', borderRadius: 50,
@@ -257,7 +420,7 @@ export function LockIn() {
         </div>
       </div>
 
-      {/* ── Cream content sheet — slides up over the gradient ── */}
+      {/* ── Content sheet ── */}
       <div className="bg-cream rounded-t-4xl -mt-10 px-5 pt-6 pb-28 flex flex-col gap-5">
 
         {/* Error */}
@@ -279,29 +442,75 @@ export function LockIn() {
               {dupeUsers.join(', ')} locked a similar look. Pick something different or lock anyway.
             </p>
             <div className="flex gap-2.5">
-              <button
-                type="button"
-                onClick={() => setDupeUsers([])}
-                className="flex-1 py-3 rounded-2xl border border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all"
-              >
+              <button type="button" onClick={() => setDupeUsers([])}
+                className="flex-1 py-3 rounded-2xl border border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all">
                 Pick Different
               </button>
-              <button
-                type="button"
-                onClick={saveLock}
-                className="flex-1 py-3 rounded-2xl bg-amber-500 text-white text-xs font-bold active:scale-95 transition-all"
-              >
+              <button type="button" onClick={saveLock}
+                className="flex-1 py-3 rounded-2xl bg-amber-500 text-white text-xs font-bold active:scale-95 transition-all">
                 Lock Anyway
               </button>
             </div>
           </div>
         )}
 
-        {/* ── Form card: color + silhouette in one container ── */}
+        {/* ── CARD 1: The Look (required for dupe check) ── */}
         <div className="bg-white rounded-3xl shadow-medium p-6 flex flex-col gap-5">
+          <CardHeader title="The Look" badge="required for dupe check" />
           <ColorSelect value={color} onChange={setColor}/>
           <div className="h-px bg-plum/5"/>
           <SilhouetteGrid value={silhouette} onChange={setSilhouette}/>
+        </div>
+
+        {/* ── CARD 2: Dress Details (optional) ── */}
+        <div className="bg-white rounded-3xl shadow-medium p-6 flex flex-col gap-5">
+          <CardHeader title="Dress Details" badge="optional" />
+
+          {/* Designer — plain text input */}
+          <div>
+            <p className="label mb-2.5">Designer / Brand</p>
+            <input
+              type="text"
+              placeholder="e.g. Sherri Hill, Jovani, La Femme..."
+              value={designer}
+              onChange={e => setDesigner(e.target.value)}
+              className="input"
+            />
+          </div>
+
+          <div className="h-px bg-plum/5"/>
+          <ChipSelect
+            label="Neckline"
+            value={neckline}
+            onChange={setNeckline}
+            options={NECKLINES}
+          />
+
+          <div className="h-px bg-plum/5"/>
+          <ChipSelect
+            label="Back Style"
+            value={backStyle}
+            onChange={setBackStyle}
+            options={BACK_STYLES}
+          />
+
+          <div className="h-px bg-plum/5"/>
+          <ChipSelect
+            label="Dress Length"
+            value={dressLength}
+            onChange={setDressLength}
+            options={LENGTHS}
+          />
+        </div>
+
+        {/* ── CARD 3: Embellishments (optional) ── */}
+        <div className="bg-white rounded-3xl shadow-medium p-6">
+          <MultiChipSelect
+            label="Embellishments"
+            value={embellishments}
+            onChange={setEmbellishments}
+            options={EMBELLISHMENTS}
+          />
         </div>
 
         {/* ── Squad card ── */}
@@ -350,15 +559,46 @@ export function LockIn() {
           </div>
         </div>
 
-        {/* ── Selection preview (shown when both are picked) ── */}
+        {/* ── Selection preview ── */}
         {hasInput && (
-          <div className="bg-gradient-to-br from-blush to-lavender rounded-3xl px-6 py-5 flex items-center justify-between border border-primary/20 shadow-soft">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-2">Your Selection</p>
-              <p className="font-display text-xl font-bold text-plum">{color}</p>
-              <p className="text-plum/50 text-sm mt-0.5">{silhouette}</p>
+          <div className="bg-gradient-to-br from-blush to-lavender rounded-3xl px-6 py-5 border border-primary/20 shadow-soft">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-3">Your Selection</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-display text-xl font-bold text-plum">{color}</p>
+                <p className="text-plum/50 text-sm mt-0.5">{silhouette}</p>
+                {(designer || neckline || dressLength || embellishments.length > 0) && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {designer && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: PLUM, background: 'rgba(255,255,255,0.65)', borderRadius: 50, padding: '4px 10px', backdropFilter: 'blur(4px)' }}>
+                        {designer}
+                      </span>
+                    )}
+                    {dressLength && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: PLUM, background: 'rgba(255,255,255,0.65)', borderRadius: 50, padding: '4px 10px', backdropFilter: 'blur(4px)' }}>
+                        {dressLength}
+                      </span>
+                    )}
+                    {neckline && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: PLUM, background: 'rgba(255,255,255,0.65)', borderRadius: 50, padding: '4px 10px', backdropFilter: 'blur(4px)' }}>
+                        {neckline}
+                      </span>
+                    )}
+                    {embellishments.slice(0, 2).map(e => (
+                      <span key={e} style={{ fontSize: 10, fontWeight: 700, color: PLUM, background: 'rgba(255,255,255,0.65)', borderRadius: 50, padding: '4px 10px', backdropFilter: 'blur(4px)' }}>
+                        {e}
+                      </span>
+                    ))}
+                    {embellishments.length > 2 && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: PLUM, background: 'rgba(255,255,255,0.65)', borderRadius: 50, padding: '4px 10px', backdropFilter: 'blur(4px)' }}>
+                        +{embellishments.length - 2} more
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <CheckCircle2 size={26} className="text-primary flex-shrink-0 mt-0.5"/>
             </div>
-            <CheckCircle2 size={28} className="text-primary flex-shrink-0"/>
           </div>
         )}
 
