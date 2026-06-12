@@ -110,7 +110,7 @@ export function NewListing() {
         const path = `${user!.id}/${Date.now()}-${i}.${ext}`;
 
         const { error: uploadErr } = await supabase.storage
-          .from('dress-photos')
+          .from('dresses')
           .upload(path, file, { contentType: file.type, upsert: false });
 
         if (uploadErr) {
@@ -120,7 +120,7 @@ export function NewListing() {
         }
 
         const { data: { publicUrl } } = supabase.storage
-          .from('dress-photos')
+          .from('dresses')
           .getPublicUrl(path);
 
         uploadedUrls.push(publicUrl);
