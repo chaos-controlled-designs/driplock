@@ -344,44 +344,59 @@ export function ListingDetail() {
 
             {/* Price breakdown */}
             {(() => {
-              const fee = getPlatformFee(listing, checkoutType);
-              const stripeLink = getStripeLink(listing, checkoutType);
-              const dressCents = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const suffix = checkoutType === 'rent' ? '/wknd' : '';
+              const dressCents  = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice  = dressCents / 100;
+              const fee         = getPlatformFee(listing, checkoutType);
+              const shipping    = listing.ships ? 2.99 : 0;
+              const total       = dressPrice + fee + shipping;
+              const stripeLink  = getStripeLink(listing, checkoutType);
+              const suffix      = checkoutType === 'rent' ? '/wknd' : '';
 
               return (
                 <>
-                  <div className="bg-cream rounded-2xl p-4 mb-5 flex flex-col gap-3">
-                    <div className="flex justify-between items-start">
-                      <span className="text-plum/60 text-sm">
-                        {checkoutType === 'rent' ? 'Rental price' : 'Buy price'}
-                      </span>
-                      <span className="text-plum font-semibold text-sm">
-                        {formatPrice(dressCents)}{suffix}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-plum/60 text-sm">Platform fee</p>
-                        <p className="text-plum/35 text-[10px]">Covers transaction support + protection</p>
-                      </div>
-                      <span className="text-plum font-semibold text-sm">${fee.toFixed(2)}</span>
-                    </div>
-                    {listing.ships && (
+                  <div className="bg-cream rounded-2xl p-4 mb-5">
+                    {/* Line items */}
+                    <div className="flex flex-col gap-2.5 mb-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-plum/60 text-sm">Shipping (est.)</span>
-                        <span className="text-plum font-semibold text-sm">$2.99</span>
+                        <span className="text-plum/60 text-sm">
+                          {checkoutType === 'rent' ? 'Rental price' : 'Dress price'}
+                        </span>
+                        <span className="text-plum font-semibold text-sm">
+                          {formatPrice(dressCents)}{suffix}
+                        </span>
                       </div>
-                    )}
-                    <div className="h-px bg-plum/8"/>
-                    <div className="flex justify-between items-start">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-plum/60 text-sm">Platform fee (10%)</p>
+                          <p className="text-plum/35 text-[10px]">Transaction support + protection</p>
+                        </div>
+                        <span className="text-plum font-semibold text-sm">${fee.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-plum/60 text-sm">Shipping</span>
+                        <span className="text-plum font-semibold text-sm">
+                          {listing.ships ? '$2.99' : 'Local pickup'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-plum/10 mb-3"/>
+
+                    {/* Total */}
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-plum font-bold text-sm">Total you'll spend</span>
+                      <span className="text-plum font-bold text-2xl">${total.toFixed(2)}</span>
+                    </div>
+
+                    <div className="h-px bg-plum/10 mb-3"/>
+
+                    {/* Stripe amount callout */}
+                    <div className="bg-primary/10 rounded-xl px-3 py-2.5 flex justify-between items-center">
                       <div>
-                        <p className="text-plum font-bold text-sm">Charged via Stripe now</p>
-                        <p className="text-plum/35 text-[10px]">
-                          {checkoutType === 'rent' ? 'Rental price paid directly to seller' : 'Dress price arranged directly with seller'}
-                        </p>
+                        <p className="text-plum text-xs font-bold">Charged via Stripe now</p>
+                        <p className="text-plum/45 text-[10px]">Dress price paid directly to seller</p>
                       </div>
-                      <span className="font-bold text-lg text-primary">${fee.toFixed(2)}</span>
+                      <span className="text-primary font-bold text-lg">${fee.toFixed(2)}</span>
                     </div>
                   </div>
 
