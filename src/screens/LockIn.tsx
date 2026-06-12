@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -87,13 +87,24 @@ function DupeWarning({ results, onDismiss, onLockAnyway }: {
   const sorted = [...results].sort((a, b) => b.matchedFields.length - a.matchedFields.length);
   const primary = sorted[0];
   const others = sorted.slice(1);
+  const isStrong = primary.matchedFields.filter(f => f !== 'color' && f !== 'silhouette').includes('designer') ||
+    primary.matchedFields.filter(f => f !== 'color' && f !== 'silhouette').length >= 2;
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <AlertCircle size={15} className="text-amber-700"/>
-        <p className="font-bold text-amber-800 text-sm">{getDupeTitle(primary.matchedFields)}</p>
+    <div
+      className="rounded-3xl p-5 dupe-warning-appear"
+      style={{
+        background: isStrong ? '#fffbeb' : '#fffdf5',
+        border: isStrong ? '2px solid #fbbf24' : '2px solid #fde68a',
+        boxShadow: '0 4px 28px rgba(245,158,11,0.18)',
+      }}
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <AlertCircle size={16} className="text-amber-600"/>
+        </div>
+        <p className="font-bold text-amber-900 text-base">{getDupeTitle(primary.matchedFields)}</p>
       </div>
-      <p className="text-amber-900 text-sm font-semibold mb-1">
+      <p className="text-amber-900 text-sm font-semibold mb-1 leading-snug">
         {getDupeDetail(primary.matchedFields, primary.username)}
       </p>
       {others.length > 0 && (
@@ -101,16 +112,17 @@ function DupeWarning({ results, onDismiss, onLockAnyway }: {
           Also: {others.map(o => `@${o.username}`).join(', ')} locked a similar look
         </p>
       )}
-      <p className="text-amber-700/75 text-xs mt-2.5 mb-4 leading-relaxed">
+      <p className="text-amber-700 text-xs mt-2.5 mb-4 leading-relaxed">
         {getDupeHint(primary.matchedFields)}
       </p>
       <div className="flex gap-2.5">
         <button type="button" onClick={onDismiss}
-          className="flex-1 py-3 rounded-2xl border border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all">
+          className="flex-1 py-3 rounded-2xl border-2 border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all hover:border-amber-300 hover:shadow-sm">
           Pick Different
         </button>
         <button type="button" onClick={onLockAnyway}
-          className="flex-1 py-3 rounded-2xl bg-amber-500 text-white text-xs font-bold active:scale-95 transition-all">
+          className="flex-1 py-3 rounded-2xl text-white text-xs font-bold active:scale-95 transition-all"
+          style={{ background: '#f59e0b', boxShadow: '0 4px 14px rgba(245,158,11,0.35)' }}>
           Lock Anyway
         </button>
       </div>
@@ -300,6 +312,14 @@ export function LockIn() {
   const [error,      setError]      = useState('');
   const [dupeResults, setDupeResults] = useState<DupeResult[]>([]);
   const [peers,      setPeers]      = useState<PeerLock[]>([]);
+
+  const dupeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (dupeResults.length > 0 && dupeRef.current) {
+      dupeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [dupeResults]);
 
   const hasInput = color && silhouette;
 
@@ -548,11 +568,13 @@ export function LockIn() {
 
         {/* Dupe warning */}
         {dupeResults.length > 0 && (
-          <DupeWarning
-            results={dupeResults}
-            onDismiss={() => setDupeResults([])}
-            onLockAnyway={saveLock}
-          />
+          <div ref={dupeRef}>
+            <DupeWarning
+              results={dupeResults}
+              onDismiss={() => setDupeResults([])}
+              onLockAnyway={saveLock}
+            />
+          </div>
         )}
 
         {/* ── CARD 1: The Look (required for dupe check) ── */}
@@ -738,7 +760,15 @@ export function LockIn() {
 
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes dupeAppear {
+          0%   { opacity: 0; transform: translateY(-10px) scale(0.97); }
+          65%  { opacity: 1; transform: translateY(3px)  scale(1.01); }
+          100% { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+        .dupe-warning-appear { animation: dupeAppear 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
+      `}</style>
     </div>
   );
 }
