@@ -60,7 +60,7 @@ export function BottomNav({
               {tab.label}
             </span>
             {isActive && (
-              <span className="w-1 h-1 rounded-full bg-[#d06050] -mt-0.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d06050] -mt-0.5" />
             )}
           </button>
         );

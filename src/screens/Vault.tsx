@@ -207,7 +207,7 @@ export function Vault() {
 
                   {/* Info — compact but breathable */}
                   <div className="p-4">
-                    <p className="font-semibold text-plum text-[13px] leading-snug line-clamp-1 mb-1.5">
+                    <p className="font-semibold text-plum text-sm leading-snug line-clamp-1 mb-1.5">
                       {listing.title}
                     </p>
                     {listing.designer && (
@@ -215,7 +215,7 @@ export function Vault() {
                     )}
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-plum/35 text-[10px]">Size {listing.dress_size}</p>
-                      <p className="font-bold text-sm text-primary">{formatPrice(listing)}</p>
+                      <p className="font-bold text-base text-primary">{formatPrice(listing)}</p>
                     </div>
                   </div>
                 </div>

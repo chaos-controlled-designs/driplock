@@ -36,10 +36,10 @@ function getUsername(peer: PeerLock): string {
 
 function ColorSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div style={{ marginBottom: 24 }}>
       <label style={{
         display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.09em',
-        textTransform: 'uppercase', color: PRIMARY, marginBottom: 8,
+        textTransform: 'uppercase', color: 'rgba(63,42,42,0.48)', marginBottom: 10,
       }}>Dress Color</label>
       <div style={{ position: 'relative' }}>
         <select
@@ -48,27 +48,27 @@ function ColorSelect({ value, onChange }: { value: string; onChange: (v: string)
           onChange={e => onChange(e.target.value)}
           style={{
             width: '100%', appearance: 'none',
-            padding: '14px 44px 14px 18px',
-            borderRadius: 16,
+            padding: '15px 48px 15px 18px',
+            borderRadius: 18,
             border: value ? `2px solid ${PRIMARY}` : '2px solid rgba(255,193,184,0.25)',
             background: value ? '#fff0eb' : '#fff',
             fontSize: 14, fontWeight: value ? 700 : 400,
-            color: value ? PLUM : 'rgba(63,42,42,0.30)',
+            color: value ? PLUM : 'rgba(63,42,42,0.35)',
             cursor: 'pointer', outline: 'none',
             transition: 'all 0.2s',
             boxShadow: value ? '0 0 0 3px rgba(255,193,184,0.14)' : '0 1px 4px rgba(0,0,0,0.04)',
           }}
         >
-          <option value="">Select your color</option>
+          <option value="">Select your dress color</option>
           {COLORS.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
         <ChevronDown size={16} style={{
           position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
-          color: PRIMARY, pointerEvents: 'none',
+          color: value ? PRIMARY : 'rgba(63,42,42,0.30)', pointerEvents: 'none',
         }} />
         {value && (
           <CheckCircle2 size={16} style={{
-            position: 'absolute', right: 40, top: '50%', transform: 'translateY(-50%)',
+            position: 'absolute', right: 42, top: '50%', transform: 'translateY(-50%)',
             color: PRIMARY,
           }}/>
         )}
@@ -82,9 +82,9 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
     <div>
       <label style={{
         display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.09em',
-        textTransform: 'uppercase', color: PRIMARY, marginBottom: 10,
+        textTransform: 'uppercase', color: 'rgba(63,42,42,0.48)', marginBottom: 12,
       }}>Silhouette</label>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9 }}>
         {SILHOUETTES.map(s => {
           const sel = value === s;
           return (
@@ -93,14 +93,15 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
               key={s}
               onClick={() => onChange(s)}
               style={{
-                padding: '11px 6px', borderRadius: 14,
-                fontSize: 11.5, fontWeight: 700,
+                padding: '14px 8px', borderRadius: 18,
+                fontSize: 12, fontWeight: 700,
                 border: sel ? `2px solid ${PRIMARY}` : '2px solid rgba(255,193,184,0.20)',
                 background: sel ? PRIMARY : '#fafafa',
                 color: sel ? PLUM : 'rgba(63,42,42,0.50)',
                 cursor: 'pointer', transition: 'all 0.15s ease',
                 boxShadow: sel ? '0 4px 16px rgba(255,193,184,0.40)' : '0 1px 3px rgba(0,0,0,0.04)',
                 transform: sel ? 'scale(1.04)' : 'scale(1)',
+                lineHeight: 1.25,
               }}
             >
               {s}
@@ -178,152 +179,135 @@ export function LockIn() {
     }
   };
 
-  // ── Success screen ────────────────────────────────────────────────────────
+  // ── Success screen ────────────────────────────────────────────
   if (locked) return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(160deg, #fff8f0 0%, #fff0eb 100%)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', padding: '40px 24px', textAlign: 'center',
-    }}>
-      <div style={{
-        width: 88, height: 88, borderRadius: '50%',
-        background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 24, boxShadow: '0 12px 40px rgba(255,193,184,0.40)',
-      }}>
-        <CheckCircle2 size={40} color={PLUM} />
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-6 shadow-glow">
+        <CheckCircle2 size={44} className="text-plum"/>
       </div>
 
-      <h2 style={{ fontSize: 28, fontWeight: 800, color: PLUM, margin: '0 0 8px' }}>Look Locked!</h2>
-      <p style={{ color: 'rgba(63,42,42,0.50)', fontSize: 14, marginBottom: 32, lineHeight: 1.6 }}>
+      <h2 className="font-display text-3xl font-bold text-plum mb-2">Look Locked!</h2>
+      <p className="text-plum/50 text-sm mb-8 leading-relaxed max-w-[280px]">
         No dupes detected — your look is uniquely yours.
       </p>
 
-      <div style={{
-        background: '#fff', borderRadius: 24, padding: '20px 28px',
-        width: '100%', maxWidth: 360, marginBottom: 16,
-        border: '1.5px solid rgba(255,193,184,0.22)',
-        boxShadow: '0 4px 24px rgba(255,193,184,0.10)',
-      }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: 8 }}>
-          Your Locked Look
-        </div>
-        <div style={{ fontSize: 20, fontWeight: 800, color: PLUM }}>{color}</div>
-        <div style={{ fontSize: 14, color: 'rgba(63,42,42,0.45)', marginTop: 2 }}>{silhouette}</div>
+      {/* Selected look card */}
+      <div className="w-full max-w-sm bg-white rounded-3xl border border-primary/15 shadow-soft px-6 py-5 mb-4 text-left">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-2">Your Locked Look</p>
+        <p className="font-display text-2xl font-bold text-plum">{color}</p>
+        <p className="text-plum/45 text-sm mt-1">{silhouette}</p>
       </div>
 
-      <div style={{
-        background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: 20,
-        padding: '14px 20px', width: '100%', maxWidth: 360, marginBottom: 32, textAlign: 'left',
-      }}>
-        <div style={{ fontWeight: 700, color: '#166534', fontSize: 13, marginBottom: 4 }}>Privacy protected</div>
-        <div style={{ fontSize: 12, color: '#15803d', lineHeight: 1.6 }}>
-          Only the dupe-check runs on your details. Peers only see you're locked — not what you chose.
+      {/* Privacy note — uses sage palette, not green */}
+      <div className="w-full max-w-sm bg-sage/40 rounded-3xl border border-sage px-5 py-4 mb-8 flex items-start gap-3 text-left">
+        <Shield size={16} className="text-plum/50 flex-shrink-0 mt-0.5"/>
+        <div>
+          <p className="font-bold text-plum text-sm mb-1">Privacy protected</p>
+          <p className="text-plum/55 text-xs leading-relaxed">
+            Only the dupe-check runs on your details. Peers only see you're locked — not what you chose.
+          </p>
         </div>
       </div>
 
-      <button type="button" onClick={() => navigate('/event')} style={{
-        padding: '16px 32px', borderRadius: 18, fontSize: 14, fontWeight: 700,
-        background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
-        color: PLUM, border: 'none', cursor: 'pointer',
-        boxShadow: '0 8px 24px rgba(255,193,184,0.42)',
-        width: '100%', maxWidth: 360, marginBottom: 12,
-      }}>Back to Dashboard</button>
-
-      <button type="button" onClick={() => { setLocked(false); setColor(''); setSilhouette(''); }} style={{
-        padding: '14px 32px', borderRadius: 18, fontSize: 14, fontWeight: 700,
-        background: '#fff', color: 'rgba(63,42,42,0.60)',
-        border: '1.5px solid rgba(255,193,184,0.28)', cursor: 'pointer',
-        width: '100%', maxWidth: 360,
-      }}>Lock Another Look</button>
+      <div className="w-full max-w-sm">
+        <button type="button" onClick={() => navigate('/event')} className="btn-primary mb-3">
+          Back to Dashboard
+        </button>
+        <button
+          type="button"
+          onClick={() => { setLocked(false); setColor(''); setSilhouette(''); }}
+          className="btn-secondary"
+        >
+          Lock Another Look
+        </button>
+      </div>
     </div>
   );
 
-  // ── Main screen ───────────────────────────────────────────────────────────
+  // ── Main screen ───────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: '#fff8f0' }}>
 
-      {/* Hero header */}
+      {/* Hero header — matches EventDashboard gradient */}
       <div style={{
-        background: `linear-gradient(135deg, ${PRIMARY_L} 0%, ${PRIMARY} 100%)`,
-        padding: '32px 20px 48px', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(145deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
+        padding: '36px 22px 52px', position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }}/>
-        <div style={{ position: 'absolute', bottom: -30, left: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }}/>
+        <div style={{ position: 'absolute', top: -48, right: -48, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', bottom: -36, left: -24, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }}/>
 
-        {/* Lock icon display */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 18,
-            background: 'rgba(255,255,255,0.35)',
+            width: 64, height: 64, borderRadius: 20,
+            background: 'rgba(255,255,255,0.40)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
+            backdropFilter: 'blur(8px)', flexShrink: 0,
           }}>
-            <Lock size={28} color={PLUM} />
+            <Lock size={30} color={PLUM} />
           </div>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: PLUM, margin: 0, lineHeight: 1.1 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: PLUM, margin: 0, lineHeight: 1.1 }}>
               Lock In My Look
             </h1>
-            <p style={{ color: 'rgba(63,42,42,0.55)', fontSize: 12.5, margin: '4px 0 0', lineHeight: 1.4 }}>
+            <p style={{ color: 'rgba(63,42,42,0.55)', fontSize: 13, margin: '5px 0 0', lineHeight: 1.4 }}>
               Real-time dupe check with your squad
             </p>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: '0 16px 110px', marginTop: -20 }}>
+      <div style={{ padding: '0 18px 120px', marginTop: -24 }}>
 
         {/* Privacy card */}
         <div style={{
-          background: '#fff', borderRadius: 22, padding: '14px 16px', marginBottom: 14,
-          display: 'flex', gap: 12, alignItems: 'center',
+          background: '#fff', borderRadius: 24, padding: '16px 18px', marginBottom: 14,
+          display: 'flex', gap: 14, alignItems: 'center',
           boxShadow: '0 4px 20px rgba(255,193,184,0.08)', border: '1.5px solid rgba(255,193,184,0.15)',
         }}>
-          <div style={{ background: 'rgba(255,193,184,0.15)', borderRadius: 12, padding: 8, flexShrink: 0 }}>
-            <Shield size={16} color={PRIMARY} />
+          <div style={{ background: 'rgba(255,193,184,0.15)', borderRadius: 14, padding: 10, flexShrink: 0 }}>
+            <Shield size={18} color={PRIMARY} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: PLUM, fontSize: 12.5, marginBottom: 2 }}>100% Private</div>
-            <div style={{ fontSize: 11, color: 'rgba(63,42,42,0.45)', lineHeight: 1.6 }}>
+            <div style={{ fontWeight: 700, color: PLUM, fontSize: 13, marginBottom: 2 }}>100% Private</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(63,42,42,0.45)', lineHeight: 1.6 }}>
               Your picks are only used to check for dupes. Nobody sees what you chose.
             </div>
           </div>
         </div>
 
+        {/* Error */}
         {error && (
           <div style={{
-            background: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: 16,
-            padding: '10px 14px', marginBottom: 14,
-            display: 'flex', gap: 8, alignItems: 'center',
+            background: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: 18,
+            padding: '12px 16px', marginBottom: 14,
+            display: 'flex', gap: 10, alignItems: 'center',
           }}>
-            <AlertCircle size={14} color="#dc2626"/>
+            <AlertCircle size={14} color="#dc2626" style={{ flexShrink: 0 }}/>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#991b1b' }}>{error}</span>
           </div>
         )}
 
+        {/* Dupe warning */}
         {dupeUsers.length > 0 && (
           <div style={{
-            background: '#fffbeb', border: '1.5px solid #fcd34d', borderRadius: 18,
-            padding: '16px 18px', marginBottom: 14,
+            background: '#fffbeb', border: '1.5px solid #fcd34d', borderRadius: 22,
+            padding: '18px 20px', marginBottom: 14,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <AlertCircle size={14} color="#92400e" />
-              <p style={{ fontWeight: 700, color: '#92400e', fontSize: 13, margin: 0 }}>Possible Dupe Found</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <AlertCircle size={15} color="#92400e" />
+              <p style={{ fontWeight: 800, color: '#92400e', fontSize: 13.5, margin: 0 }}>Possible Dupe Found</p>
             </div>
-            <p style={{ color: '#78350f', fontSize: 12, margin: '0 0 14px', lineHeight: 1.6 }}>
+            <p style={{ color: '#78350f', fontSize: 12.5, margin: '0 0 16px', lineHeight: 1.6 }}>
               {dupeUsers.join(', ')} locked a similar look. Lock anyway or pick something different.
             </p>
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="button" onClick={() => setDupeUsers([])} style={{
-                flex: 1, padding: '11px', borderRadius: 12, border: '1.5px solid #fcd34d',
-                background: '#fff', color: '#92400e', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid #fcd34d',
+                background: '#fff', color: '#92400e', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Pick Different</button>
               <button type="button" onClick={saveLock} style={{
-                flex: 1, padding: '11px', borderRadius: 12, border: 'none',
-                background: '#f59e0b', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                flex: 1, padding: '13px', borderRadius: 14, border: 'none',
+                background: '#f59e0b', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Lock Anyway</button>
             </div>
           </div>
@@ -331,8 +315,9 @@ export function LockIn() {
 
         {/* Form card */}
         <div style={{
-          background: '#fff', borderRadius: 28, padding: '28px 22px',
-          boxShadow: '0 4px 28px rgba(255,193,184,0.09)', border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
+          background: '#fff', borderRadius: 28, padding: '30px 24px',
+          boxShadow: '0 4px 28px rgba(255,193,184,0.09)',
+          border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
         }}>
           <ColorSelect value={color} onChange={setColor} />
           <SilhouetteGrid value={silhouette} onChange={setSilhouette} />
@@ -340,28 +325,30 @@ export function LockIn() {
 
         {/* Squad section */}
         <div style={{
-          background: '#fff', borderRadius: 28, padding: '22px 22px 24px',
-          boxShadow: '0 4px 28px rgba(255,193,184,0.09)', border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
+          background: '#fff', borderRadius: 28, padding: '24px 24px 26px',
+          boxShadow: '0 4px 28px rgba(255,193,184,0.09)',
+          border: '1.5px solid rgba(255,193,184,0.14)', marginBottom: 16,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: PLUM }}>Your Squad</div>
-              <div style={{ fontSize: 11, color: 'rgba(63,42,42,0.38)', marginTop: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: PLUM }}>Your Squad</div>
+              <div style={{ fontSize: 11.5, color: 'rgba(63,42,42,0.38)', marginTop: 2 }}>
                 {peers.length === 0
                   ? 'No one locked in yet — be first!'
                   : `${peers.length} girl${peers.length > 1 ? 's' : ''} locked in`}
               </div>
             </div>
+            {/* Subtle VS badge */}
             <div style={{
-              background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
-              borderRadius: 10, padding: '5px 14px',
-              fontSize: 12, fontWeight: 800, color: PLUM,
+              background: 'rgba(255,193,184,0.18)', borderRadius: 20,
+              padding: '5px 14px', fontSize: 11, fontWeight: 800,
+              color: 'rgba(63,42,42,0.45)', letterSpacing: '0.05em',
             }}>VS</div>
           </div>
 
           {peers.length === 0 ? (
             <div style={{
-              textAlign: 'center', padding: '16px 0',
+              textAlign: 'center', padding: '20px 0',
               color: 'rgba(63,42,42,0.30)', fontSize: 12,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
@@ -373,20 +360,21 @@ export function LockIn() {
               {peers.map(peer => (
                 <div key={peer.user_id} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
-                  background: '#fafafa', border: '1.5px solid rgba(255,193,184,0.18)',
-                  borderRadius: 16, padding: '11px 14px',
+                  background: '#fff8f0',
+                  border: '1.5px solid rgba(255,193,184,0.20)',
+                  borderRadius: 18, padding: '12px 16px',
                 }}>
                   <div style={{
-                    width: 38, height: 38, borderRadius: '50%',
+                    width: 40, height: 40, borderRadius: '50%',
                     background: `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: 13, color: PLUM, flexShrink: 0,
+                    fontWeight: 800, fontSize: 14, color: PLUM, flexShrink: 0,
                   }}>
                     {getUsername(peer)[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: PLUM }}>@{getUsername(peer)}</div>
-                    <div style={{ fontSize: 10, color: PRIMARY, display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: PLUM }}>@{getUsername(peer)}</div>
+                    <div style={{ fontSize: 10.5, color: PRIMARY, display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
                       <Lock size={9} color={PRIMARY} /> Locked in
                     </div>
                   </div>
@@ -400,19 +388,19 @@ export function LockIn() {
         {/* Selection preview */}
         {hasInput && (
           <div style={{
-            background: `linear-gradient(135deg, #fff0eb, #ffe8dc)`,
-            borderRadius: 20, padding: '14px 20px', marginBottom: 16,
+            background: 'linear-gradient(135deg, #fff0eb, #ffe8dc)',
+            borderRadius: 24, padding: '16px 22px', marginBottom: 16,
             border: '1.5px solid rgba(255,193,184,0.28)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: 4 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: 5 }}>
                 Your Selection
               </div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: PLUM }}>{color}</div>
-              <div style={{ fontSize: 12, color: 'rgba(63,42,42,0.50)', marginTop: 1 }}>{silhouette}</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: PLUM }}>{color}</div>
+              <div style={{ fontSize: 12.5, color: 'rgba(63,42,42,0.50)', marginTop: 2 }}>{silhouette}</div>
             </div>
-            <CheckCircle2 size={22} color={PRIMARY} />
+            <CheckCircle2 size={24} color={PRIMARY} />
           </div>
         )}
 
@@ -422,7 +410,7 @@ export function LockIn() {
           onClick={handleLock}
           disabled={loading || !hasInput}
           style={{
-            width: '100%', padding: '18px', borderRadius: 22, border: 'none',
+            width: '100%', padding: '19px', borderRadius: 24, border: 'none',
             background: hasInput
               ? `linear-gradient(135deg, ${PRIMARY}, ${PRIMARY_L})`
               : 'rgba(63,42,42,0.08)',

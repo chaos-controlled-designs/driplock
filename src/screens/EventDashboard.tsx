@@ -103,7 +103,7 @@ export function EventDashboard() {
     <div className="min-h-screen bg-cream pb-28">
 
       {/* ── Gradient hero — compact, Lock In CTA lives inside it ── */}
-      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-5 pb-8 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-10 relative overflow-hidden">
 
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/10 -translate-y-16 translate-x-16 pointer-events-none"/>
@@ -161,14 +161,14 @@ export function EventDashboard() {
 
         {/* Stats — single unified card */}
         <div className="bg-white rounded-3xl shadow-soft border border-primary/10 flex overflow-hidden">
-          <div className="flex-1 text-center py-6">
+          <div className="flex-1 text-center py-7">
             <p className="text-5xl font-bold text-primary leading-none mb-2">{lockCount}</p>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Looks Locked</p>
           </div>
-          <div className="w-px bg-plum/6 my-5"/>
-          <div className="flex-1 text-center py-6 flex flex-col items-center justify-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-blush flex items-center justify-center">
-              <Users size={20} className="text-primary"/>
+          <div className="w-px bg-plum/6 my-6"/>
+          <div className="flex-1 text-center py-7 flex flex-col items-center justify-center gap-2">
+            <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
+              <Users size={22} className="text-primary"/>
             </div>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Your School</p>
           </div>
@@ -179,20 +179,20 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/vault')}
-            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-7 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
           >
-            <div className="w-12 h-12 rounded-2xl bg-blush flex items-center justify-center">
-              <ShoppingBag size={22} className="text-plum/60"/>
+            <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
+              <ShoppingBag size={24} className="text-plum/60"/>
             </div>
             <span className="text-plum font-semibold text-sm">Browse Vault</span>
           </button>
           <button
             type="button"
             onClick={() => navigate('/new-listing')}
-            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-7 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
           >
-            <div className="w-12 h-12 rounded-2xl bg-sage flex items-center justify-center">
-              <Plus size={22} className="text-plum/60"/>
+            <div className="w-14 h-14 rounded-3xl bg-sage flex items-center justify-center">
+              <Plus size={24} className="text-plum/60"/>
             </div>
             <span className="text-plum font-semibold text-sm">List a Dress</span>
           </button>

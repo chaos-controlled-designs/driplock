@@ -57,8 +57,8 @@ export function Market() {
             <h2 className="font-display text-2xl font-bold text-plum mb-1">Cash In</h2>
             <p className="text-plum/50 text-sm">{listings.length} dress{listings.length !== 1 ? 'es' : ''} listed</p>
           </div>
-          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-lavender text-plum px-4 py-2 rounded-2xl text-sm font-semibold shadow-soft">
-            <Plus size={16}/> Add
+          <button type="button" onClick={() => navigate('/new-listing')} className="flex items-center gap-2 bg-gradient-to-r from-primary to-lavender text-plum px-5 py-2.5 rounded-2xl text-sm font-bold shadow-soft active:scale-95 transition-all">
+            <Plus size={16}/> Add Dress
           </button>
         </div>
       </div>
@@ -66,9 +66,9 @@ export function Market() {
       <div className="px-4 pt-4">
 
         {/* Earnings banner */}
-        <div className="rounded-3xl p-4 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">
+        <div className="rounded-3xl p-5 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">
           <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings</p>
-          <p className="font-display text-3xl font-bold text-plum mb-0.5">
+          <p className="font-display text-4xl font-bold text-plum mb-0.5">
             ${listings.reduce((sum, l) => sum + (l.rental_price_cents ?? l.price_cents ?? 0) / 100, 0).toFixed(0)}
           </p>
           <p className="text-plum/50 text-xs">across {listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
@@ -76,19 +76,19 @@ export function Market() {
 
         {listings.length === 0 ? (
           <div className="card text-center py-10">
-            <div className="w-14 h-14 rounded-full bg-blush flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag size={26} className="text-primary"/>
+            <div className="w-16 h-16 rounded-3xl bg-blush flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag size={28} className="text-primary"/>
             </div>
             <h3 className="font-display text-lg font-semibold text-plum mb-2">No listings yet</h3>
             <p className="text-plum/50 text-sm mb-6">List last year's dress and earn cash back on your closet!</p>
             <button type="button" onClick={() => navigate('/new-listing')} className="btn-primary">List My First Dress</button>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {listings.map(listing => (
-              <div key={listing.id} className="bg-white rounded-3xl border border-primary/10 shadow-soft flex gap-3 p-3">
+              <div key={listing.id} className="bg-white rounded-3xl border border-primary/10 shadow-soft flex gap-4 p-4">
                 {/* Photo */}
-                <div className="w-20 h-24 rounded-2xl bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-24 h-28 rounded-2xl bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {listing.photo_urls.length > 0 ? (
                     <img src={listing.photo_urls[0]} alt={listing.title} className="w-full h-full object-cover"/>
                   ) : (
