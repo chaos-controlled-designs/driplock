@@ -170,7 +170,7 @@ export function NewListing() {
     <div className="min-h-screen bg-cream pb-10">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-sage to-blush px-5 pt-12 pb-6">
+      <div className="bg-gradient-to-br from-sage to-blush px-5 pt-12 pb-6 rounded-b-[28px]">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -312,7 +312,7 @@ export function NewListing() {
           <div className="grid grid-cols-3 gap-2">
             {CATEGORIES.map(c => (
               <button type="button" key={c.value} onClick={() => setCategory(c.value)}
-                className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                className={`py-2.5 px-2 rounded-2xl text-xs font-semibold border transition-all ${
                   category === c.value ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {c.label}
@@ -366,7 +366,7 @@ export function NewListing() {
           <div className="flex flex-wrap gap-2">
             {DRESS_SIZES.map(s => (
               <button type="button" key={s} onClick={() => setDressSize(s)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                className={`px-3 py-1.5 rounded-2xl text-xs font-semibold border transition-all ${
                   dressSize === s ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {s}
@@ -404,7 +404,7 @@ export function NewListing() {
           <div className="flex flex-col gap-2">
             {CONDITIONS.map(c => (
               <button type="button" key={c.value} onClick={() => setCondition(c.value)}
-                className={`py-3 px-4 rounded-xl text-left text-xs font-medium border transition-all ${
+                className={`py-3 px-4 rounded-2xl text-left text-xs font-medium border transition-all ${
                   condition === c.value
                     ? 'bg-primary/10 border-primary text-plum'
                     : 'bg-white border-primary/15 text-plum/70'
@@ -425,7 +425,7 @@ export function NewListing() {
               { value: 'both', label: 'Rent & Sell' },
             ].map(t => (
               <button type="button" key={t.value} onClick={() => setListingType(t.value)}
-                className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                className={`py-2.5 px-2 rounded-2xl text-xs font-semibold border transition-all ${
                   listingType === t.value ? ACTIVE_PILL : INACTIVE_PILL
                 }`}>
                 {t.label}

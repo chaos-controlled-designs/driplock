@@ -182,7 +182,7 @@ export function LockIn() {
       <p className="text-plum/50 text-sm mb-8 leading-relaxed max-w-[280px]">
         No dupes detected — your look is uniquely yours.
       </p>
-      <div className="w-full max-w-sm bg-white rounded-3xl border border-primary/15 shadow-soft px-6 py-5 mb-4 text-left">
+      <div className="w-full max-w-sm bg-white rounded-3xl border border-primary/15 shadow-medium px-6 py-5 mb-4 text-left">
         <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-2">Your Locked Look</p>
         <p className="font-display text-2xl font-bold text-plum">{color}</p>
         <p className="text-plum/45 text-sm mt-1">{silhouette}</p>
@@ -352,7 +352,7 @@ export function LockIn() {
 
         {/* ── Selection preview (shown when both are picked) ── */}
         {hasInput && (
-          <div className="bg-gradient-to-br from-blush to-lavender rounded-3xl px-6 py-5 flex items-center justify-between border border-primary/20">
+          <div className="bg-gradient-to-br from-blush to-lavender rounded-3xl px-6 py-5 flex items-center justify-between border border-primary/20 shadow-soft">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-2">Your Selection</p>
               <p className="font-display text-xl font-bold text-plum">{color}</p>

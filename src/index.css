@@ -34,9 +34,12 @@
     border-color: rgba(255,193,184,0.55);
   }
   .btn-gold {
-    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95;
+    @apply w-full py-4 rounded-3xl font-semibold text-sm tracking-wide transition-all duration-200 active:scale-95 hover:-translate-y-0.5;
     background-color: #C9A96E;
     color: white;
+  }
+  .btn-gold:hover {
+    box-shadow: 0 8px 28px rgba(201,169,110,0.38);
   }
   .card {
     background-color: white;

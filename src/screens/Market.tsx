@@ -66,7 +66,7 @@ export function Market() {
       <div className="px-5 pt-5">
 
         {/* Earnings banner */}
-        <div className="rounded-3xl p-5 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">
+        <div className="rounded-3xl p-5 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-medium">
           <p className="text-plum/50 text-xs font-semibold uppercase tracking-wider mb-1">Potential Earnings</p>
           <p className="font-display text-4xl font-bold text-plum mb-0.5">
             ${listings.reduce((sum, l) => sum + (l.rental_price_cents ?? l.price_cents ?? 0) / 100, 0).toFixed(0)}
@@ -86,7 +86,7 @@ export function Market() {
         ) : (
           <div className="flex flex-col gap-4">
             {listings.map(listing => (
-              <div key={listing.id} className="bg-white rounded-3xl border border-primary/10 shadow-soft flex gap-4 p-4">
+              <div key={listing.id} className="bg-white rounded-3xl border border-primary/10 shadow-medium flex gap-4 p-4">
                 {/* Photo */}
                 <div className="w-24 h-28 rounded-2xl bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {listing.photo_urls.length > 0 ? (

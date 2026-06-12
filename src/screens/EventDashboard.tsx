@@ -198,7 +198,7 @@ export function EventDashboard() {
         </div>
 
         {/* Safety note */}
-        <div className="bg-sage/50 rounded-3xl px-5 py-4 flex items-center gap-3">
+        <div className="bg-sage/50 rounded-3xl px-5 py-4 flex items-center gap-3 shadow-soft">
           <Shield size={14} className="text-plum/45 flex-shrink-0"/>
           <p className="text-plum/55 text-xs leading-relaxed">
             Buddy system for meetups · Never share your address · Stay safe

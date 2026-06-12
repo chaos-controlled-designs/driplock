@@ -131,7 +131,7 @@ export function Vault() {
             className={`flex-shrink-0 px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
               activeFilter === f
                 ? 'bg-plum text-white shadow-soft'
-                : 'bg-white text-plum/55 border border-plum/10'
+                : 'bg-white text-plum/55 border border-plum/10 hover:bg-blush/70 hover:border-plum/20 transition-all'
             }`}
           >
             {f}
