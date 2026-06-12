@@ -89,8 +89,8 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
               style={{
                 padding: '18px 14px', borderRadius: 20,
                 fontSize: 13, fontWeight: 700, letterSpacing: '0.01em',
-                border: sel ? `2.5px solid ${PRIMARY}` : '2px solid rgba(255,193,184,0.22)',
-                background: sel ? PRIMARY : '#fafafa',
+                border: sel ? `2.5px solid ${PRIMARY}` : '1.5px solid rgba(255,193,184,0.38)',
+                background: sel ? PRIMARY : 'transparent',
                 color: sel ? PLUM : 'rgba(63,42,42,0.55)',
                 cursor: 'pointer', transition: 'all 0.15s ease',
                 boxShadow: sel ? '0 6px 20px rgba(255,193,184,0.45)' : 'none',
@@ -218,7 +218,7 @@ export function LockIn() {
       {/* ── Gradient hero — tall, airy, privacy pill embedded ── */}
       <div style={{
         background: 'linear-gradient(150deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
-        padding: '44px 24px 72px',
+        padding: '44px 24px 56px',
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Decorative circles */}
@@ -256,7 +256,7 @@ export function LockIn() {
       </div>
 
       {/* ── Cream content sheet — slides up over the gradient ── */}
-      <div className="bg-cream rounded-t-4xl -mt-8 px-5 pt-6 pb-32 flex flex-col gap-5">
+      <div className="bg-cream rounded-t-4xl -mt-10 px-5 pt-7 pb-32 flex flex-col gap-6">
 
         {/* Error */}
         {error && (
@@ -296,14 +296,14 @@ export function LockIn() {
         )}
 
         {/* ── Form card: color + silhouette in one container ── */}
-        <div className="bg-white rounded-3xl shadow-soft border border-primary/10 p-6 flex flex-col gap-5">
+        <div className="bg-white rounded-3xl shadow-medium p-7 flex flex-col gap-6">
           <ColorSelect value={color} onChange={setColor}/>
           <div className="h-px bg-plum/5"/>
           <SilhouetteGrid value={silhouette} onChange={setSilhouette}/>
         </div>
 
         {/* ── Squad card ── */}
-        <div className="bg-white rounded-3xl shadow-soft border border-primary/10">
+        <div className="bg-white rounded-3xl shadow-medium">
           <div className="p-6">
             <div className="flex items-center justify-between mb-5">
               <div>

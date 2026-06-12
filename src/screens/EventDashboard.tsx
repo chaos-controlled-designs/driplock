@@ -157,16 +157,15 @@ export function EventDashboard() {
       </div>
 
       {/* ── Cream content sheet — slides up with rounded top ── */}
-      <div className="bg-cream rounded-t-3xl -mt-5 px-4 pt-6 flex flex-col gap-4">
+      <div className="bg-cream rounded-t-4xl -mt-6 px-5 pt-7 flex flex-col gap-5">
 
-        {/* Stats — single unified card */}
-        <div className="bg-white rounded-3xl shadow-soft border border-primary/10 flex overflow-hidden">
-          <div className="flex-1 text-center py-7">
+        {/* Stats — two separate floating cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-7">
             <p className="text-5xl font-bold text-primary leading-none mb-2">{lockCount}</p>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Looks Locked</p>
           </div>
-          <div className="w-px bg-plum/6 my-6"/>
-          <div className="flex-1 text-center py-7 flex flex-col items-center justify-center gap-2">
+          <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-7 gap-2.5">
             <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
               <Users size={22} className="text-primary"/>
             </div>
@@ -175,11 +174,11 @@ export function EventDashboard() {
         </div>
 
         {/* Secondary actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
             onClick={() => navigate('/vault')}
-            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
           >
             <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
               <ShoppingBag size={24} className="text-plum/60"/>
@@ -189,7 +188,7 @@ export function EventDashboard() {
           <button
             type="button"
             onClick={() => navigate('/new-listing')}
-            className="bg-white rounded-3xl shadow-soft border border-primary/10 flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
+            className="bg-white rounded-3xl shadow-medium flex flex-col items-center gap-3 py-8 active:scale-[0.97] transition-all"
           >
             <div className="w-14 h-14 rounded-3xl bg-sage flex items-center justify-center">
               <Plus size={24} className="text-plum/60"/>
@@ -216,7 +215,7 @@ export function EventDashboard() {
           </div>
 
           {recentLocks.length === 0 ? (
-            <div className="bg-white rounded-3xl shadow-soft border border-primary/10 text-center py-10 px-6">
+            <div className="bg-white rounded-3xl shadow-medium text-center py-10 px-6">
               <div className="w-14 h-14 rounded-full bg-blush flex items-center justify-center mx-auto mb-3">
                 <Lock size={24} className="text-primary"/>
               </div>
@@ -231,7 +230,7 @@ export function EventDashboard() {
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl shadow-soft border border-primary/10 overflow-hidden divide-y divide-plum/4">
+            <div className="bg-white rounded-3xl shadow-medium overflow-hidden divide-y divide-plum/4">
               {recentLocks.map((lock) => (
                 <div key={lock.id} className="flex items-center gap-3.5 px-5 py-5">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 font-bold text-plum text-sm">

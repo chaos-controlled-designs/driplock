@@ -35,8 +35,8 @@
     background-color: white;
     border-radius: 28px;
     padding: 22px 24px;
-    box-shadow: 0 2px 16px rgba(255,193,184,0.08);
-    border: 1px solid rgba(255,193,184,0.18);
+    box-shadow: 0 4px 24px rgba(255,193,184,0.14);
+    border: none;
   }
   .input {
     @apply w-full py-3.5 px-4 rounded-2xl text-sm font-medium transition-all;

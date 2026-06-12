@@ -145,7 +145,7 @@ export function Vault() {
         </p>
 
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-soft border border-primary/10 text-center py-16 px-6">
+          <div className="bg-white rounded-3xl shadow-medium text-center py-16 px-6">
             <div className="w-16 h-16 rounded-full bg-blush flex items-center justify-center mx-auto mb-4">
               <ShoppingBag size={28} className="text-primary"/>
             </div>
@@ -160,7 +160,7 @@ export function Vault() {
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className="bg-white rounded-3xl overflow-hidden shadow-medium border border-primary/8 active:scale-[0.97] transition-all cursor-pointer"
+                  className="bg-white rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all cursor-pointer"
                 >
                   {/* Full-bleed photo — taller aspect */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender relative overflow-hidden">
