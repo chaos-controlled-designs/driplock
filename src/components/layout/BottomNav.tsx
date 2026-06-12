@@ -29,10 +29,10 @@ export function BottomNav({
             onClick={() => onChange(tab.id)}
             className="flex-1 flex flex-col items-center -mt-7"
           >
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-strong transition-all duration-200 ${
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 ${
               isActive
-                ? 'bg-plum scale-105'
-                : 'bg-gradient-to-br from-primary to-lavender'
+                ? 'bg-plum scale-105 shadow-strong'
+                : 'bg-gradient-to-br from-primary to-lavender shadow-glow'
             }`}>
               <Lock size={24} color={isActive ? 'white' : '#3f2a2a'} strokeWidth={isActive ? 2.5 : 2} />
             </div>

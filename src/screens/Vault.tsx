@@ -114,9 +114,9 @@ export function Vault() {
           <button
             type="button"
             aria-label="Filters"
-            className="w-11 h-11 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 border border-primary/20"
+            className="w-12 h-12 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 border border-primary/20"
           >
-            <SlidersHorizontal size={16} className="text-plum/60"/>
+            <SlidersHorizontal size={17} className="text-plum/60"/>
           </button>
         </div>
       </div>
@@ -128,7 +128,7 @@ export function Vault() {
             key={f}
             type="button"
             onClick={() => setActiveFilter(f)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
               activeFilter === f
                 ? 'bg-plum text-white shadow-soft'
                 : 'bg-white text-plum/55 border border-plum/10'

@@ -144,12 +144,12 @@ export function EventDashboard() {
             onClick={() => navigate('/lock')}
             className="w-full bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-5 flex items-center gap-4 active:scale-[0.98] transition-all text-left"
           >
-            <div className="w-14 h-14 rounded-3xl bg-primary/25 flex items-center justify-center flex-shrink-0">
-              <Lock size={24} className="text-plum"/>
+            <div className="w-14 h-14 rounded-3xl bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-soft">
+              <Lock size={26} className="text-plum"/>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-plum text-base leading-tight mb-1">Lock In My Look</p>
-              <p className="text-plum/50 text-xs leading-relaxed">Check for dupes · Claim your unique look</p>
+              <p className="text-plum/55 text-[13px] leading-relaxed">Check for dupes · Claim your unique look</p>
             </div>
             <ChevronRight size={16} className="text-plum/35 flex-shrink-0"/>
           </button>
