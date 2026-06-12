@@ -57,10 +57,10 @@ export function Profile() {
     }
     if (!user) return;
     setCreating(true); setCreateError('');
-    const { error } = await supabase.from('profiles').insert({
+    const { error } = await supabase.from('profiles').upsert({
       id: user.id, username: username.trim(), school_id: schoolId,
       grade, safety_agreed: true,
-    });
+    }, { onConflict: 'id' });
     if (error) { setCreateError(error.message); setCreating(false); return; }
     await refreshProfile();
     setCreating(false);

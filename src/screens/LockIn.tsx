@@ -46,10 +46,76 @@ interface PeerLock {
   profiles?: { username: string } | { username: string }[];
 }
 
+interface LockRecord extends PeerLock {
+  designer?: string | null;
+  neckline?: string | null;
+  back_style?: string | null;
+  dress_length?: string | null;
+}
+
+interface DupeResult {
+  username: string;
+  matchedFields: string[];
+}
+
 function getUsername(peer: PeerLock): string {
   if (!peer.profiles) return '?';
   const p = Array.isArray(peer.profiles) ? peer.profiles[0] : peer.profiles;
   return p?.username ?? '?';
+}
+
+function getDupeTitle(fields: string[]): string {
+  const extras = fields.filter(f => f !== 'color' && f !== 'silhouette');
+  if (extras.includes('designer') || extras.length >= 2) return 'Strong Dupe Found';
+  return 'Possible Dupe Found';
+}
+
+function getDupeDetail(fields: string[], username: string): string {
+  return `Same ${fields.slice(0, 3).join(' + ')} as @${username}`;
+}
+
+function getDupeHint(fields: string[]): string {
+  const extras = fields.filter(f => f !== 'color' && f !== 'silhouette');
+  if (extras.includes('designer') || extras.length >= 2)
+    return "That's a really close match! Try switching up your color, silhouette, or designer to make your look totally yours.";
+  return "You might still look different in person — lock anyway or mix up your look a little.";
+}
+
+function DupeWarning({ results, onDismiss, onLockAnyway }: {
+  results: DupeResult[]; onDismiss: () => void; onLockAnyway: () => void;
+}) {
+  const sorted = [...results].sort((a, b) => b.matchedFields.length - a.matchedFields.length);
+  const primary = sorted[0];
+  const others = sorted.slice(1);
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <AlertCircle size={15} className="text-amber-700"/>
+        <p className="font-bold text-amber-800 text-sm">{getDupeTitle(primary.matchedFields)}</p>
+      </div>
+      <p className="text-amber-900 text-sm font-semibold mb-1">
+        {getDupeDetail(primary.matchedFields, primary.username)}
+      </p>
+      {others.length > 0 && (
+        <p className="text-amber-700 text-xs mt-1.5">
+          Also: {others.map(o => `@${o.username}`).join(', ')} locked a similar look
+        </p>
+      )}
+      <p className="text-amber-700/75 text-xs mt-2.5 mb-4 leading-relaxed">
+        {getDupeHint(primary.matchedFields)}
+      </p>
+      <div className="flex gap-2.5">
+        <button type="button" onClick={onDismiss}
+          className="flex-1 py-3 rounded-2xl border border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all">
+          Pick Different
+        </button>
+        <button type="button" onClick={onLockAnyway}
+          className="flex-1 py-3 rounded-2xl bg-amber-500 text-white text-xs font-bold active:scale-95 transition-all">
+          Lock Anyway
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // ── Color dropdown ─────────────────────────────────────────────
@@ -232,7 +298,7 @@ export function LockIn() {
   const [loading,    setLoading]    = useState(false);
   const [locked,     setLocked]     = useState(false);
   const [error,      setError]      = useState('');
-  const [dupeUsers,  setDupeUsers]  = useState<string[]>([]);
+  const [dupeResults, setDupeResults] = useState<DupeResult[]>([]);
   const [peers,      setPeers]      = useState<PeerLock[]>([]);
 
   const hasInput = color && silhouette;
@@ -254,20 +320,49 @@ export function LockIn() {
       new Promise<T>((_, rej) => setTimeout(() => rej(new Error('Request timed out — tap Retry')), ms)),
     ]);
 
-  const runDupeCheck = async (): Promise<string[]> => {
+  const runDupeCheck = async (): Promise<DupeResult[]> => {
     const { data, error: err } = await supabase
       .from('locks')
-      .select('user_id, profiles(username)')
+      .select('user_id, profiles(username), designer, neckline, back_style, dress_length')
       .eq('event_id', EVENT_ID)
       .ilike('color', color)
       .ilike('silhouette', silhouette)
       .neq('user_id', user!.id);
-    if (err) console.error('Dupe check:', err.message);
+
+    if (err) {
+      if (err.message.includes('schema cache') || err.message.includes('Could not find') || err.message.includes('column')) {
+        const { data: fd } = await supabase
+          .from('locks')
+          .select('user_id, profiles(username)')
+          .eq('event_id', EVENT_ID)
+          .ilike('color', color)
+          .ilike('silhouette', silhouette)
+          .neq('user_id', user!.id);
+        if (!fd) return [];
+        return fd.map((d: PeerLock) => ({ username: getUsername(d), matchedFields: ['color', 'silhouette'] }));
+      }
+      console.error('Dupe check:', err.message);
+      return [];
+    }
+
     if (!data) return [];
-    return data.map((d: PeerLock) => getUsername(d));
+
+    return (data as LockRecord[]).map(d => {
+      const matched: string[] = ['color', 'silhouette'];
+      if (designer.trim() && d.designer && designer.trim().toLowerCase() === d.designer.toLowerCase())
+        matched.push('designer');
+      if (neckline && d.neckline && neckline.toLowerCase() === d.neckline.toLowerCase())
+        matched.push('neckline');
+      if (backStyle && d.back_style && backStyle.toLowerCase() === d.back_style.toLowerCase())
+        matched.push('back style');
+      if (dressLength && d.dress_length && dressLength.toLowerCase() === d.dress_length.toLowerCase())
+        matched.push('length');
+      return { username: getUsername(d), matchedFields: matched };
+    });
   };
 
   const saveLock = async () => {
+    // Attempt full insert with all detail columns
     const { error: err } = await supabase.from('locks').insert({
       user_id:        user!.id,
       event_id:       EVENT_ID,
@@ -279,17 +374,37 @@ export function LockIn() {
       dress_length:   dressLength       || null,
       embellishments: embellishments.length > 0 ? embellishments.join(', ') : null,
     });
-    if (err) { setError(err.message); setLoading(false); return; }
+
+    if (err) {
+      // PostgREST schema cache hasn't picked up the new columns yet.
+      // Fall back to inserting only the original columns so the lock still succeeds.
+      if (
+        err.message.includes('schema cache') ||
+        err.message.includes('Could not find') ||
+        err.message.includes('column')
+      ) {
+        const { error: fallbackErr } = await supabase.from('locks').insert({
+          user_id:   user!.id,
+          event_id:  EVENT_ID,
+          color,
+          silhouette,
+        });
+        if (fallbackErr) { setError(fallbackErr.message); setLoading(false); return; }
+        setLocked(true); setLoading(false);
+        return;
+      }
+      setError(err.message); setLoading(false); return;
+    }
     setLocked(true); setLoading(false);
   };
 
   const handleLock = async () => {
     if (!hasInput) { setError('Pick a color and silhouette first.'); return; }
     if (!user) { setError('You must be signed in.'); return; }
-    setError(''); setLoading(true); setDupeUsers([]);
+    setError(''); setLoading(true); setDupeResults([]);
     try {
       const dupes = await withTimeout(runDupeCheck(), 10000);
-      if (dupes.length > 0) { setDupeUsers(dupes); setLoading(false); return; }
+      if (dupes.length > 0) { setDupeResults(dupes); setLoading(false); return; }
       await saveLock();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
@@ -302,7 +417,7 @@ export function LockIn() {
     setColor(''); setSilhouette('');
     setDesigner(''); setNeckline(''); setBackStyle(''); setDressLength('');
     setEmbellishments([]);
-    setError(''); setDupeUsers([]);
+    setError(''); setDupeResults([]);
   };
 
   // ── Success screen ────────────────────────────────────────────
@@ -432,26 +547,12 @@ export function LockIn() {
         )}
 
         {/* Dupe warning */}
-        {dupeUsers.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle size={15} className="text-amber-700"/>
-              <p className="font-bold text-amber-800 text-sm">Possible Dupe Found</p>
-            </div>
-            <p className="text-amber-700 text-xs mb-4 leading-relaxed">
-              {dupeUsers.join(', ')} locked a similar look. Pick something different or lock anyway.
-            </p>
-            <div className="flex gap-2.5">
-              <button type="button" onClick={() => setDupeUsers([])}
-                className="flex-1 py-3 rounded-2xl border border-amber-200 bg-white text-amber-800 text-xs font-bold active:scale-95 transition-all">
-                Pick Different
-              </button>
-              <button type="button" onClick={saveLock}
-                className="flex-1 py-3 rounded-2xl bg-amber-500 text-white text-xs font-bold active:scale-95 transition-all">
-                Lock Anyway
-              </button>
-            </div>
-          </div>
+        {dupeResults.length > 0 && (
+          <DupeWarning
+            results={dupeResults}
+            onDismiss={() => setDupeResults([])}
+            onLockAnyway={saveLock}
+          />
         )}
 
         {/* ── CARD 1: The Look (required for dupe check) ── */}
