@@ -6,7 +6,11 @@ import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star } from 
 
 const MAX_PHOTOS = 6;
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
-const SILHOUETTES = ['A-Line','Ball Gown','Mermaid','Trumpet','Sheath','Empire','Two-Piece'];
+const SILHOUETTES = [
+  'A-Line', 'Ball Gown', 'Mermaid', 'Fit & Flare',
+  'Bodycon', 'Baby Doll', 'High-Low', 'Slip Dress',
+  'Off-Shoulder', 'Strapless',
+];
 const POPULAR_DESIGNERS = [
   'Sherri Hill','Jovani','Portia & Scarlett','La Femme',
   'Faviana','Mac Duggal','Ellie Wilde','Terani Couture',
@@ -342,21 +346,30 @@ export function NewListing() {
           )}
         </div>
 
-        {/* ── Color + Silhouette ───────────────────────────────── */}
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <label className="label">Color</label>
-            <input type="text" placeholder="e.g. Emerald" value={color} onChange={e => setColor(e.target.value)} className="input"/>
-          </div>
-          <div className="flex-1">
-            <label className="label">Silhouette</label>
-            <div className="relative">
-              <select aria-label="Silhouette" value={silhouette} onChange={e => setSilhouette(e.target.value)} className="input appearance-none pr-8">
-                <option value="">Select</option>
-                {SILHOUETTES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-plum/40 pointer-events-none"/>
-            </div>
+        {/* ── Color ────────────────────────────────────────────── */}
+        <div>
+          <label className="label">Color</label>
+          <input type="text" placeholder="e.g. Emerald Green, Blush Pink..." value={color} onChange={e => setColor(e.target.value)} className="input"/>
+        </div>
+
+        {/* ── Silhouette ───────────────────────────────────────── */}
+        <div>
+          <label className="label">Silhouette</label>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            {SILHOUETTES.map(s => (
+              <button
+                type="button"
+                key={s}
+                onClick={() => setSilhouette(silhouette === s ? '' : s)}
+                className={`py-3 px-3 rounded-2xl text-xs font-semibold border transition-all text-center ${
+                  silhouette === s
+                    ? 'bg-primary border-primary text-plum shadow-soft'
+                    : 'bg-white border-primary/20 text-plum/60 hover:border-primary/40'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
 

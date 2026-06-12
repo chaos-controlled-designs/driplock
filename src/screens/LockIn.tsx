@@ -7,9 +7,9 @@ import { Lock, ChevronDown, Shield, AlertCircle, ChevronRight, CheckCircle2 } fr
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
 
 const SILHOUETTES = [
-  'A-Line', 'Ball Gown', 'Bodycon', 'Empire Waist',
-  'Fit & Flare', 'Sheath', 'Wrap', 'Slip Dress',
-  'Mermaid', 'High-Low', 'Midi', 'Mini',
+  'A-Line', 'Ball Gown', 'Mermaid', 'Fit & Flare',
+  'Bodycon', 'Baby Doll', 'High-Low', 'Slip Dress',
+  'Off-Shoulder', 'Strapless',
 ];
 
 const COLORS = [
