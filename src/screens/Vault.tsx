@@ -122,7 +122,7 @@ export function Vault() {
       </div>
 
       {/* Filter pills */}
-      <div className="flex gap-2.5 overflow-x-auto px-4 py-4 no-scrollbar">
+      <div className="flex gap-2.5 overflow-x-auto px-5 py-4 no-scrollbar">
         {FILTERS.map(f => (
           <button
             key={f}
@@ -139,7 +139,7 @@ export function Vault() {
         ))}
       </div>
 
-      <div className="px-4">
+      <div className="px-5">
         <p className="text-plum/35 text-[11px] font-semibold uppercase tracking-wider mb-3">
           {filtered.length} {filtered.length === 1 ? 'dress' : 'dresses'} available
         </p>

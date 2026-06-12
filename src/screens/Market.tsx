@@ -63,7 +63,7 @@ export function Market() {
         </div>
       </div>
 
-      <div className="px-4 pt-4">
+      <div className="px-5 pt-5">
 
         {/* Earnings banner */}
         <div className="rounded-3xl p-5 mb-5 bg-gradient-to-r from-blush via-lavender to-blush border border-primary/15 shadow-soft">

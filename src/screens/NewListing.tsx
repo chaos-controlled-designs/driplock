@@ -183,7 +183,7 @@ export function NewListing() {
         <p className="text-plum/60 text-sm">Earn cash on your closet — safe, simple, girl-to-girl</p>
       </div>
 
-      <div className="px-4 pt-4 flex flex-col gap-5">
+      <div className="px-5 pt-5 flex flex-col gap-5">
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 text-xs font-medium">

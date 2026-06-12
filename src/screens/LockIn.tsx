@@ -87,8 +87,8 @@ function SilhouetteGrid({ value, onChange }: { value: string; onChange: (v: stri
               key={s}
               onClick={() => onChange(s)}
               style={{
-                padding: '18px 14px', borderRadius: 20,
-                fontSize: 13, fontWeight: 700, letterSpacing: '0.01em',
+                padding: '14px 10px', borderRadius: 18,
+                fontSize: 12.5, fontWeight: 700, letterSpacing: '0.01em',
                 border: sel ? `2.5px solid ${PRIMARY}` : '1.5px solid rgba(255,193,184,0.38)',
                 background: sel ? PRIMARY : 'transparent',
                 color: sel ? PLUM : 'rgba(63,42,42,0.55)',
@@ -256,7 +256,7 @@ export function LockIn() {
       </div>
 
       {/* ── Cream content sheet — slides up over the gradient ── */}
-      <div className="bg-cream rounded-t-4xl -mt-10 px-5 pt-7 pb-32 flex flex-col gap-6">
+      <div className="bg-cream rounded-t-4xl -mt-10 px-5 pt-6 pb-28 flex flex-col gap-5">
 
         {/* Error */}
         {error && (
@@ -296,7 +296,7 @@ export function LockIn() {
         )}
 
         {/* ── Form card: color + silhouette in one container ── */}
-        <div className="bg-white rounded-3xl shadow-medium p-7 flex flex-col gap-6">
+        <div className="bg-white rounded-3xl shadow-medium p-6 flex flex-col gap-5">
           <ColorSelect value={color} onChange={setColor}/>
           <div className="h-px bg-plum/5"/>
           <SilhouetteGrid value={silhouette} onChange={setSilhouette}/>

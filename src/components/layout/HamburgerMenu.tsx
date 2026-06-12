@@ -89,7 +89,7 @@ export function HamburgerMenu({ isOpen, onClose, onNavigate }: Props) {
         </div>
 
         {/* Nav items */}
-        <div className="flex-1 overflow-auto px-4 py-4 flex flex-col gap-1">
+        <div className="flex-1 overflow-auto px-5 py-4 flex flex-col gap-1">
           {PRIMARY_ITEMS.map(item => (
             <NavItem key={item.path} item={item} onNavigate={onNavigate}/>
           ))}
@@ -102,7 +102,7 @@ export function HamburgerMenu({ isOpen, onClose, onNavigate }: Props) {
         </div>
 
         {/* Sign out */}
-        <div className="px-4 pb-10">
+        <div className="px-5 pb-10">
           <button
             type="button"
             onClick={async () => { await signOut(); onClose(); }}
