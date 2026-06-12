@@ -1,17 +1,32 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { supabase, Message } from '../lib/supabase';
+import { supabase, Message, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Send, Shield } from 'lucide-react';
+
+const STRIPE_LINKS = {
+  low:      'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00',  // $8.99
+  standard: 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02',  // $10.99
+  premium:  'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01',  // $15.99
+};
+
+function getPaymentLink(listing: Listing): string {
+  if (listing.listing_type === 'rent') return STRIPE_LINKS.low;
+  const cents = listing.price_cents ?? 0;
+  if (cents >= 10000) return STRIPE_LINKS.premium;
+  return STRIPE_LINKS.standard;
+}
 
 export function ChatRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages,      setMessages]      = useState<Message[]>([]);
   const [otherUsername, setOtherUsername] = useState('');
-  const [text, setText] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [listing,       setListing]       = useState<Listing | null>(null);
+  const [text,          setText]          = useState('');
+  const [loading,       setLoading]       = useState(true);
+  const [paid,          setPaid]          = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,6 +39,11 @@ export function ChatRoom() {
         const { data: profile } = await supabase
           .from('profiles').select('username').eq('id', otherId).single();
         setOtherUsername(profile?.username ?? 'Unknown');
+        if (conv.listing_id) {
+          const { data: lst } = await supabase
+            .from('listings').select('*').eq('id', conv.listing_id).single();
+          if (lst) setListing(lst as Listing);
+        }
       }
       const { data: msgs } = await supabase
         .from('messages').select('*')
@@ -91,6 +111,35 @@ export function ChatRoom() {
         <Shield size={12} className="text-plum/40"/>
         <p className="text-plum/50 text-[10px]">Never share personal info. Buddy system for meetups. Stay safe!</p>
       </div>
+
+      {/* Payment bar — shown when a listing is attached to this chat */}
+      {listing && (
+        <div className="px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0 border-b border-primary/10"
+          style={{ background: 'linear-gradient(135deg, #fff0eb 0%, #ffd4c4 60%)' }}>
+          <div className="flex-1 min-w-0">
+            <p className="text-plum font-semibold text-xs leading-tight line-clamp-1">{listing.title}</p>
+            <p className="text-plum/50 text-[10px] mt-0.5">
+              {listing.listing_type === 'rent' ? 'Platform fee: $8.99' : listing.listing_type === 'sell' && (listing.price_cents ?? 0) >= 10000 ? 'Platform fee: $15.99' : 'Platform fee: $10.99'}
+            </p>
+          </div>
+          {paid ? (
+            <span className="flex-shrink-0 text-[10px] font-bold px-3 py-1.5 bg-sage text-plum rounded-full">
+              Payment sent!
+            </span>
+          ) : (
+            <a
+              href={getPaymentLink(listing)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setPaid(true)}
+              className="flex-shrink-0 px-4 py-2 rounded-xl text-plum text-xs font-bold active:scale-95 transition-all shadow-soft whitespace-nowrap"
+              style={{ background: '#ffc1b8' }}
+            >
+              Pay Fee →
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-auto px-4 py-4 flex flex-col gap-3">

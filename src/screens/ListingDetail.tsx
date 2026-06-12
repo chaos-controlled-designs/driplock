@@ -4,6 +4,25 @@ import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield, ShoppingBag } from 'lucide-react';
 
+const STRIPE_LINKS = {
+  low:      'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00',  // $8.99
+  standard: 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02',  // $10.99
+  premium:  'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01',  // $15.99
+};
+
+function getPaymentLink(listing: Listing): string {
+  if (listing.listing_type === 'rent') return STRIPE_LINKS.low;
+  const cents = listing.price_cents ?? 0;
+  if (cents >= 10000) return STRIPE_LINKS.premium;
+  return STRIPE_LINKS.standard;
+}
+
+function getPaymentLabel(listing: Listing): string {
+  if (listing.listing_type === 'rent') return 'Pay Fee & Rent This Dress';
+  if (listing.listing_type === 'sell') return 'Pay Fee & Buy This Dress';
+  return 'Pay Platform Fee & Complete Transaction';
+}
+
 export function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,6 +32,7 @@ export function ListingDetail() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [safetyChecked, setSafetyChecked] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
+  const [paid, setPaid] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -235,6 +255,35 @@ export function ListingDetail() {
               Message Seller
             </button>
           )
+        )}
+
+        {/* Payment button — shown to buyer only */}
+        {listing.user_id !== user?.id && (
+          <div className="card mb-4">
+            <p className="font-bold text-plum text-sm mb-1">Ready to make it official?</p>
+            <p className="text-plum/50 text-xs mb-4 leading-relaxed">
+              A small platform fee covers transaction support and keeps both parties protected.
+            </p>
+            {paid ? (
+              <div className="bg-sage/40 rounded-2xl px-4 py-4 text-center">
+                <p className="font-bold text-plum text-sm mb-0.5">Payment started!</p>
+                <p className="text-plum/55 text-xs leading-relaxed">
+                  Complete checkout in the new tab, then message the seller to confirm.
+                </p>
+              </div>
+            ) : (
+              <a
+                href={getPaymentLink(listing)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setPaid(true)}
+                className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all shadow-medium"
+                style={{ background: 'linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%)', boxShadow: '0 6px 24px rgba(255,193,184,0.45)' }}
+              >
+                {getPaymentLabel(listing)}
+              </a>
+            )}
+          </div>
         )}
       </div>
     </div>
