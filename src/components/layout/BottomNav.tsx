@@ -7,7 +7,7 @@ const tabs = [
   { id: 'vault'  as Tab, label: 'Vault',   Icon: ShoppingBag },
   { id: 'lock'   as Tab, label: 'Lock In', isCenter: true },
   { id: 'market' as Tab, label: 'Cash In', Icon: Tag },
-  { id: 'chats'  as Tab, label: 'Chats',   Icon: MessageCircle },
+  { id: 'chats'  as Tab, label: 'Messages', Icon: MessageCircle },
 ];
 
 export function BottomNav({
