@@ -48,6 +48,12 @@ export function SignUp() {
         setSchoolFieldError(SCHOOL_ERROR); return;
       }
       setSchoolFieldError('');
+      // Persist for Profile.tsx create-mode pre-fill (survives email-confirm redirect)
+      localStorage.setItem('drip_signup', JSON.stringify({
+        username: username.trim(),
+        school: schoolName.trim(),
+        grade,
+      }));
     }
     setError('');
     setStep(s => s + 1);
@@ -76,6 +82,7 @@ export function SignUp() {
         safety_agreed: true,
       });
       if (profileError) { setError(profileError.message); setLoading(false); return; }
+      localStorage.removeItem('drip_signup');
     }
 
     navigate('/event');
