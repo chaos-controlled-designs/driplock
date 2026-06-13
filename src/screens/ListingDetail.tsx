@@ -4,31 +4,37 @@ import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield, ShoppingBag, X } from 'lucide-react';
 
-const STRIPE_LINKS = {
-  low:      'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00',  // $8.99
-  standard: 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02',  // $10.99
-  premium:  'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01',  // $15.99
-};
-
-function getStripeLink(listing: Listing, type: 'rent' | 'buy'): string {
-  if (type === 'rent') return STRIPE_LINKS.low;
+// Single source of truth — fee and matching Stripe link always come from the same branch.
+function getFeeAndLink(
+  listing: Listing,
+  type: 'rent' | 'buy',
+): { fee: number; link: string } {
+  if (type === 'rent') {
+    return { fee: 8.99, link: 'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00' };
+  }
   const cents = listing.price_cents ?? 0;
-  if (cents >= 10000) return STRIPE_LINKS.premium;
-  return STRIPE_LINKS.standard;
-}
-
-function getPlatformFee(listing: Listing, type: 'rent' | 'buy'): number {
-  if (type === 'rent') return 8.99;
-  const cents = listing.price_cents ?? 0;
-  if (cents >= 10000) return 15.99;
-  return 10.99;
+  if (cents >= 10000) {
+    return { fee: 15.99, link: 'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01' };
+  }
+  return { fee: 10.99, link: 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02' };
 }
 
 function getAutoMessage(type: 'rent' | 'buy', title: string): string {
   if (type === 'rent') {
-    return `Platform fee paid for "${title}"!\n\nNext steps:\n\nSeller — please ship the dress within 2 days. Share your tracking number here.\n\nBuyer — send your shipping address in this chat.\n\nThe dress must be returned within 7 days after prom in the same condition it was received.\n\nKeep all communication here for everyone's protection!`;
+    return (
+      `✅ Platform fee paid — "${title}" rental is confirmed!\n\n` +
+      `📦 SELLER: Please ship the dress within 2 days and drop your tracking number here.\n\n` +
+      `📍 BUYER: Reply with your shipping address so the seller can ship to you.\n\n` +
+      `🔄 Return window: The dress must be returned within 7 days after prom, in the same condition you received it. Ship it back with tracking.\n\n` +
+      `Keep all communication in this chat for both your protection. Have fun at prom! 💕`
+    );
   }
-  return `Platform fee paid for "${title}"!\n\nNext steps:\n\nSeller — please ship the dress within 3 days. Share your tracking number here.\n\nBuyer — send your shipping address in this chat. Message here within 48 hours of receiving if there are any issues.\n\nEnjoy your dress!`;
+  return (
+    `✅ Platform fee paid — "${title}" purchase is confirmed!\n\n` +
+    `📦 SELLER: Please ship the dress within 3 days and drop your tracking number here.\n\n` +
+    `📍 BUYER: Reply with your shipping address so the seller can ship to you. Message here within 48 hours of receiving if there are any issues.\n\n` +
+    `Keep all communication in this chat for both your protection. Enjoy your dress! 💕`
+  );
 }
 
 export function ListingDetail() {
@@ -344,13 +350,12 @@ export function ListingDetail() {
 
             {/* Price breakdown */}
             {(() => {
-              const dressCents  = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice  = dressCents / 100;
-              const fee         = getPlatformFee(listing, checkoutType);
-              const shipping    = listing.ships ? 2.99 : 0;
-              const total       = dressPrice + fee + shipping;
-              const stripeLink  = getStripeLink(listing, checkoutType);
-              const suffix      = checkoutType === 'rent' ? '/wknd' : '';
+              const dressCents      = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice      = dressCents / 100;
+              const { fee, link }   = getFeeAndLink(listing, checkoutType);
+              const shipping        = listing.ships ? 2.99 : 0;
+              const total           = dressPrice + fee + shipping;
+              const suffix          = checkoutType === 'rent' ? '/wknd' : '';
 
               return (
                 <>
@@ -419,7 +424,7 @@ export function ListingDetail() {
                     </div>
                   ) : (
                     <a
-                      href={stripeLink}
+                      href={link}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={handleCheckoutConfirm}
