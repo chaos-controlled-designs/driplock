@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Lock, ShoppingBag, Plus, Users, MapPin, Shield, AlertCircle, Calendar, ChevronRight } from 'lucide-react';
+import {
+  Lock, ShoppingBag, Plus, Users, MapPin, Shield, AlertCircle,
+  Calendar, ChevronRight, Edit2, X, Save, Check,
+} from 'lucide-react';
 
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
 
@@ -26,42 +29,103 @@ interface EventLock {
 export function EventDashboard() {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [lockCount, setLockCount] = useState(0);
+
+  const [event,       setEvent]       = useState<Event | null>(null);
+  const [lockCount,   setLockCount]   = useState(0);
+  const [schoolCount, setSchoolCount] = useState(0);
   const [recentLocks, setRecentLocks] = useState<EventLock[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [retryKey, setRetryKey] = useState(0);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState<string | null>(null);
+  const [retryKey,    setRetryKey]    = useState(0);
+
+  // Edit-event sheet state
+  const [editing,      setEditing]      = useState(false);
+  const [editName,     setEditName]     = useState('');
+  const [editDate,     setEditDate]     = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [saving,       setSaving]       = useState(false);
+  const [saveError,    setSaveError]    = useState('');
+  const [saveDone,     setSaveDone]     = useState(false);
+
+  const schoolName = profile?.school ?? null;
 
   useEffect(() => {
     const load = async () => {
       try {
         setError(null);
+
+        // ── Event details ──────────────────────────────────────────────
         const { data: ev } = await supabase
           .from('events').select('*').eq('id', EVENT_ID).single();
         setEvent(ev ?? null);
+        if (ev) {
+          setEditName(ev.name ?? '');
+          // datetime-local expects "YYYY-MM-DDTHH:MM"
+          setEditDate(ev.date ? ev.date.slice(0, 16) : '');
+          setEditLocation(ev.location ?? '');
+        }
 
+        // ── Total lock count (separate from the 5-item list) ──────────
+        const { count: total } = await supabase
+          .from('locks')
+          .select('id', { count: 'exact', head: true })
+          .eq('event_id', EVENT_ID);
+        setLockCount(total ?? 0);
+
+        // ── Recent 5 locks for the feed ───────────────────────────────
         const { data: locks, error: locksError } = await supabase
           .from('locks')
           .select('*, profiles(username)')
           .eq('event_id', EVENT_ID)
           .order('created_at', { ascending: false })
           .limit(5);
+        if (!locksError) setRecentLocks((locks ?? []) as EventLock[]);
 
-        if (locksError) {
-          console.error('Locks fetch error:', locksError);
-        } else {
-          setRecentLocks((locks ?? []) as EventLock[]);
-          setLockCount((locks ?? []).length);
+        // ── School-specific count ─────────────────────────────────────
+        if (profile?.school) {
+          const { data: schoolProfiles } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('school', profile.school);
+
+          if (schoolProfiles && schoolProfiles.length > 0) {
+            const { count: sc } = await supabase
+              .from('locks')
+              .select('id', { count: 'exact', head: true })
+              .eq('event_id', EVENT_ID)
+              .in('user_id', schoolProfiles.map((p: { id: string }) => p.id));
+            setSchoolCount(sc ?? 0);
+          }
         }
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard');
       } finally {
         setLoading(false);
       }
     };
+
     if (user) { load(); } else { setLoading(false); }
-  }, [user, retryKey]);
+  }, [user, profile, retryKey]);
+
+  const handleSaveEvent = async () => {
+    if (!editName.trim() || !editDate) {
+      setSaveError('Event name and date are required.'); return;
+    }
+    setSaving(true); setSaveError('');
+    const { error: err } = await supabase
+      .from('events')
+      .update({ name: editName.trim(), date: editDate, location: editLocation.trim() })
+      .eq('id', EVENT_ID);
+    setSaving(false);
+    if (err) { setSaveError(err.message); return; }
+    setEvent(e => e
+      ? { ...e, name: editName.trim(), date: editDate, location: editLocation.trim() }
+      : e
+    );
+    setSaveDone(true);
+    setTimeout(() => { setSaveDone(false); setEditing(false); }, 1200);
+  };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
@@ -73,6 +137,11 @@ export function EventDashboard() {
     if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
     return `${Math.floor(mins / 1440)}d ago`;
   };
+
+  // Short school label for the stat card (avoids overflow)
+  const shortSchool = schoolName
+    ? (schoolName.length > 22 ? schoolName.slice(0, 20) + '…' : schoolName)
+    : 'Your School';
 
   if (loading) return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -102,28 +171,33 @@ export function EventDashboard() {
   return (
     <div className="min-h-screen bg-cream pb-28">
 
-      {/* ── Gradient hero — compact, Lock In CTA lives inside it ── */}
+      {/* ── Gradient hero ── */}
       <div className="bg-gradient-to-br from-blush to-lavender px-5 pt-6 pb-10 relative overflow-hidden rounded-b-[28px]">
-
-        {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/10 -translate-y-16 translate-x-16 pointer-events-none"/>
         <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full bg-white/15 translate-y-12 -translate-x-8 pointer-events-none"/>
 
         <div className="relative">
-          {/* Welcome */}
           {profile && (
             <p className="text-plum/55 text-xs font-medium mb-3">
-              Welcome back,{' '}
-              <span className="text-plum font-bold">@{profile.username}</span>
+              Welcome back, <span className="text-plum font-bold">@{profile.username}</span>
             </p>
           )}
 
-          {/* Event name */}
-          <h1 className="font-display text-2xl font-bold text-plum leading-snug mb-2">
-            {event?.name ?? 'Your Prom Event'}
-          </h1>
+          {/* Event name + edit button */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h1 className="font-display text-2xl font-bold text-plum leading-snug flex-1">
+              {event?.name ?? 'Your Prom Event'}
+            </h1>
+            <button
+              type="button"
+              aria-label="Edit event details"
+              onClick={() => { setEditing(true); setSaveError(''); setSaveDone(false); }}
+              className="w-9 h-9 rounded-2xl bg-white/50 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/60 active:scale-90 transition-all"
+            >
+              <Edit2 size={15} className="text-plum/70"/>
+            </button>
+          </div>
 
-          {/* Date pill */}
           {event?.date && (
             <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/40">
               <Calendar size={12} className="text-plum/55"/>
@@ -131,14 +205,13 @@ export function EventDashboard() {
             </div>
           )}
 
-          {/* Location */}
           {event?.location && (
             <p className="text-plum/45 text-xs mb-5 flex items-center gap-1.5 font-medium">
               <MapPin size={11}/>{event.location}
             </p>
           )}
 
-          {/* Lock In CTA — frosted glass card inside the gradient */}
+          {/* Lock In CTA */}
           <button
             type="button"
             onClick={() => navigate('/lock')}
@@ -156,22 +229,45 @@ export function EventDashboard() {
         </div>
       </div>
 
-      {/* ── Cream content sheet — slides up with rounded top ── */}
+      {/* ── Cream content ── */}
       <div className="bg-cream rounded-t-4xl -mt-6 px-5 pt-7 flex flex-col gap-5">
 
-        {/* Stats — two separate floating cards */}
+        {/* Stats row */}
         <div className="grid grid-cols-2 gap-4">
+          {/* Total looks locked */}
           <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-7">
             <p className="text-5xl font-bold text-primary leading-none mb-2">{lockCount}</p>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Looks Locked</p>
           </div>
-          <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-7 gap-2.5">
-            <div className="w-14 h-14 rounded-3xl bg-blush flex items-center justify-center">
-              <Users size={22} className="text-primary"/>
+
+          {/* School count */}
+          <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-6 px-3 text-center gap-1.5">
+            <div className="w-10 h-10 rounded-2xl bg-blush flex items-center justify-center">
+              <Users size={18} className="text-primary"/>
             </div>
-            <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Your School</p>
+            <p className="text-3xl font-bold text-plum leading-none">{schoolCount}</p>
+            <p className="text-plum/40 text-[9px] font-bold uppercase tracking-wider leading-snug line-clamp-2">
+              {shortSchool}
+            </p>
           </div>
         </div>
+
+        {/* School banner */}
+        {schoolName && (
+          <div className="bg-lavender/40 rounded-3xl px-4 py-3.5 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-white/70 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm">🏫</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-plum font-semibold text-sm leading-tight truncate">{schoolName}</p>
+              <p className="text-plum/50 text-xs mt-0.5">
+                {schoolCount === 0
+                  ? 'Be the first from your school to lock in!'
+                  : `${schoolCount} girl${schoolCount === 1 ? '' : 's'} from your school locked in`}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Secondary actions */}
         <div className="grid grid-cols-2 gap-4">
@@ -205,7 +301,7 @@ export function EventDashboard() {
           </p>
         </div>
 
-        {/* Recently locked */}
+        {/* Recently locked feed */}
         <div className="pb-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center">
@@ -231,7 +327,7 @@ export function EventDashboard() {
             </div>
           ) : (
             <div className="bg-white rounded-3xl shadow-medium overflow-hidden divide-y divide-plum/4">
-              {recentLocks.map((lock) => (
+              {recentLocks.map(lock => (
                 <div key={lock.id} className="flex items-center gap-3.5 px-5 py-5">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blush to-lavender flex items-center justify-center flex-shrink-0 font-bold text-plum text-sm">
                     {lock.profiles?.username?.slice(0, 2).toUpperCase() ?? '??'}
@@ -249,8 +345,88 @@ export function EventDashboard() {
             </div>
           )}
         </div>
-
       </div>
+
+      {/* ── Edit Event Sheet ── */}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          <div
+            className="absolute inset-0 bg-plum/25 backdrop-blur-sm"
+            onClick={() => setEditing(false)}
+          />
+          <div className="relative bg-white rounded-t-[32px] px-5 pt-6 pb-10 z-10">
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-bold text-plum text-base">Edit Event Details</p>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setEditing(false)}
+                className="w-8 h-8 rounded-full bg-cream flex items-center justify-center"
+              >
+                <X size={16} className="text-plum/50"/>
+              </button>
+            </div>
+
+            {saveError && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4 text-red-600 text-xs font-medium">
+                {saveError}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="label">Event Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  placeholder="Georgetown Prom 2026"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-event-date" className="label">Date &amp; Time</label>
+                <input
+                  id="edit-event-date"
+                  type="datetime-local"
+                  value={editDate}
+                  onChange={e => setEditDate(e.target.value)}
+                  title="Event date and time"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="label">Location / Venue</label>
+                <input
+                  type="text"
+                  value={editLocation}
+                  onChange={e => setEditLocation(e.target.value)}
+                  placeholder="The Grand Ballroom, Georgetown, OH"
+                  className="input"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveEvent}
+              disabled={saving || saveDone}
+              className="btn-primary mt-5 flex items-center justify-center gap-2"
+            >
+              {saveDone
+                ? <><Check size={16}/> Saved!</>
+                : saving
+                  ? 'Saving...'
+                  : <><Save size={16}/> Save Event Details</>}
+            </button>
+
+            <p className="text-plum/35 text-[10px] text-center mt-3 leading-relaxed">
+              Changes are visible to everyone at your school's event.
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
