@@ -138,13 +138,11 @@ export function EventDashboard() {
     return `${Math.floor(mins / 1440)}d ago`;
   };
 
-  // Smart event title: school-based default when DB has nothing set
-  const defaultEventName = schoolName ? `${schoolName} Prom 2026` : 'Your Prom Event';
-  const displayEventName = event?.name || defaultEventName;
+  // Title: use custom DB name if set, otherwise generic "Your Prom"
+  const displayEventName = event?.name || 'Your Prom';
 
   const openEdit = () => {
-    const smartName = event?.name || (schoolName ? `${schoolName} Prom 2026` : '');
-    setEditName(smartName);
+    setEditName(event?.name || '');
     setEditing(true);
     setSaveError('');
     setSaveDone(false);
@@ -274,22 +272,23 @@ export function EventDashboard() {
           </div>
         </div>
 
-        {/* School banner */}
-        {schoolName && (
-          <div className="bg-lavender/40 rounded-3xl px-4 py-3.5 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/70 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm">🏫</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-plum font-semibold text-sm leading-tight truncate">{schoolName}</p>
-              <p className="text-plum/50 text-xs mt-0.5">
-                {schoolCount === 0
-                  ? 'Be the first from your school to lock in!'
-                  : `${schoolCount} girl${schoolCount === 1 ? '' : 's'} from your school locked in`}
-              </p>
-            </div>
+        {/* School count banner */}
+        <div className="bg-lavender/40 rounded-3xl px-4 py-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-2xl bg-white/70 flex items-center justify-center flex-shrink-0">
+            <Users size={17} className="text-primary"/>
           </div>
-        )}
+          <p className="text-plum text-sm leading-snug flex-1">
+            {schoolCount === 0 ? (
+              schoolName
+                ? <>Be the first girl from <span className="font-bold">{schoolName}</span> to lock in for prom!</>
+                : 'Be the first to lock in for prom!'
+            ) : (
+              schoolName
+                ? <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} from <span className="font-bold">{schoolName}</span> {schoolCount === 1 ? 'has' : 'have'} locked in for prom</>
+                : <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} locked in for prom</>
+            )}
+          </p>
+        </div>
 
         {/* Secondary actions */}
         <div className="grid grid-cols-2 gap-4">
