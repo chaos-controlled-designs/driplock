@@ -59,7 +59,7 @@ export function EventDashboard() {
           .from('events').select('*').eq('id', EVENT_ID).single();
         setEvent(ev ?? null);
         if (ev) {
-          setEditName(ev.name ?? '');
+          setEditName(ev.name || '');
           // datetime-local expects "YYYY-MM-DDTHH:MM"
           setEditDate(ev.date ? ev.date.slice(0, 16) : '');
           setEditLocation(ev.location ?? '');
@@ -138,6 +138,18 @@ export function EventDashboard() {
     return `${Math.floor(mins / 1440)}d ago`;
   };
 
+  // Smart event title: school-based default when DB has nothing set
+  const defaultEventName = schoolName ? `${schoolName} Prom 2026` : 'Your Prom Event';
+  const displayEventName = event?.name || defaultEventName;
+
+  const openEdit = () => {
+    const smartName = event?.name || (schoolName ? `${schoolName} Prom 2026` : '');
+    setEditName(smartName);
+    setEditing(true);
+    setSaveError('');
+    setSaveDone(false);
+  };
+
   // Short school label for the stat card (avoids overflow)
   const shortSchool = schoolName
     ? (schoolName.length > 22 ? schoolName.slice(0, 20) + '…' : schoolName)
@@ -183,33 +195,43 @@ export function EventDashboard() {
             </p>
           )}
 
-          {/* Event name + edit button */}
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h1 className="font-display text-2xl font-bold text-plum leading-snug flex-1">
-              {event?.name ?? 'Your Prom Event'}
-            </h1>
-            <button
-              type="button"
-              aria-label="Edit event details"
-              onClick={() => { setEditing(true); setSaveError(''); setSaveDone(false); }}
-              className="w-9 h-9 rounded-2xl bg-white/50 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/60 active:scale-90 transition-all"
-            >
-              <Edit2 size={15} className="text-plum/70"/>
-            </button>
-          </div>
+          {/* Event name */}
+          <h1 className="font-display text-2xl font-bold text-plum leading-snug mb-2">
+            {displayEventName}
+          </h1>
 
-          {event?.date && (
+          {/* Date pill — or prompt to set one */}
+          {event?.date ? (
             <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/40">
               <Calendar size={12} className="text-plum/55"/>
               <p className="text-plum font-semibold text-xs">{formatDate(event.date)}</p>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={openEdit}
+              className="bg-white/40 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/30 active:scale-95 transition-all"
+            >
+              <Calendar size={12} className="text-plum/40"/>
+              <p className="text-plum/50 font-semibold text-xs">Set event date →</p>
+            </button>
           )}
 
           {event?.location && (
-            <p className="text-plum/45 text-xs mb-5 flex items-center gap-1.5 font-medium">
+            <p className="text-plum/45 text-xs flex items-center gap-1.5 font-medium">
               <MapPin size={11}/>{event.location}
             </p>
           )}
+
+          {/* Prominent edit CTA */}
+          <button
+            type="button"
+            onClick={openEdit}
+            className="mt-3 mb-5 flex items-center gap-1.5 text-plum/55 text-xs font-semibold active:scale-95 transition-all hover:text-plum/80"
+          >
+            <Edit2 size={12}/>
+            Edit event name, date &amp; location
+          </button>
 
           {/* Lock In CTA */}
           <button
