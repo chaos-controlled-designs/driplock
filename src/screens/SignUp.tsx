@@ -82,7 +82,8 @@ export function SignUp() {
         safety_agreed: true,
       });
       if (profileError) { setError(profileError.message); setLoading(false); return; }
-      localStorage.removeItem('drip_signup');
+      // Don't clear localStorage here — Profile.tsx clears it once AuthContext
+      // confirms the profile is loaded, preventing a race-condition blank form.
     }
 
     navigate('/event');

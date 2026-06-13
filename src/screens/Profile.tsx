@@ -13,18 +13,28 @@ export function Profile() {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
 
-  // ── Create-profile state (pre-filled from localStorage if available) ──
-  const signupData = (() => { try { return JSON.parse(localStorage.getItem('drip_signup') || '{}'); } catch { return {}; } })();
-  const [username,         setUsername]         = useState<string>(signupData.username ?? '');
-  const [schoolName,       setSchoolName]       = useState<string>(signupData.school   ?? '');
+  // ── Create-profile state — lazy-initialized from localStorage ──────────
+  // Using lazy initializers so localStorage is read exactly once (first render).
+  const readSignup = (key: string) => () => {
+    try { return JSON.parse(localStorage.getItem('drip_signup') || '{}')[key] ?? ''; }
+    catch { return ''; }
+  };
+  const [username,         setUsername]         = useState<string>(readSignup('username'));
+  const [schoolName,       setSchoolName]       = useState<string>(readSignup('school'));
   const [schoolFieldError, setSchoolFieldError] = useState('');
-  const [grade,            setGrade]            = useState<string>(signupData.grade    ?? '');
+  const [grade,            setGrade]            = useState<string>(readSignup('grade'));
   const [createBio,        setCreateBio]        = useState('');
   const [createSize,       setCreateSize]       = useState('');
   const [creating,         setCreating]         = useState(false);
   const [createError,      setCreateError]      = useState('');
 
-  const hasSignupData = !!(signupData.username && signupData.school && signupData.grade);
+  // hasSignupData drives whether we show the read-only "From signup" card
+  const [hasSignupData]    = useState<boolean>(() => {
+    try {
+      const d = JSON.parse(localStorage.getItem('drip_signup') || '{}');
+      return !!(d.username && d.school && d.grade);
+    } catch { return false; }
+  });
 
   // ── Edit-profile state ───────────────────────────────────────────────
   const [bio,       setBio]       = useState('');
@@ -50,6 +60,9 @@ export function Profile() {
       setBust(profile.bust_inches?.toString() ?? '');
       setWaist(profile.waist_inches?.toString() ?? '');
       setHips(profile.hips_inches?.toString() ?? '');
+      // Profile confirmed loaded — safe to clear signup cache now.
+      // This is the authoritative cleanup point; SignUp.tsx no longer does it.
+      localStorage.removeItem('drip_signup');
     }
   }, [profile]);
 
@@ -139,34 +152,56 @@ export function Profile() {
             </div>
           )}
 
-          {/* ── From signup (read-only when data exists) ── */}
+          {/* ── Locked fields ── */}
           {hasSignupData ? (
-            <div className="bg-white rounded-3xl border border-primary/15 shadow-soft px-4 py-4">
-              <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-3">From your signup</p>
-              <div className="flex flex-col gap-2.5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blush flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-primary">@</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-plum/40 font-semibold uppercase tracking-wider">Username</p>
-                    <p className="text-plum font-semibold text-sm">@{username}</p>
-                  </div>
+            <div className="flex flex-col gap-2">
+              {/* Section header */}
+              <div className="flex items-center justify-between px-1 mb-1">
+                <p className="text-plum/55 text-xs font-semibold">Account details</p>
+                <div className="flex items-center gap-1 text-plum/35">
+                  <Lock size={10}/>
+                  <span className="text-[10px] font-semibold">Set during signup</span>
                 </div>
-                <div className="h-px bg-plum/5"/>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blush flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs">🏫</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-plum/40 font-semibold uppercase tracking-wider">School · Grade</p>
-                    <p className="text-plum font-semibold text-sm">{schoolName} · {grade}</p>
-                  </div>
+              </div>
+
+              {/* Username row */}
+              <div className="flex items-center gap-3 bg-plum/[0.04] border border-plum/10 rounded-2xl px-4 py-3">
+                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-soft">
+                  <span className="text-xs font-bold text-primary">@</span>
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-plum/35 font-semibold uppercase tracking-wider mb-0.5">Username</p>
+                  <p className="text-plum font-semibold text-sm">@{username}</p>
+                </div>
+                <Lock size={13} className="text-plum/20 flex-shrink-0"/>
+              </div>
+
+              {/* School row */}
+              <div className="flex items-center gap-3 bg-plum/[0.04] border border-plum/10 rounded-2xl px-4 py-3">
+                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-soft">
+                  <span className="text-sm">🏫</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-plum/35 font-semibold uppercase tracking-wider mb-0.5">School</p>
+                  <p className="text-plum font-semibold text-sm truncate">{schoolName}</p>
+                </div>
+                <Lock size={13} className="text-plum/20 flex-shrink-0"/>
+              </div>
+
+              {/* Grade row */}
+              <div className="flex items-center gap-3 bg-plum/[0.04] border border-plum/10 rounded-2xl px-4 py-3">
+                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-soft">
+                  <span className="text-sm">🎓</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-plum/35 font-semibold uppercase tracking-wider mb-0.5">Grade</p>
+                  <p className="text-plum font-semibold text-sm">{grade} Grade</p>
+                </div>
+                <Lock size={13} className="text-plum/20 flex-shrink-0"/>
               </div>
             </div>
           ) : (
-            /* No localStorage data — show editable fields */
+            /* Fallback — no signup data in storage, show editable inputs */
             <>
               <div>
                 <label className="label">Username <span className="text-primary">*</span></label>
@@ -209,6 +244,13 @@ export function Profile() {
               </div>
             </>
           )}
+
+          {/* Divider between locked and editable sections */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-plum/8"/>
+            <p className="text-plum/30 text-[10px] font-semibold uppercase tracking-wider">Optional extras</p>
+            <div className="flex-1 h-px bg-plum/8"/>
+          </div>
 
           {/* ── Bio ── */}
           <div>
