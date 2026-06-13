@@ -5,12 +5,8 @@ import { ChevronDown, Eye, EyeOff, Users, MapPin, Lock, MessageCircle, Shield } 
 
 const GRADES = ['9th', '10th', '11th', '12th'];
 
-const SCHOOLS = [
-  { id: '11111111-1111-1111-1111-111111111111', name: 'Georgetown Exempted Village High School', city: 'Georgetown', state: 'OH' },
-  { id: '00000000-0000-0000-0000-000000000001', name: 'Lakewood High School', city: 'Lakewood', state: 'OH' },
-  { id: '00000000-0000-0000-0000-000000000002', name: 'Westfield High School', city: 'Westfield', state: 'NJ' },
-  { id: '00000000-0000-0000-0000-000000000003', name: 'Riverside High School', city: 'Riverside', state: 'CA' },
-];
+const SCHOOL_REGEX = /^[a-zA-Z0-9\s&.,'"-]{5,100}$/;
+const SCHOOL_ERROR = "Please type your full official school name (example: Georgetown High School, not GHS or Geo HS). Short abbreviations will break dupe checking.";
 
 const SAFETY_RULES = [
   { Icon: Users,         title: 'Buddy System Required', desc: 'Always bring a friend to any in-person meetup. Never go alone.' },
@@ -28,7 +24,8 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [grade, setGrade] = useState('');
-  const [schoolId, setSchoolId] = useState('');
+  const [schoolName,      setSchoolName]      = useState('');
+  const [schoolFieldError, setSchoolFieldError] = useState('');
   const [safetyChecked, setSafetyChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -43,9 +40,14 @@ export function SignUp() {
       }
     }
     if (step === 2) {
-      if (!schoolId || !grade) {
-        setError('Please select your school and grade.'); return;
+      const trimmed = schoolName.trim();
+      if (!trimmed || !grade) {
+        setError('Please fill in your school name and grade.'); return;
       }
+      if (!SCHOOL_REGEX.test(trimmed)) {
+        setSchoolFieldError(SCHOOL_ERROR); return;
+      }
+      setSchoolFieldError('');
     }
     setError('');
     setStep(s => s + 1);
@@ -69,7 +71,7 @@ export function SignUp() {
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         username: username.trim(),
-        school_id: schoolId,
+        school: schoolName.trim(),
         grade,
         safety_agreed: true,
       });
@@ -145,16 +147,19 @@ export function SignUp() {
 
           <div className="flex flex-col gap-4 mb-8">
             <div>
-              <label className="label">Your School</label>
-              <div className="relative">
-                <select value={schoolId} onChange={e => setSchoolId(e.target.value)} className="input appearance-none pr-10" aria-label="Select your school">
-                  <option value="">Select your school</option>
-                  {SCHOOLS.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} — {s.city}, {s.state}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-plum/40 pointer-events-none" />
-              </div>
+              <label className="label">School Name <span className="text-primary">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Georgetown High School"
+                value={schoolName}
+                onChange={e => { setSchoolName(e.target.value); setSchoolFieldError(''); }}
+                className="input"
+                autoCapitalize="words"
+              />
+              <p className="text-plum/40 text-[11px] mt-1">Type your full official school name</p>
+              {schoolFieldError && (
+                <p className="text-red-500 text-xs mt-1.5 leading-snug">{schoolFieldError}</p>
+              )}
             </div>
 
             <div>

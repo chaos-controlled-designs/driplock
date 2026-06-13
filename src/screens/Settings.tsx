@@ -34,7 +34,7 @@ export function Settings() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const initials    = profile?.username?.slice(0, 2).toUpperCase() ?? user?.email?.slice(0, 2).toUpperCase() ?? '??';
-  const schoolName  = profile?.school_id ? (SCHOOLS[profile.school_id] ?? 'Unknown School') : null;
+  const schoolName  = profile?.school ?? (profile?.school_id ? (SCHOOLS[profile.school_id] ?? null) : null);
 
   const handlePasswordChange = async () => {
     setPasswordError('');

@@ -4,25 +4,22 @@ import { supabase, DRESS_SIZES } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Save, Lock, ChevronDown, Shield } from 'lucide-react';
 
-const SCHOOLS = [
-  { id: '11111111-1111-1111-1111-111111111111', name: 'Georgetown Exempted Village High School' },
-  { id: '00000000-0000-0000-0000-000000000001', name: 'Lakewood High School' },
-  { id: '00000000-0000-0000-0000-000000000002', name: 'Westfield High School' },
-  { id: '00000000-0000-0000-0000-000000000003', name: 'Riverside High School' },
-];
-
 const GRADES = ['9th', '10th', '11th', '12th'];
+
+const SCHOOL_REGEX = /^[a-zA-Z0-9\s&.,'"-]{5,100}$/;
+const SCHOOL_ERROR = "Please type your full official school name (example: Georgetown High School, not GHS or Geo HS). Short abbreviations will break dupe checking.";
 
 export function Profile() {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
 
   // ── Create-profile state ─────────────────────────────────────────────
-  const [username,    setUsername]    = useState('');
-  const [schoolId,    setSchoolId]    = useState('');
-  const [grade,       setGrade]       = useState('');
-  const [creating,    setCreating]    = useState(false);
-  const [createError, setCreateError] = useState('');
+  const [username,         setUsername]         = useState('');
+  const [schoolName,       setSchoolName]       = useState('');
+  const [schoolFieldError, setSchoolFieldError] = useState('');
+  const [grade,            setGrade]            = useState('');
+  const [creating,         setCreating]         = useState(false);
+  const [createError,      setCreateError]      = useState('');
 
   // ── Edit-profile state ───────────────────────────────────────────────
   const [bio,       setBio]       = useState('');
@@ -52,13 +49,18 @@ export function Profile() {
   }, [profile]);
 
   const handleCreate = async () => {
-    if (!username.trim() || !schoolId || !grade) {
+    const trimmedSchool = schoolName.trim();
+    if (!username.trim() || !trimmedSchool || !grade) {
       setCreateError('Please fill in all fields.'); return;
     }
+    if (!SCHOOL_REGEX.test(trimmedSchool)) {
+      setSchoolFieldError(SCHOOL_ERROR); return;
+    }
+    setSchoolFieldError('');
     if (!user) return;
     setCreating(true); setCreateError('');
     const { error } = await supabase.from('profiles').upsert({
-      id: user.id, username: username.trim(), school_id: schoolId,
+      id: user.id, username: username.trim(), school: trimmedSchool,
       grade, safety_agreed: true,
     }, { onConflict: 'id' });
     if (error) { setCreateError(error.message); setCreating(false); return; }
@@ -127,19 +129,19 @@ export function Profile() {
           </div>
 
           <div>
-            <label className="label">Your School <span className="text-primary">*</span></label>
-            <div className="relative">
-              <select
-                value={schoolId}
-                onChange={e => setSchoolId(e.target.value)}
-                className="input appearance-none pr-10"
-                aria-label="Select your school"
-              >
-                <option value="">Select your school</option>
-                {SCHOOLS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-plum/40 pointer-events-none"/>
-            </div>
+            <label className="label">School Name <span className="text-primary">*</span></label>
+            <input
+              type="text"
+              placeholder="e.g. Georgetown High School"
+              value={schoolName}
+              onChange={e => { setSchoolName(e.target.value); setSchoolFieldError(''); }}
+              className="input"
+              autoCapitalize="words"
+            />
+            <p className="text-plum/40 text-[11px] mt-1">Type your full official school name</p>
+            {schoolFieldError && (
+              <p className="text-red-500 text-xs mt-1.5 leading-snug">{schoolFieldError}</p>
+            )}
           </div>
 
           <div>
