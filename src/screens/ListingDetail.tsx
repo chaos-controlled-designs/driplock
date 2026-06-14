@@ -398,17 +398,23 @@ export function ListingDetail() {
 
             {/* ── SHIP breakdown ── */}
             {checkout.method === 'ship' && (() => {
-              const dressCents  = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice  = dressCents / 100;
-              const platformFee = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
-              const total       = dressPrice + platformFee + SHIPPING_FEE;
-              const suffix      = checkout.transType === 'rent' ? '/wknd' : '';
-              const link        = getStripeLink(listing, checkout.transType);
+              const dressCents   = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice   = dressCents / 100;
+              // Deposit only applies to rentals; buy flow always 0
+              const depositCents = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
+              const depositPrice = depositCents / 100;
+              // Platform fee is 10% of the dress/rental price (deposit is a returnable security, not part of the fee base)
+              const platformFee  = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
+              const total        = dressPrice + depositPrice + platformFee + SHIPPING_FEE;
+              const suffix       = checkout.transType === 'rent' ? '/wknd' : '';
+              const link         = getStripeLink(listing, checkout.transType);
 
               return (
                 <>
                   <div className="bg-cream rounded-2xl p-4 mb-4">
                     <div className="flex flex-col gap-2.5 mb-3">
+
+                      {/* Dress / rental price */}
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-plum/60 text-sm">
@@ -418,6 +424,19 @@ export function ListingDetail() {
                         </div>
                         <span className="text-plum font-semibold text-sm">{formatPrice(dressCents)}{suffix}</span>
                       </div>
+
+                      {/* Security deposit — rentals only, hidden for buy */}
+                      {depositCents > 0 && (
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-plum/60 text-sm">Security deposit</p>
+                            <p className="text-plum/35 text-[10px]">Refunded when dress is returned in good condition</p>
+                          </div>
+                          <span className="text-plum font-semibold text-sm">${depositPrice.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      {/* Platform fee */}
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-plum/60 text-sm">Platform fee (10%)</p>
@@ -425,6 +444,8 @@ export function ListingDetail() {
                         </div>
                         <span className="text-plum font-semibold text-sm">${platformFee.toFixed(2)}</span>
                       </div>
+
+                      {/* Shipping */}
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-plum/60 text-sm">Shipping</p>
@@ -435,7 +456,7 @@ export function ListingDetail() {
                     </div>
                     <div className="h-px bg-plum/10 mb-3"/>
                     <div className="flex justify-between items-center">
-                      <span className="text-plum font-bold text-sm">Total Due via Stripe</span>
+                      <span className="text-plum font-bold text-sm">Total Due</span>
                       <span className="text-plum font-bold text-2xl">${total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -505,17 +526,21 @@ export function ListingDetail() {
 
             {/* ── MEETUP breakdown ── */}
             {checkout.method === 'meetup' && (() => {
-              const dressCents  = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice  = dressCents / 100;
-              const platformFee = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
-              const suffix      = checkout.transType === 'rent' ? '/wknd' : '';
-              const link        = getStripeLink(listing, checkout.transType);
+              const dressCents   = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice   = dressCents / 100;
+              // Deposit only applies to rentals; buy flow always 0
+              const depositCents = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
+              const depositPrice = depositCents / 100;
+              const platformFee  = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
+              const suffix       = checkout.transType === 'rent' ? '/wknd' : '';
+              const inPersonTotal = dressPrice + depositPrice;
+              const link         = getStripeLink(listing, checkout.transType);
 
               return (
                 <>
                   {/* Two-part payment breakdown */}
                   <div className="flex flex-col gap-3 mb-4">
-                    {/* Stripe portion */}
+                    {/* Stripe portion — platform fee only */}
                     <div className="bg-cream rounded-2xl p-4">
                       <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-2.5">Pay now via Stripe</p>
                       <div className="flex justify-between items-center mb-3">
@@ -532,22 +557,34 @@ export function ListingDetail() {
                       </div>
                     </div>
 
-                    {/* In-person portion */}
+                    {/* In-person portion — dress price + deposit (rentals) */}
                     <div className="bg-white border border-plum/10 rounded-2xl p-4">
                       <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-2.5">Pay seller in person at meetup</p>
-                      <div className="flex justify-between items-center mb-3">
-                        <div>
-                          <p className="text-plum/60 text-sm">
-                            {checkout.transType === 'rent' ? 'Rental price' : 'Dress price'}
-                          </p>
-                          <p className="text-plum/35 text-[10px]">Cash (or agreed method) directly to seller</p>
+                      <div className="flex flex-col gap-2.5 mb-3">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-plum/60 text-sm">
+                              {checkout.transType === 'rent' ? 'Rental price' : 'Dress price'}
+                            </p>
+                            <p className="text-plum/35 text-[10px]">Cash or agreed method directly to seller</p>
+                          </div>
+                          <span className="text-plum font-semibold text-sm">{formatPrice(dressCents)}{suffix}</span>
                         </div>
-                        <span className="text-plum font-semibold text-sm">{formatPrice(dressCents)}{suffix}</span>
+                        {/* Security deposit — rentals only, hidden for buy */}
+                        {depositCents > 0 && (
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-plum/60 text-sm">Security deposit</p>
+                              <p className="text-plum/35 text-[10px]">Returned when dress is back in good condition</p>
+                            </div>
+                            <span className="text-plum font-semibold text-sm">${depositPrice.toFixed(2)}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="h-px bg-plum/10 mb-3"/>
                       <div className="flex justify-between items-center">
-                        <span className="text-plum font-bold text-sm">At meetup</span>
-                        <span className="text-plum font-bold text-xl">{formatPrice(dressCents)}{suffix}</span>
+                        <span className="text-plum font-bold text-sm">At meetup total</span>
+                        <span className="text-plum font-bold text-xl">${inPersonTotal.toFixed(2)}{depositCents > 0 ? '' : suffix}</span>
                       </div>
                     </div>
                   </div>
@@ -577,7 +614,7 @@ export function ListingDetail() {
                         <ul className="text-plum/65 text-[11px] leading-relaxed space-y-1">
                           <li>· Message the seller to agree on time &amp; location</li>
                           <li>· Choose a busy public spot — mall, coffee shop, etc.</li>
-                          <li>· Bring a friend, inspect dress, then hand over {formatPrice(dressCents)}{suffix}</li>
+                          <li>· Bring a friend, inspect dress, then hand over ${inPersonTotal.toFixed(2)} to seller</li>
                         </ul>
                       </div>
                       <button type="button" onClick={() => { setCheckout(null); handleMessage(); }} className="btn-primary">
