@@ -90,6 +90,7 @@ export function Profile() {
     localStorage.removeItem('drip_signup');
     await refreshProfile();
     setCreating(false);
+    navigate('/event');
   };
 
   const handleSave = async () => {
