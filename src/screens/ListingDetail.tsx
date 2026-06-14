@@ -2,38 +2,32 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield, ShoppingBag, X } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield, ShoppingBag, X, Lock } from 'lucide-react';
 
-// Single source of truth — fee and matching Stripe link always come from the same branch.
-function getFeeAndLink(
-  listing: Listing,
-  type: 'rent' | 'buy',
-): { fee: number; link: string } {
-  if (type === 'rent') {
-    return { fee: 8.99, link: 'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00' };
-  }
+const PLATFORM_FEE_RATE = 0.10; // 10% of dress price
+const SHIPPING_FEE = 2.99;
+
+// Stripe links are fixed-price placeholders until full payment processing is wired.
+function getStripeLink(listing: Listing, type: 'rent' | 'buy'): string {
+  if (type === 'rent') return 'https://buy.stripe.com/00wfZafgFgAzdSZ9dggYU00';
   const cents = listing.price_cents ?? 0;
-  if (cents >= 10000) {
-    return { fee: 15.99, link: 'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01' };
-  }
-  return { fee: 10.99, link: 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02' };
+  if (cents >= 10000) return 'https://buy.stripe.com/fZu4gs3xXbgf2ah2OSgYU01';
+  return 'https://buy.stripe.com/5kQeV62tT8436qx758gYU02';
 }
 
 function getAutoMessage(type: 'rent' | 'buy', title: string): string {
-  if (type === 'rent') {
-    return (
-      `✅ Platform fee paid — "${title}" rental is confirmed!\n\n` +
-      `📦 SELLER: Please ship the dress within 2 days and drop your tracking number here.\n\n` +
-      `📍 BUYER: Reply with your shipping address so the seller can ship to you.\n\n` +
-      `🔄 Return window: The dress must be returned within 7 days after prom, in the same condition you received it. Ship it back with tracking.\n\n` +
-      `Keep all communication in this chat for both your protection. Have fun at prom! 💕`
-    );
-  }
+  const returnNote = type === 'rent'
+    ? '\n\n🔄 RETURN: Dress must be shipped back within 7 days after prom in original condition with tracking.'
+    : '';
   return (
-    `✅ Platform fee paid — "${title}" purchase is confirmed!\n\n` +
-    `📦 SELLER: Please ship the dress within 3 days and drop your tracking number here.\n\n` +
-    `📍 BUYER: Reply with your shipping address so the seller can ship to you. Message here within 48 hours of receiving if there are any issues.\n\n` +
-    `Keep all communication in this chat for both your protection. Enjoy your dress! 💕`
+    `✅ Payment started for "${title}"${type === 'rent' ? ' (rental)' : ''}!\n\n` +
+    `📦 SELLER: Do NOT ship the dress yet. Wait for a confirmation email from DripLock first. ` +
+    `We hold the payment in escrow and will email you once it's verified and time to ship.\n\n` +
+    `📍 BUYER: Reply here with your full shipping address. ` +
+    `Once you receive the dress and confirm it's in good condition, let us know in this chat — ` +
+    `DripLock will then release payment to the seller.` +
+    returnNote + '\n\n' +
+    `Keep all communication in this chat for both your protection. 💕`
   );
 }
 
@@ -350,24 +344,25 @@ export function ListingDetail() {
 
             {/* Price breakdown */}
             {(() => {
-              const dressCents      = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice      = dressCents / 100;
-              const { fee, link }   = getFeeAndLink(listing, checkoutType);
-              const shipping        = listing.ships ? 2.99 : 0;
-              const total           = dressPrice + fee + shipping;
-              const suffix          = checkoutType === 'rent' ? '/wknd' : '';
+              const dressCents   = checkoutType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice   = dressCents / 100;
+              const platformFee  = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
+              const shipping     = listing.ships ? SHIPPING_FEE : 0;
+              const total        = dressPrice + platformFee + shipping;
+              const suffix       = checkoutType === 'rent' ? '/wknd' : '';
+              const link         = getStripeLink(listing, checkoutType);
 
               return (
                 <>
-                  <div className="bg-cream rounded-2xl p-4 mb-5">
-                    {/* Line items */}
+                  {/* Line items */}
+                  <div className="bg-cream rounded-2xl p-4 mb-4">
                     <div className="flex flex-col gap-2.5 mb-3">
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-plum/60 text-sm">
                             {checkoutType === 'rent' ? 'Rental price' : 'Dress price'}
                           </p>
-                          <p className="text-plum/35 text-[10px]">From seller</p>
+                          <p className="text-plum/35 text-[10px]">Released to seller after delivery</p>
                         </div>
                         <span className="text-plum font-semibold text-sm">
                           {formatPrice(dressCents)}{suffix}
@@ -376,50 +371,77 @@ export function ListingDetail() {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-plum/60 text-sm">Platform fee (10%)</p>
-                          <p className="text-plum/35 text-[10px]">Transaction support + protection</p>
+                          <p className="text-plum/35 text-[10px]">Buyer protection &amp; escrow service</p>
                         </div>
-                        <span className="text-plum font-semibold text-sm">${fee.toFixed(2)}</span>
+                        <span className="text-plum font-semibold text-sm">${platformFee.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-plum/60 text-sm">Shipping</span>
+                        <div>
+                          <p className="text-plum/60 text-sm">Shipping</p>
+                          <p className="text-plum/35 text-[10px]">
+                            {listing.ships ? 'Address shared only after payment' : 'Local pickup — no shipping'}
+                          </p>
+                        </div>
                         <span className="text-plum font-semibold text-sm">
-                          {listing.ships ? '$2.99' : 'Local pickup'}
+                          {listing.ships ? `$${SHIPPING_FEE.toFixed(2)}` : 'Free'}
                         </span>
                       </div>
                     </div>
 
                     <div className="h-px bg-plum/10 mb-3"/>
 
-                    {/* Total */}
-                    <div className="flex justify-between items-center mb-3">
+                    <div className="flex justify-between items-center">
                       <span className="text-plum font-bold text-sm">Total Due</span>
                       <span className="text-plum font-bold text-2xl">${total.toFixed(2)}</span>
                     </div>
+                  </div>
 
-                    <div className="h-px bg-plum/10 mb-3"/>
-
-                    {/* Stripe amount callout */}
-                    <div className="bg-primary/10 rounded-xl px-3 py-2.5 flex justify-between items-center">
-                      <div>
-                        <p className="text-plum text-xs font-bold">Charged via Stripe now</p>
-                        <p className="text-plum/45 text-[10px]">Dress price paid directly to seller</p>
-                      </div>
-                      <span className="text-primary font-bold text-lg">${fee.toFixed(2)}</span>
+                  {/* Escrow explanation */}
+                  <div className="bg-white border border-primary/20 rounded-2xl px-4 py-3 mb-4 flex gap-3 items-start">
+                    <Lock size={15} className="text-primary mt-0.5 flex-shrink-0"/>
+                    <div>
+                      <p className="text-plum text-xs font-bold mb-0.5">Secure Escrow Payment</p>
+                      <p className="text-plum/55 text-[11px] leading-relaxed">
+                        Your full payment goes to DripLock — not directly to the seller.
+                        We release the dress price to the seller only after you confirm safe delivery.
+                      </p>
                     </div>
                   </div>
 
                   {checkoutDone ? (
-                    <div className="bg-sage/40 rounded-2xl p-5 text-center">
-                      <p className="font-bold text-plum text-base mb-1.5">Payment started!</p>
-                      <p className="text-plum/60 text-xs leading-relaxed mb-4">
-                        Complete checkout in the new tab. A message has been sent to the chat with next steps for both of you.
-                      </p>
+                    /* Post-payment instructions */
+                    <div className="flex flex-col gap-3">
+                      <div className="bg-sage/40 rounded-2xl px-4 py-3 text-center">
+                        <p className="font-bold text-plum text-base">Payment Started! ✅</p>
+                        <p className="text-plum/55 text-xs mt-1 leading-relaxed">
+                          Complete checkout in the Stripe tab, then follow the steps below.
+                        </p>
+                      </div>
+
+                      <div className="bg-lavender/50 rounded-2xl px-4 py-3">
+                        <p className="font-bold text-plum text-xs mb-1">📦 For the Seller</p>
+                        <p className="text-plum/65 text-[11px] leading-relaxed">
+                          <span className="font-semibold text-plum">Do NOT ship the dress yet.</span>{' '}
+                          Wait for a confirmation email from DripLock.
+                          We'll email you once payment is verified and it's safe to ship.
+                        </p>
+                      </div>
+
+                      <div className="bg-primary/10 rounded-2xl px-4 py-3">
+                        <p className="font-bold text-plum text-xs mb-1">📍 For You (Buyer)</p>
+                        <p className="text-plum/65 text-[11px] leading-relaxed">
+                          Send your shipping address in chat.
+                          Once you receive the dress and confirm it's in good condition,
+                          DripLock will release payment to the seller.
+                        </p>
+                      </div>
+
                       <button
                         type="button"
                         onClick={() => { setCheckoutType(null); handleMessage(); }}
-                        className="px-6 py-2.5 rounded-2xl bg-plum text-white text-xs font-bold active:scale-95 transition-all"
+                        className="btn-primary"
                       >
-                        View Chat with Seller
+                        Go to Chat →
                       </button>
                     </div>
                   ) : (
@@ -431,22 +453,20 @@ export function ListingDetail() {
                       className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all"
                       style={{ background: 'linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%)', boxShadow: '0 6px 24px rgba(255,193,184,0.45)' }}
                     >
-                      Confirm & Pay ${fee.toFixed(2)} →
+                      Pay ${total.toFixed(2)} Securely →
                     </a>
                   )}
                 </>
               );
             })()}
 
-            {/* Rental how-it-works */}
+            {/* Rental return note */}
             {checkoutType === 'rent' && !checkoutDone && (
-              <div className="mt-4 bg-lavender/30 rounded-2xl px-4 py-4">
-                <p className="text-plum font-semibold text-xs mb-2">How rentals work</p>
-                <ul className="text-plum/60 text-[11px] space-y-1.5 leading-relaxed">
-                  <li>· Seller ships the dress within 2 days of payment</li>
-                  <li>· Buyer sends shipping address via chat</li>
-                  <li>· Buyer returns dress within 7 days after prom</li>
-                  <li>· Dress must be returned in original condition</li>
+              <div className="mt-4 bg-lavender/30 rounded-2xl px-4 py-3">
+                <p className="text-plum font-semibold text-xs mb-1.5">Rental return policy</p>
+                <ul className="text-plum/60 text-[11px] space-y-1 leading-relaxed">
+                  <li>· Return dress within 7 days after prom with tracking</li>
+                  <li>· Must be in original condition — no stains or damage</li>
                 </ul>
               </div>
             )}
