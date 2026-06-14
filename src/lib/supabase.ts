@@ -16,6 +16,10 @@ export type Profile = {
   bust_inches?: number;
   waist_inches?: number;
   hips_inches?: number;
+  event_type?: string;
+  event_date?: string;
+  event_time?: string;
+  event_location?: string;
   created_at: string;
 };
 

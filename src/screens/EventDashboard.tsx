@@ -8,13 +8,7 @@ import {
 } from 'lucide-react';
 
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
-
-interface Event {
-  id: string;
-  name: string;
-  date: string;
-  location: string;
-}
+const EVENT_TYPES = ['Prom', 'Homecoming', 'Other'] as const;
 
 interface EventLock {
   id: string;
@@ -28,9 +22,8 @@ interface EventLock {
 
 export function EventDashboard() {
   const navigate = useNavigate();
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
 
-  const [event,       setEvent]       = useState<Event | null>(null);
   const [lockCount,   setLockCount]   = useState(0);
   const [schoolCount, setSchoolCount] = useState(0);
   const [recentLocks, setRecentLocks] = useState<EventLock[]>([]);
@@ -39,13 +32,14 @@ export function EventDashboard() {
   const [retryKey,    setRetryKey]    = useState(0);
 
   // Edit-event sheet state
-  const [editing,      setEditing]      = useState(false);
-  const [editName,     setEditName]     = useState('');
-  const [editDate,     setEditDate]     = useState('');
-  const [editLocation, setEditLocation] = useState('');
-  const [saving,       setSaving]       = useState(false);
-  const [saveError,    setSaveError]    = useState('');
-  const [saveDone,     setSaveDone]     = useState(false);
+  const [editing,       setEditing]       = useState(false);
+  const [editEventType, setEditEventType] = useState('Prom');
+  const [editDate,      setEditDate]      = useState('');
+  const [editTime,      setEditTime]      = useState('');
+  const [editLocation,  setEditLocation]  = useState('');
+  const [saving,        setSaving]        = useState(false);
+  const [saveError,     setSaveError]     = useState('');
+  const [saveDone,      setSaveDone]      = useState(false);
 
   const schoolName = profile?.school ?? null;
 
@@ -54,18 +48,7 @@ export function EventDashboard() {
       try {
         setError(null);
 
-        // ── Event details ──────────────────────────────────────────────
-        const { data: ev } = await supabase
-          .from('events').select('*').eq('id', EVENT_ID).single();
-        setEvent(ev ?? null);
-        if (ev) {
-          setEditName(ev.name || '');
-          // datetime-local expects "YYYY-MM-DDTHH:MM"
-          setEditDate(ev.date ? ev.date.slice(0, 16) : '');
-          setEditLocation(ev.location ?? '');
-        }
-
-        // ── Total lock count (separate from the 5-item list) ──────────
+        // ── Total lock count ──────────────────────────────────────────
         const { count: total } = await supabase
           .from('locks')
           .select('id', { count: 'exact', head: true })
@@ -109,27 +92,34 @@ export function EventDashboard() {
   }, [user, profile, retryKey]);
 
   const handleSaveEvent = async () => {
-    if (!editName.trim() || !editDate) {
-      setSaveError('Event name and date are required.'); return;
-    }
+    if (!user) return;
     setSaving(true); setSaveError('');
     const { error: err } = await supabase
-      .from('events')
-      .update({ name: editName.trim(), date: editDate, location: editLocation.trim() })
-      .eq('id', EVENT_ID);
+      .from('profiles')
+      .update({
+        event_type: editEventType || 'Prom',
+        event_date: editDate || null,
+        event_time: editTime || null,
+        event_location: editLocation.trim() || null,
+      })
+      .eq('id', user.id);
     setSaving(false);
     if (err) { setSaveError(err.message); return; }
-    setEvent(e => e
-      ? { ...e, name: editName.trim(), date: editDate, location: editLocation.trim() }
-      : e
-    );
+    await refreshProfile();
     setSaveDone(true);
     setTimeout(() => { setSaveDone(false); setEditing(false); }, 1200);
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-  });
+  const formatEventDate = (dateStr: string) => {
+    const d = new Date(dateStr + 'T00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  const formatEventTime = (timeStr: string) => {
+    const [h, m] = timeStr.split(':');
+    const hour = parseInt(h);
+    return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+  };
 
   const timeAgo = (d: string) => {
     const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
@@ -138,17 +128,21 @@ export function EventDashboard() {
     return `${Math.floor(mins / 1440)}d ago`;
   };
 
-  // Title: use custom DB name if set, otherwise generic "Your Prom"
-  const displayEventName = event?.name || 'Your Prom';
+  const eventType = profile?.event_type || 'Prom';
+  const displayEventName = schoolName
+    ? `${schoolName} ${eventType}`
+    : `Your ${eventType}`;
 
   const openEdit = () => {
-    setEditName(event?.name || '');
+    setEditEventType(profile?.event_type || 'Prom');
+    setEditDate(profile?.event_date || '');
+    setEditTime(profile?.event_time ? profile.event_time.slice(0, 5) : '');
+    setEditLocation(profile?.event_location || '');
     setEditing(true);
     setSaveError('');
     setSaveDone(false);
   };
 
-  // Short school label for the stat card (avoids overflow)
   const shortSchool = schoolName
     ? (schoolName.length > 22 ? schoolName.slice(0, 20) + '…' : schoolName)
     : 'Your School';
@@ -193,42 +187,45 @@ export function EventDashboard() {
             </p>
           )}
 
-          {/* Event name */}
+          {/* Event name — school + event type */}
           <h1 className="font-display text-2xl font-bold text-plum leading-snug mb-2">
             {displayEventName}
           </h1>
 
-          {/* Date pill — or prompt to set one */}
-          {event?.date ? (
-            <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/40">
+          {/* Date + time pill */}
+          {profile?.event_date ? (
+            <div className="bg-white/55 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-1 ring-1 ring-white/40">
               <Calendar size={12} className="text-plum/55"/>
-              <p className="text-plum font-semibold text-xs">{formatDate(event.date)}</p>
+              <p className="text-plum font-semibold text-xs">
+                {formatEventDate(profile.event_date)}
+                {profile.event_time ? ` · ${formatEventTime(profile.event_time)}` : ''}
+              </p>
             </div>
           ) : (
             <button
               type="button"
               onClick={openEdit}
-              className="bg-white/40 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-2 ring-1 ring-white/30 active:scale-95 transition-all"
+              className="bg-white/40 backdrop-blur-sm rounded-2xl px-3.5 py-2 inline-flex items-center gap-2 mb-1 ring-1 ring-white/30 active:scale-95 transition-all"
             >
               <Calendar size={12} className="text-plum/40"/>
               <p className="text-plum/50 font-semibold text-xs">Set event date →</p>
             </button>
           )}
 
-          {event?.location && (
-            <p className="text-plum/45 text-xs flex items-center gap-1.5 font-medium">
-              <MapPin size={11}/>{event.location}
+          {profile?.event_location && (
+            <p className="text-plum/45 text-xs flex items-center gap-1.5 font-medium mb-1">
+              <MapPin size={11}/>{profile.event_location}
             </p>
           )}
 
-          {/* Prominent edit CTA */}
+          {/* Edit CTA */}
           <button
             type="button"
             onClick={openEdit}
-            className="mt-3 mb-5 flex items-center gap-1.5 text-plum/55 text-xs font-semibold active:scale-95 transition-all hover:text-plum/80"
+            className="mt-2 mb-5 flex items-center gap-1.5 text-plum/55 text-xs font-semibold active:scale-95 transition-all hover:text-plum/80"
           >
             <Edit2 size={12}/>
-            Edit event name, date &amp; location
+            Edit event type, date &amp; location
           </button>
 
           {/* Lock In CTA */}
@@ -254,13 +251,11 @@ export function EventDashboard() {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Total looks locked */}
           <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-7">
             <p className="text-5xl font-bold text-primary leading-none mb-2">{lockCount}</p>
             <p className="text-plum/35 text-[10px] font-bold uppercase tracking-widest">Looks Locked</p>
           </div>
 
-          {/* School count */}
           <div className="bg-white rounded-3xl shadow-medium flex flex-col items-center justify-center py-6 px-3 text-center gap-1.5">
             <div className="w-10 h-10 rounded-2xl bg-blush flex items-center justify-center">
               <Users size={18} className="text-primary"/>
@@ -280,12 +275,12 @@ export function EventDashboard() {
           <p className="text-plum text-sm leading-snug flex-1">
             {schoolCount === 0 ? (
               schoolName
-                ? <>Be the first girl from <span className="font-bold">{schoolName}</span> to lock in for prom!</>
-                : 'Be the first to lock in for prom!'
+                ? <>Be the first girl from <span className="font-bold">{schoolName}</span> to lock in for {eventType.toLowerCase()}!</>
+                : `Be the first to lock in for ${eventType.toLowerCase()}!`
             ) : (
               schoolName
-                ? <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} from <span className="font-bold">{schoolName}</span> {schoolCount === 1 ? 'has' : 'have'} locked in for prom</>
-                : <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} locked in for prom</>
+                ? <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} from <span className="font-bold">{schoolName}</span> {schoolCount === 1 ? 'has' : 'have'} locked in for {eventType.toLowerCase()}</>
+                : <><span className="font-bold text-primary">{schoolCount}</span> girl{schoolCount === 1 ? '' : 's'} locked in for {eventType.toLowerCase()}</>
             )}
           </p>
         </div>
@@ -395,27 +390,54 @@ export function EventDashboard() {
             )}
 
             <div className="flex flex-col gap-4">
+              {/* Event type chips */}
               <div>
-                <label className="label">Event Name</label>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                  placeholder="Georgetown Prom 2026"
-                  className="input"
-                />
+                <label className="label">Event Type</label>
+                <div className="flex gap-2">
+                  {EVENT_TYPES.map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setEditEventType(t)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+                        editEventType === t
+                          ? 'bg-primary border-primary text-plum shadow-soft'
+                          : 'bg-white border-primary/20 text-plum/55'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div>
-                <label htmlFor="edit-event-date" className="label">Date &amp; Time</label>
-                <input
-                  id="edit-event-date"
-                  type="datetime-local"
-                  value={editDate}
-                  onChange={e => setEditDate(e.target.value)}
-                  title="Event date and time"
-                  className="input"
-                />
+
+              {/* Date + Time */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="edit-event-date" className="label">Date</label>
+                  <input
+                    id="edit-event-date"
+                    type="date"
+                    value={editDate}
+                    onChange={e => setEditDate(e.target.value)}
+                    title="Event date"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-event-time" className="label">Time</label>
+                  <input
+                    id="edit-event-time"
+                    type="time"
+                    value={editTime}
+                    onChange={e => setEditTime(e.target.value)}
+                    title="Event time"
+                    className="input"
+                  />
+                </div>
               </div>
+
+              {/* Location */}
               <div>
                 <label className="label">Location / Venue</label>
                 <input
@@ -442,7 +464,7 @@ export function EventDashboard() {
             </button>
 
             <p className="text-plum/35 text-[10px] text-center mt-3 leading-relaxed">
-              Changes are visible to everyone at your school's event.
+              Changes are saved to your profile and shown on your dashboard.
             </p>
           </div>
         </div>

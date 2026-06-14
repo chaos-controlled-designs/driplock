@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, DRESS_SIZES } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Save, Lock, ChevronDown, Shield } from 'lucide-react';
+import { ArrowLeft, Save, Lock, ChevronDown, Shield, Calendar } from 'lucide-react';
 
 const GRADES = ['9th', '10th', '11th', '12th'];
 
@@ -23,9 +23,13 @@ export function Profile() {
   const [schoolName,       setSchoolName]       = useState<string>(readSignup('school'));
   const [schoolFieldError, setSchoolFieldError] = useState('');
   const [grade,            setGrade]            = useState<string>(readSignup('grade'));
-  const [createBio,        setCreateBio]        = useState('');
-  const [createSize,       setCreateSize]       = useState('');
-  const [creating,         setCreating]         = useState(false);
+  const [createBio,           setCreateBio]           = useState('');
+  const [createSize,          setCreateSize]          = useState('');
+  const [createEventType,     setCreateEventType]     = useState('Prom');
+  const [createEventDate,     setCreateEventDate]     = useState('');
+  const [createEventTime,     setCreateEventTime]     = useState('');
+  const [createEventLocation, setCreateEventLocation] = useState('');
+  const [creating,            setCreating]            = useState(false);
   const [createError,      setCreateError]      = useState('');
 
   // hasSignupData drives whether we show the read-only "From signup" card
@@ -42,6 +46,10 @@ export function Profile() {
   const [bust,      setBust]      = useState('');
   const [waist,     setWaist]     = useState('');
   const [hips,      setHips]      = useState('');
+  const [eventType,     setEventType]     = useState('');
+  const [eventDate,     setEventDate]     = useState('');
+  const [eventTime,     setEventTime]     = useState('');
+  const [eventLocation, setEventLocation] = useState('');
   const [saving,    setSaving]    = useState(false);
   const [saved,     setSaved]     = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -60,6 +68,10 @@ export function Profile() {
       setBust(profile.bust_inches?.toString() ?? '');
       setWaist(profile.waist_inches?.toString() ?? '');
       setHips(profile.hips_inches?.toString() ?? '');
+      setEventType(profile.event_type ?? 'Prom');
+      setEventDate(profile.event_date ?? '');
+      setEventTime(profile.event_time ? profile.event_time.slice(0, 5) : '');
+      setEventLocation(profile.event_location ?? '');
       // Profile confirmed loaded — safe to clear signup cache now.
       // This is the authoritative cleanup point; SignUp.tsx no longer does it.
       localStorage.removeItem('drip_signup');
@@ -83,8 +95,12 @@ export function Profile() {
       school: trimmedSchool,
       grade,
       safety_agreed: true,
-      ...((!skip && createBio.trim())  ? { bio: createBio.trim() }           : {}),
-      ...((!skip && createSize)        ? { usual_dress_size: createSize }    : {}),
+      ...((!skip && createBio.trim())             ? { bio: createBio.trim() }                         : {}),
+      ...((!skip && createSize)                   ? { usual_dress_size: createSize }                  : {}),
+      event_type: createEventType || 'Prom',
+      ...((!skip && createEventDate)              ? { event_date: createEventDate }                   : {}),
+      ...((!skip && createEventTime)              ? { event_time: createEventTime }                   : {}),
+      ...((!skip && createEventLocation.trim())   ? { event_location: createEventLocation.trim() }   : {}),
     }, { onConflict: 'id' });
     if (error) { setCreateError(error.message); setCreating(false); return; }
     localStorage.removeItem('drip_signup');
@@ -102,6 +118,10 @@ export function Profile() {
       bust_inches:  bust  ? parseInt(bust)  : null,
       waist_inches: waist ? parseInt(waist) : null,
       hips_inches:  hips  ? parseInt(hips)  : null,
+      event_type: eventType || 'Prom',
+      event_date: eventDate || null,
+      event_time: eventTime || null,
+      event_location: eventLocation.trim() || null,
     }).eq('id', profile.id);
     if (error) { setSaveError(error.message); setSaving(false); return; }
     await refreshProfile();
@@ -293,6 +313,69 @@ export function Profile() {
             </div>
           </div>
 
+          {/* ── Your event ── */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-plum/8"/>
+            <p className="text-plum/30 text-[10px] font-semibold uppercase tracking-wider">Your Event</p>
+            <div className="flex-1 h-px bg-plum/8"/>
+          </div>
+
+          <div>
+            <label className="label">Event Type <span className="text-plum/35 font-normal">(optional)</span></label>
+            <div className="flex gap-2">
+              {['Prom', 'Homecoming', 'Other'].map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setCreateEventType(createEventType === t ? '' : t)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+                    createEventType === t
+                      ? 'bg-primary border-primary text-plum shadow-soft'
+                      : 'bg-white border-primary/20 text-plum/55 hover:border-primary/40'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="create-event-date" className="label">Date</label>
+              <input
+                id="create-event-date"
+                type="date"
+                value={createEventDate}
+                onChange={e => setCreateEventDate(e.target.value)}
+                title="Event date"
+                className="input"
+              />
+            </div>
+            <div>
+              <label htmlFor="create-event-time" className="label">Time</label>
+              <input
+                id="create-event-time"
+                type="time"
+                value={createEventTime}
+                onChange={e => setCreateEventTime(e.target.value)}
+                title="Event time"
+                className="input"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Venue / Location</label>
+            <input
+              type="text"
+              placeholder="e.g. The Grand Ballroom, Georgetown"
+              value={createEventLocation}
+              onChange={e => setCreateEventLocation(e.target.value)}
+              className="input"
+            />
+          </div>
+
           {/* ── Actions ── */}
           <button
             type="button"
@@ -420,6 +503,69 @@ export function Profile() {
               Measurements only appear when you post a listing. Your real name, email, and school are never shown.
             </p>
           </div>
+        </div>
+
+        {/* ── Event details ── */}
+        <div className="h-px bg-plum/8"/>
+        <div className="flex items-center gap-2 mb-1">
+          <Calendar size={15} className="text-primary"/>
+          <h3 className="font-display text-base font-semibold text-plum">Your Event</h3>
+        </div>
+
+        <div>
+          <label className="label">Event Type</label>
+          <div className="flex gap-2">
+            {['Prom', 'Homecoming', 'Other'].map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setEventType(t)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+                  eventType === t
+                    ? 'bg-primary border-primary text-plum shadow-soft'
+                    : 'bg-white border-primary/20 text-plum/60'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="edit-event-date" className="label">Date</label>
+            <input
+              id="edit-event-date"
+              type="date"
+              value={eventDate}
+              onChange={e => setEventDate(e.target.value)}
+              title="Event date"
+              className="input"
+            />
+          </div>
+          <div>
+            <label htmlFor="edit-event-time" className="label">Time</label>
+            <input
+              id="edit-event-time"
+              type="time"
+              value={eventTime}
+              onChange={e => setEventTime(e.target.value)}
+              title="Event time"
+              className="input"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="label">Venue / Location</label>
+          <input
+            type="text"
+            placeholder="e.g. The Grand Ballroom, Georgetown"
+            value={eventLocation}
+            onChange={e => setEventLocation(e.target.value)}
+            className="input"
+          />
         </div>
 
         <button
