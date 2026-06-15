@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Lock, ChevronDown, Shield, AlertCircle, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Lock, ChevronDown, Shield, AlertCircle, ChevronRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { isVIPActive } from '../lib/supabase';
+import { VIPModal } from '../components/VIPModal';
 
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
 
@@ -295,7 +297,8 @@ function CardHeader({ title, badge }: { title: string; badge?: string }) {
 
 export function LockIn() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const [showVIPModal, setShowVIPModal] = useState(false);
 
   // Required
   const [color,          setColor]          = useState('');
@@ -501,6 +504,24 @@ export function LockIn() {
           </p>
         </div>
       </div>
+      {/* VIP upgrade nudge */}
+      {!isVIPActive(profile) && (
+        <button
+          type="button"
+          onClick={() => setShowVIPModal(true)}
+          className="w-full max-w-sm bg-gradient-to-r from-primary/20 to-lavender/30 rounded-3xl border border-primary/20 px-5 py-4 mb-4 flex items-center gap-3 active:scale-[0.98] transition-all text-left"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-white/60 flex items-center justify-center flex-shrink-0">
+            <Sparkles size={18} className="text-plum/60" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-plum text-sm">Upgrade to VIP Lock ✨</p>
+            <p className="text-plum/55 text-xs leading-snug">See your school's looks · get seen first · from $6.99</p>
+          </div>
+          <div className="text-primary font-bold text-lg flex-shrink-0">›</div>
+        </button>
+      )}
+
       <div className="w-full max-w-sm">
         <button type="button" onClick={() => navigate('/event')} className="btn-primary mb-3">
           Back to Dashboard
@@ -509,6 +530,8 @@ export function LockIn() {
           Lock Another Look
         </button>
       </div>
+
+      <VIPModal open={showVIPModal} onClose={() => setShowVIPModal(false)} userId={user?.id} />
     </div>
   );
 
@@ -725,6 +748,24 @@ export function LockIn() {
           </div>
         )}
 
+        {/* ── VIP upgrade card ── */}
+        {!isVIPActive(profile) && (
+          <button
+            type="button"
+            onClick={() => setShowVIPModal(true)}
+            className="w-full rounded-2xl bg-gradient-to-r from-primary/15 via-lavender/20 to-primary/10 border border-primary/20 px-4 py-3.5 flex items-center gap-3 active:scale-[0.98] transition-all text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center flex-shrink-0">
+              <Sparkles size={16} className="text-plum/60" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-plum text-sm">Upgrade to VIP Lock ✨</p>
+              <p className="text-plum/50 text-xs">See who's wearing your color · get your listing seen first</p>
+            </div>
+            <span className="text-primary font-bold text-lg flex-shrink-0">›</span>
+          </button>
+        )}
+
         {/* ── Submit ── */}
         <button
           type="button"
@@ -759,6 +800,8 @@ export function LockIn() {
         </button>
 
       </div>
+
+      <VIPModal open={showVIPModal} onClose={() => setShowVIPModal(false)} userId={user?.id} />
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }

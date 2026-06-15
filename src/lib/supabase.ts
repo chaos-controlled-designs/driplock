@@ -20,8 +20,16 @@ export type Profile = {
   event_date?: string;
   event_time?: string;
   event_location?: string;
+  vip_status?: 'single' | 'season' | null;
+  vip_expiry?: string | null;
+  zip_code?: string | null;
   created_at: string;
 };
+
+export function isVIPActive(profile: Profile | null | undefined): boolean {
+  if (!profile?.vip_status || !profile?.vip_expiry) return false;
+  return new Date(profile.vip_expiry) > new Date();
+}
 
 export type Listing = {
   id: string;

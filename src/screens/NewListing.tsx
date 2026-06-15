@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star } from 'lucide-react';
-
-const MAX_PHOTOS = 6;
+import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star, Sparkles } from 'lucide-react';
+import { isVIPActive } from '../lib/supabase';
+import { VIPModal } from '../components/VIPModal';
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
 const SILHOUETTES = [
   'A-Line', 'Ball Gown', 'Mermaid', 'Fit & Flare',
@@ -34,7 +34,9 @@ const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 
 export function NewListing() {
   const navigate  = useNavigate();
-  const { user }  = useAuth();
+  const { user, profile } = useAuth();
+  const MAX_PHOTOS = isVIPActive(profile) ? 10 : 6;
+  const [showVIPModal, setShowVIPModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Photos
@@ -210,6 +212,7 @@ export function NewListing() {
             type="file"
             multiple
             accept="image/*"
+            aria-label="Upload dress photos"
             className="hidden"
             onChange={handlePhotoSelect}
           />
@@ -224,7 +227,7 @@ export function NewListing() {
               <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mb-3 shadow-soft">
                 <Camera size={28} className="text-primary/70"/>
               </div>
-              <p className="text-plum/70 text-sm font-semibold">Add up to 6 photos</p>
+              <p className="text-plum/70 text-sm font-semibold">Add up to {MAX_PHOTOS} photos</p>
               <p className="text-plum/35 text-xs mt-1">Tap to browse your camera roll</p>
               <p className="text-primary/50 text-[10px] mt-3 font-medium">Great photos = way more interest!</p>
             </button>
@@ -297,6 +300,26 @@ export function NewListing() {
             </div>
           )}
         </div>
+
+        {/* VIP photo slot nudge for free users */}
+        {!isVIPActive(profile) && (
+          <div className="bg-gradient-to-r from-primary/15 to-lavender/25 rounded-2xl border border-primary/15 px-4 py-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles size={12} className="text-plum/50" />
+                <p className="font-semibold text-plum text-xs">VIP: 10 photos per listing</p>
+              </div>
+              <p className="text-plum/45 text-[11px]">Free accounts get 6 · Upgrade for more</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowVIPModal(true)}
+              className="flex-shrink-0 bg-plum rounded-xl px-3 py-1.5 text-white text-[11px] font-bold"
+            >
+              Upgrade
+            </button>
+          </div>
+        )}
 
         {/* ── Title ───────────────────────────────────────────── */}
         <div>
@@ -527,6 +550,8 @@ export function NewListing() {
         </button>
 
       </div>
+
+      <VIPModal open={showVIPModal} onClose={() => setShowVIPModal(false)} userId={user?.id} />
     </div>
   );
 }

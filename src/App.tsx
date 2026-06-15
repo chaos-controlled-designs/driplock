@@ -17,12 +17,14 @@ import { Profile } from './screens/Profile';
 import { Settings } from './screens/Settings';
 import { Favorites } from './screens/Favorites';
 import { Help } from './screens/Help';
+import { VIPUpgrade } from './screens/VIPUpgrade';
+import { SchoolFeed } from './screens/SchoolFeed';
 
 import { TopBar } from './components/layout/TopBar';
 import { BottomNav } from './components/layout/BottomNav';
 import { HamburgerMenu } from './components/layout/HamburgerMenu';
 
-type Tab = 'event' | 'lock' | 'vault' | 'market' | 'chats';
+type Tab = 'event' | 'lock' | 'vault' | 'market' | 'chats' | 'school';
 
 const PATH_TO_TAB: Record<string, Tab> = {
   '/event': 'event',
@@ -30,6 +32,7 @@ const PATH_TO_TAB: Record<string, Tab> = {
   '/vault': 'vault',
   '/market': 'market',
   '/chats': 'chats',
+  '/school': 'school',
 };
 
 function Spinner() {
@@ -101,6 +104,8 @@ function AppRoutes() {
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="/school" element={<ProtectedRoute><AppLayout><SchoolFeed /></AppLayout></ProtectedRoute>} />
+      <Route path="/vip" element={<ProtectedRoute><VIPUpgrade /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
