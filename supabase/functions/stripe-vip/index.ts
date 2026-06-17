@@ -91,13 +91,27 @@ async function handleWebhook(rawBody: string, signature: string): Promise<Respon
 
   const session = event.data.object as Stripe.Checkout.Session;
   const userId = session.client_reference_id;
-  const plan   = session.metadata?.plan;
 
-  console.log('Webhook received — userId:', userId, '| plan:', plan);
+  // Prefer metadata.plan (set when using dynamic Checkout Sessions).
+  // Fall back to amount_total for static Payment Links which don't carry metadata.
+  const planFromMeta   = session.metadata?.plan;
+  const planFromAmount = session.amount_total === 699  ? 'single'
+                       : session.amount_total === 1199 ? 'season'
+                       : null;
+  const plan = planFromMeta ?? planFromAmount;
 
-  if (!userId || !plan || !PLANS[plan]) {
-    console.error('Missing or invalid fields — userId:', userId, '| plan:', plan);
-    return json({ error: 'Missing client_reference_id or plan metadata' }, 400);
+  console.log('Webhook received — userId:', userId, '| plan:', plan,
+              '| amount_total:', session.amount_total,
+              '| metadata.plan:', planFromMeta);
+
+  if (!userId) {
+    console.error('Missing client_reference_id — was it appended to the Payment Link URL?');
+    return json({ error: 'Missing client_reference_id' }, 400);
+  }
+
+  if (!plan || !PLANS[plan]) {
+    console.error('Could not determine plan — metadata.plan:', planFromMeta, '| amount_total:', session.amount_total);
+    return json({ error: 'Cannot determine plan from metadata or amount' }, 400);
   }
 
   // Fetch event_date for accurate single-event expiry
