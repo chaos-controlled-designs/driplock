@@ -24,8 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading,        setLoading]        = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    setProfileLoading(true);
+  const fetchProfile = async (userId: string, initial = false) => {
+    if (initial) setProfileLoading(true);
     try {
       const { data } = await supabase
         .from('profiles').select('*').eq('id', userId).single();
@@ -33,12 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       setProfile(null);
     } finally {
-      setProfileLoading(false);
+      if (initial) setProfileLoading(false);
     }
   };
 
+  // Background refresh — never toggles profileLoading so ProtectedRoute stays stable
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) await fetchProfile(user.id, false);
   };
 
   const signOut = async () => {
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setLoading(false);
         if (session?.user) {
-          fetchProfile(session.user.id);
+          fetchProfile(session.user.id, true);
         }
       }
     );
