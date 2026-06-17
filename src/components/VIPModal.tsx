@@ -1,7 +1,7 @@
 import { Sparkles, X, Eye, Zap, Clock, Camera, Star } from 'lucide-react';
 
-const VIP_STRIPE_SINGLE = 'https://buy.stripe.com/7sY7sEecB9879CJ3SWgYU03';
-const VIP_STRIPE_SEASON = 'https://buy.stripe.com/28EdR25G55VV2ah9dggYU04';
+const VIP_STRIPE_SINGLE = 'https://buy.stripe.com/test_00wfZafgFgAzdSZ9dggYU00';
+const VIP_STRIPE_SEASON = 'https://buy.stripe.com/test_fZu4gs3xXbgf2ah2OSgYU01';
 
 const SINGLE_FEATURES = [
   { Icon: Eye,    text: "My School's Looks — see every look locked at your school" },
@@ -25,14 +25,17 @@ interface VIPModalProps {
 export function VIPModal({ open, onClose, userId }: VIPModalProps) {
   if (!open) return null;
 
-  const goToStripe = (base: string) => {
-    window.location.href = `${base}?client_reference_id=${userId ?? ''}`;
+  const goToStripe = (plan: 'single' | 'season') => {
+    const link = plan === 'single' ? VIP_STRIPE_SINGLE : VIP_STRIPE_SEASON;
+    const url = `${link}?client_reference_id=${userId ?? ''}`;
+    console.log('[VIPModal] redirecting to Stripe:', { plan, url });
+    onClose();
+    window.location.href = url;
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
-      style={{ background: 'rgba(63,42,42,0.40)', backdropFilter: 'blur(6px)' }}
+      className="fixed inset-0 z-50 flex items-end bg-plum/40 backdrop-blur"
       onClick={onClose}
     >
       <div
@@ -60,6 +63,7 @@ export function VIPModal({ open, onClose, userId }: VIPModalProps) {
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close"
               className="w-8 h-8 rounded-full bg-plum/8 flex items-center justify-center flex-shrink-0 mt-0.5"
             >
               <X size={15} className="text-plum/50" />
@@ -69,7 +73,7 @@ export function VIPModal({ open, onClose, userId }: VIPModalProps) {
           {/* Plan 1 — One Event */}
           <button
             type="button"
-            onClick={() => goToStripe(VIP_STRIPE_SINGLE)}
+            onClick={() => goToStripe('single')}
             className="w-full bg-white rounded-2xl border border-primary/20 shadow-soft px-4 py-4 mb-3 text-left active:scale-[0.985] transition-all"
           >
             <div className="flex items-center justify-between mb-3">
@@ -96,7 +100,7 @@ export function VIPModal({ open, onClose, userId }: VIPModalProps) {
           {/* Plan 2 — Full Season */}
           <button
             type="button"
-            onClick={() => goToStripe(VIP_STRIPE_SEASON)}
+            onClick={() => goToStripe('season')}
             className="w-full bg-plum rounded-2xl shadow-strong px-4 py-4 mb-4 text-left active:scale-[0.985] transition-all relative overflow-hidden"
           >
             <div className="absolute top-3 right-3 bg-primary rounded-full px-2 py-0.5 text-[9px] font-bold text-plum tracking-wide">
