@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, isVIPActive } from '../lib/supabase';
 import { ArrowLeft, Sparkles, CheckCircle2, RefreshCw, Lock } from 'lucide-react';
 import { VIPModal } from '../components/VIPModal';
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_MAX         = 15; // 15 × 2 s = 30 s
 
 export function VIPUpgrade() {
   const navigate = useNavigate();
@@ -17,16 +20,48 @@ export function VIPUpgrade() {
   const [zipSaved, setZipSaved]           = useState(false);
   const [showModal, setShowModal]         = useState(false);
 
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollCountRef = useRef(0);
+
   const alreadyVIP = isVIPActive(profile);
 
-  // When Stripe redirects back with ?activated=1, auto-refresh to pick up the webhook update
-  useEffect(() => {
-    if (searchParams.get('activated') === '1') {
-      setJustActivated(true);
-      setActivating(true);
-      refreshProfile().then(() => setActivating(false));
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
     }
+  };
+
+  // Start polling when Stripe redirects back with ?activated=1
+  useEffect(() => {
+    if (searchParams.get('activated') !== '1') return;
+    setJustActivated(true);
+    setActivating(true);
+    pollCountRef.current = 0;
+
+    const tick = async () => {
+      await refreshProfile();
+      pollCountRef.current += 1;
+      if (pollCountRef.current >= POLL_MAX) {
+        stopPolling();
+        setActivating(false); // fall through to "Almost there…" screen
+      }
+    };
+
+    tick(); // check immediately on landing
+    pollTimerRef.current = setInterval(tick, POLL_INTERVAL_MS);
+
+    return stopPolling;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Stop polling the moment VIP activates, then auto-redirect to dashboard
+  useEffect(() => {
+    if (!justActivated || !alreadyVIP) return;
+    stopPolling();
+    setActivating(false);
+    const t = setTimeout(() => navigate('/event'), 4000);
+    return () => clearTimeout(t);
+  }, [alreadyVIP, justActivated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -40,7 +75,7 @@ export function VIPUpgrade() {
     setZipSaved(true);
   };
 
-  // ── Activating loader (Stripe just redirected back) ─────────────
+  // ── Polling / activating state ───────────────────────────────────
   if (justActivated && activating) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-6 shadow-glow">
@@ -48,30 +83,27 @@ export function VIPUpgrade() {
       </div>
       <h2 className="font-display text-2xl font-bold text-plum mb-2">Activating VIP…</h2>
       <p className="text-plum/55 text-sm leading-relaxed max-w-[260px]">
-        Payment received — confirming your membership. Just a moment.
+        Payment received — confirming your membership. This takes just a few seconds.
       </p>
     </div>
   );
 
-  // ── Already VIP (pre-existing or just activated) ─────────────────
+  // ── Success screen (VIP confirmed) ───────────────────────────────
   if (alreadyVIP) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-      {/* Celebration ring */}
       <div className="relative mb-6">
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center shadow-glow">
           <Sparkles size={40} className="text-plum" />
         </div>
-        {justActivated && (
-          <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-emerald-400 flex items-center justify-center shadow-soft">
-            <CheckCircle2 size={18} className="text-white" />
-          </div>
-        )}
+        <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-emerald-400 flex items-center justify-center shadow-soft">
+          <CheckCircle2 size={18} className="text-white" />
+        </div>
       </div>
 
       {justActivated && (
         <div className="bg-sage/50 rounded-2xl border border-sage px-4 py-3 mb-5 max-w-[300px]">
           <p className="font-bold text-plum text-sm">VIP activated! 🎉</p>
-          <p className="text-plum/60 text-xs mt-0.5">Welcome to the VIP experience</p>
+          <p className="text-plum/60 text-xs mt-0.5">Redirecting you to your dashboard…</p>
         </div>
       )}
 
@@ -94,7 +126,7 @@ export function VIPUpgrade() {
     </div>
   );
 
-  // ── Payment received but webhook not yet processed ───────────────
+  // ── Webhook not yet processed — manual retry fallback ────────────
   if (justActivated && !activating && !alreadyVIP) return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
       <div className="w-20 h-20 rounded-full bg-lavender/60 flex items-center justify-center mb-5 shadow-soft">
@@ -102,7 +134,7 @@ export function VIPUpgrade() {
       </div>
       <h2 className="font-display text-xl font-bold text-plum mb-2">Almost there…</h2>
       <p className="text-plum/55 text-sm leading-relaxed max-w-[270px] mb-6">
-        Your payment was received. VIP activation usually takes a few seconds — tap below to check.
+        Your payment was received. VIP can take up to a minute to activate — tap below to check.
       </p>
       <button
         type="button"
@@ -120,20 +152,14 @@ export function VIPUpgrade() {
     </div>
   );
 
-  // ── Default: upgrade page ────────────────────────────────────────
+  // ── Default: upgrade / marketing page ───────────────────────────
   return (
     <div className="min-h-screen bg-cream pb-12">
 
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(150deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
-        padding: '52px 24px 40px',
-        borderRadius: '0 0 32px 32px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: -48, right: -48, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -32, left: -24, width: 130, height: 130, borderRadius: '50%', background: 'rgba(255,255,255,0.10)', pointerEvents: 'none' }} />
+      <div className="relative overflow-hidden rounded-b-[32px] bg-gradient-to-br from-cream via-lavender to-primary pt-[52px] px-6 pb-10">
+        <div className="absolute -top-12 -right-12 w-[200px] h-[200px] rounded-full bg-white/[.18] pointer-events-none" />
+        <div className="absolute -bottom-8 -left-6 w-[130px] h-[130px] rounded-full bg-white/10 pointer-events-none" />
 
         <button
           type="button"
@@ -159,7 +185,7 @@ export function VIPUpgrade() {
 
       <div className="px-5 pt-6 flex flex-col gap-5">
 
-        {/* What you get — summary cards */}
+        {/* Benefit cards */}
         <div className="grid grid-cols-2 gap-3">
           {[
             { emoji: '👁', title: "School's Looks", desc: 'See your school — anonymized' },
@@ -202,15 +228,14 @@ export function VIPUpgrade() {
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="w-full py-4 rounded-2xl font-bold text-plum text-base shadow-glow active:scale-[0.98] transition-all"
-          style={{ background: 'linear-gradient(135deg, #ffc1b8, #ffd4c4)' }}
+          className="w-full py-4 rounded-2xl font-bold text-plum text-base shadow-glow active:scale-[0.98] transition-all bg-gradient-to-br from-primary to-lavender"
         >
           <Sparkles size={16} className="inline mr-2" />
           Choose Your Plan — from $6.99
         </button>
 
         <p className="text-plum/30 text-[10px] text-center leading-relaxed">
-          Secure checkout via Stripe · Non-refundable once activated · Cancel anytime
+          Secure checkout via Stripe · Non-refundable once activated
         </p>
 
         {/* Already paid? */}
@@ -232,7 +257,6 @@ export function VIPUpgrade() {
 
       </div>
 
-      {/* VIP Plan Modal */}
       <VIPModal open={showModal} onClose={() => setShowModal(false)} userId={user?.id} />
     </div>
   );
