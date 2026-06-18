@@ -6,7 +6,7 @@ import { ArrowLeft, Sparkles, CheckCircle2, RefreshCw, Lock } from 'lucide-react
 import { VIPModal } from '../components/VIPModal';
 
 const POLL_INTERVAL_MS = 2000;
-const POLL_MAX         = 15; // 15 × 2 s = 30 s
+const POLL_MAX         = 22; // 22 × 2 s = 44 s
 
 export function VIPUpgrade() {
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ export function VIPUpgrade() {
     if (!justActivated || !alreadyVIP) return;
     stopPolling();
     setActivating(false);
-    const t = setTimeout(() => navigate('/event'), 4000);
+    const t = setTimeout(() => navigate('/school'), 3000);
     return () => clearTimeout(t);
   }, [alreadyVIP, justActivated]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -103,7 +103,7 @@ export function VIPUpgrade() {
       {justActivated && (
         <div className="bg-sage/50 rounded-2xl border border-sage px-4 py-3 mb-5 max-w-[300px]">
           <p className="font-bold text-plum text-sm">VIP activated! 🎉</p>
-          <p className="text-plum/60 text-xs mt-0.5">Redirecting you to your dashboard…</p>
+          <p className="text-plum/60 text-xs mt-0.5">Redirecting you to School Looks…</p>
         </div>
       )}
 
@@ -132,9 +132,9 @@ export function VIPUpgrade() {
       <div className="w-20 h-20 rounded-full bg-lavender/60 flex items-center justify-center mb-5 shadow-soft">
         <Lock size={32} className="text-plum/60" />
       </div>
-      <h2 className="font-display text-xl font-bold text-plum mb-2">Almost there…</h2>
+      <h2 className="font-display text-xl font-bold text-plum mb-2">Still processing…</h2>
       <p className="text-plum/55 text-sm leading-relaxed max-w-[270px] mb-6">
-        Your payment was received. VIP can take up to a minute to activate — tap below to check.
+        Your payment was received but VIP hasn't activated yet. Tap below to refresh, or try again in a minute.
       </p>
       <button
         type="button"
