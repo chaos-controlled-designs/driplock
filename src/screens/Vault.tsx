@@ -2,9 +2,20 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Heart, Truck, ShoppingBag, SlidersHorizontal } from 'lucide-react';
+import { Search, Heart, Truck, ShoppingBag, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 const FILTERS = ['All', 'Rent', 'Buy', 'Ships', 'Local'];
+
+// Returns extra Tailwind classes for the outer card based on theme
+function themeCardClass(theme?: string | null): string {
+  if (theme === 'minimal')       return 'border-2 border-rose-200 bg-white';
+  if (theme === 'soft-gradient') return 'bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-pink-100';
+  if (theme === 'dark-luxury')   return 'bg-gradient-to-br from-[#2d1b3d] to-[#1a1025] border border-purple-900/40';
+  return 'bg-white';
+}
+function themeTextClass(theme?: string | null)   { return theme === 'dark-luxury' ? 'text-white'     : 'text-plum'; }
+function themeMutedClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-white/45'  : 'text-plum/35'; }
+function themePriceClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-pink-300'  : 'text-primary'; }
 
 interface WishItem {
   listing_id: string;
@@ -28,6 +39,7 @@ export function Vault() {
           .from('listings')
           .select('*, profiles(username, school_id)')
           .eq('is_available', true)
+          .order('is_vip_listing', { ascending: false })
           .order('created_at', { ascending: false });
         if (data) { setListings(data); setFiltered(data); }
 
@@ -60,6 +72,8 @@ export function Vault() {
     if (activeFilter === 'Buy')   result = result.filter(l => l.listing_type === 'sell' || l.listing_type === 'both');
     if (activeFilter === 'Ships') result = result.filter(l => l.ships);
     if (activeFilter === 'Local') result = result.filter(l => l.local_meetup);
+    // VIP listings always float to the top even after client-side filtering
+    result.sort((a, b) => (b.is_vip_listing ? 1 : 0) - (a.is_vip_listing ? 1 : 0));
     setFiltered(result);
   }, [listings, search, activeFilter]);
 
@@ -164,12 +178,13 @@ export function Vault() {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {filtered.map(listing => {
-              const isFav = favorites.has(listing.id);
+              const isFav  = favorites.has(listing.id);
+              const theme  = listing.listing_theme ?? null;
               return (
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className="bg-white rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all duration-200 cursor-pointer hover:shadow-strong hover:-translate-y-1"
+                  className={`rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all duration-200 cursor-pointer hover:shadow-strong hover:-translate-y-1 ${themeCardClass(theme)}`}
                 >
                   {/* Full-bleed photo — taller aspect */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender relative overflow-hidden">
@@ -185,9 +200,22 @@ export function Vault() {
                       </div>
                     )}
 
-                    {/* Ships badge — top left */}
-                    {listing.ships && (
+                    {/* VIP badge — top left (overrides ships badge placement) */}
+                    {listing.is_vip_listing ? (
+                      <div className="absolute top-2.5 left-2.5 bg-plum/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                        <Sparkles size={9} className="text-primary"/>
+                        <span className="text-[9px] font-bold text-white">VIP</span>
+                      </div>
+                    ) : listing.ships ? (
                       <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                        <Truck size={9} className="text-primary"/>
+                        <span className="text-[9px] font-bold text-plum">Ships</span>
+                      </div>
+                    ) : null}
+
+                    {/* Ships badge below VIP badge if both apply */}
+                    {listing.is_vip_listing && listing.ships && (
+                      <div className="absolute top-9 left-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
                         <Truck size={9} className="text-primary"/>
                         <span className="text-[9px] font-bold text-plum">Ships</span>
                       </div>
@@ -216,15 +244,15 @@ export function Vault() {
 
                   {/* Info — compact but breathable */}
                   <div className="p-4">
-                    <p className="font-semibold text-plum text-sm leading-snug line-clamp-1 mb-1.5">
+                    <p className={`font-semibold text-sm leading-snug line-clamp-1 mb-1.5 ${themeTextClass(theme)}`}>
                       {listing.title}
                     </p>
                     {listing.designer && (
-                      <p className="text-plum/35 text-[10px] mb-1 truncate">{listing.designer}</p>
+                      <p className={`text-[10px] mb-1 truncate ${themeMutedClass(theme)}`}>{listing.designer}</p>
                     )}
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-plum/35 text-[10px]">Size {listing.dress_size}</p>
-                      <p className="font-bold text-base text-primary">{formatPrice(listing)}</p>
+                      <p className={`text-[10px] ${themeMutedClass(theme)}`}>Size {listing.dress_size}</p>
+                      <p className={`font-bold text-base ${themePriceClass(theme)}`}>{formatPrice(listing)}</p>
                     </div>
                   </div>
                 </div>

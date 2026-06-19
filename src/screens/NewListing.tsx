@@ -1,10 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, isVIPActive } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star, Sparkles } from 'lucide-react';
-import { isVIPActive } from '../lib/supabase';
+import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star, Sparkles, Video, Check } from 'lucide-react';
 import { VIPModal } from '../components/VIPModal';
+
+const THEMES = [
+  { id: 'minimal',       label: 'Minimal',  desc: 'Clean white · rose border'      },
+  { id: 'soft-gradient', label: 'Soft',     desc: 'Blush gradient · dreamy shimmer' },
+  { id: 'dark-luxury',   label: 'Luxe',     desc: 'Deep plum · editorial feel'      },
+];
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
 const SILHOUETTES = [
   'A-Line', 'Ball Gown', 'Mermaid', 'Fit & Flare',
@@ -35,13 +40,22 @@ const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 export function NewListing() {
   const navigate  = useNavigate();
   const { user, profile } = useAuth();
-  const MAX_PHOTOS = isVIPActive(profile) ? 10 : 6;
+  const isVIP      = isVIPActive(profile);
+  const MAX_PHOTOS = isVIP ? 10 : 4;
   const [showVIPModal, setShowVIPModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef  = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Photos
-  const [photos,   setPhotos]   = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [photos,       setPhotos]       = useState<File[]>([]);
+  const [previews,     setPreviews]     = useState<string[]>([]);
+
+  // Video (VIP only)
+  const [video,        setVideo]        = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState('');
+
+  // Theme (VIP only)
+  const [listingTheme, setListingTheme] = useState('');
 
   // Form fields
   const [title,          setTitle]          = useState('');
@@ -70,7 +84,10 @@ export function NewListing() {
 
   // Revoke object URLs on unmount to avoid memory leaks
   useEffect(() => {
-    return () => { previews.forEach(URL.revokeObjectURL); };
+    return () => {
+      previews.forEach(URL.revokeObjectURL);
+      if (videoPreview) URL.revokeObjectURL(videoPreview);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +106,15 @@ export function NewListing() {
     URL.revokeObjectURL(previews[index]);
     setPhotos(prev => prev.filter((_, i) => i !== index));
     setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+    setVideo(file);
+    setVideoPreview(URL.createObjectURL(file));
+    e.target.value = '';
   };
 
   const finalDesigner = designer === 'Other' ? customDesigner : designer;
@@ -129,6 +155,30 @@ export function NewListing() {
       }
     }
 
+    // Upload video (VIP only)
+    let uploadedVideoUrl: string | null = null;
+    if (isVIP && video) {
+      setUploadProgress('Uploading your Story Mode video…');
+      const ext  = video.name.split('.').pop()?.toLowerCase() ?? 'mp4';
+      const path = `${user!.id}/video-${Date.now()}.${ext}`;
+
+      const { error: vidErr } = await supabase.storage
+        .from('dresses')
+        .upload(path, video, { contentType: video.type, upsert: false });
+
+      if (vidErr) {
+        setError(`Video upload failed: ${vidErr.message}`);
+        setLoading(false); setUploadProgress('');
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('dresses')
+        .getPublicUrl(path);
+
+      uploadedVideoUrl = publicUrl;
+    }
+
     setUploadProgress('Saving your listing…');
 
     const { error: err } = await supabase.from('listings').insert({
@@ -151,6 +201,9 @@ export function NewListing() {
       ships,
       local_meetup:        localMeetup,
       photo_urls:          uploadedUrls,
+      video_url:           uploadedVideoUrl,
+      listing_theme:       isVIP && listingTheme ? listingTheme : null,
+      is_vip_listing:      isVIP,
     });
 
     setUploadProgress('');
@@ -309,7 +362,7 @@ export function NewListing() {
                 <Sparkles size={12} className="text-plum/50" />
                 <p className="font-semibold text-plum text-xs">VIP: 10 photos per listing</p>
               </div>
-              <p className="text-plum/45 text-[11px]">Free accounts get 6 · Upgrade for more</p>
+              <p className="text-plum/45 text-[11px]">Free accounts get 4 · Upgrade for more</p>
             </div>
             <button
               type="button"
@@ -318,6 +371,54 @@ export function NewListing() {
             >
               Upgrade
             </button>
+          </div>
+        )}
+
+        {/* ── VIP: Story Mode Video ──────────────────────────── */}
+        {isVIP && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles size={13} className="text-primary" />
+              <label className="label mb-0">Story Mode Video</label>
+              <span className="bg-primary/20 text-plum text-[9px] font-bold px-2 py-0.5 rounded-full">VIP</span>
+            </div>
+            <p className="text-plum/45 text-[11px] mb-3">Add a short video (up to 30s) so buyers can see the dress in motion.</p>
+
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              aria-label="Upload dress video"
+              className="hidden"
+              onChange={handleVideoSelect}
+            />
+
+            {!video ? (
+              <button
+                type="button"
+                onClick={() => videoInputRef.current?.click()}
+                className="w-full py-5 rounded-2xl border-2 border-dashed border-primary/25 bg-lavender/15 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition-all"
+              >
+                <Video size={24} className="text-primary/60" />
+                <span className="text-plum/55 text-xs font-medium">Tap to add a video</span>
+              </button>
+            ) : (
+              <div className="relative rounded-2xl overflow-hidden">
+                <video
+                  src={videoPreview}
+                  controls
+                  className="w-full rounded-2xl max-h-48 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => { URL.revokeObjectURL(videoPreview); setVideo(null); setVideoPreview(''); }}
+                  aria-label="Remove video"
+                  className="absolute top-2 right-2 w-7 h-7 bg-plum/70 rounded-full flex items-center justify-center"
+                >
+                  <X size={13} className="text-white" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -531,6 +632,38 @@ export function NewListing() {
             className="input resize-none"
           />
         </div>
+
+        {/* ── VIP: Listing Theme ──────────────────────────────── */}
+        {isVIP && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles size={13} className="text-primary" />
+              <label className="label mb-0">Listing Theme</label>
+              <span className="bg-primary/20 text-plum text-[9px] font-bold px-2 py-0.5 rounded-full">VIP</span>
+            </div>
+            <p className="text-plum/45 text-[11px] mb-3">Choose how your card looks in The Vault. Leave blank for the default.</p>
+            <div className="flex flex-col gap-2">
+              {THEMES.map(t => (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setListingTheme(listingTheme === t.id ? '' : t.id)}
+                  className={`flex items-center justify-between px-4 py-3 rounded-2xl border transition-all ${
+                    listingTheme === t.id
+                      ? 'border-primary bg-primary/10 text-plum'
+                      : 'border-primary/15 bg-white text-plum/70'
+                  }`}
+                >
+                  <div className="text-left">
+                    <p className="font-semibold text-xs">{t.label}</p>
+                    <p className="text-[11px] opacity-60">{t.desc}</p>
+                  </div>
+                  {listingTheme === t.id && <Check size={16} className="text-primary flex-shrink-0" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Upload progress */}
         {uploadProgress && (
