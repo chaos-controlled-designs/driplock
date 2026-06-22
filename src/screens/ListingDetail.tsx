@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  ArrowLeft, Truck, MapPin, MessageCircle, Heart, Shield,
+  ArrowLeft, Truck, MessageCircle, Heart, Shield,
   ShoppingBag, X, Lock, Users,
 } from 'lucide-react';
 
@@ -66,6 +66,11 @@ export function ListingDetail() {
   const [loading,       setLoading]       = useState(true);
   const [photoIndex,    setPhotoIndex]    = useState(0);
   const [safetyChecked, setSafetyChecked] = useState(false);
+
+  // Swipe gesture refs
+  const touchStartX = useRef(0);
+  const mouseStartX = useRef(0);
+  const isDragging  = useRef(false);
   const [showSafety,    setShowSafety]    = useState(false);
   const [checkout,      setCheckout]      = useState<CheckoutConfig | null>(null);
   const [checkoutDone,  setCheckoutDone]  = useState(false);
@@ -147,6 +152,50 @@ export function ListingDetail() {
   const canBuy  = listing.listing_type !== 'rent' && !!listing.price_cents;
   const isOwner = listing.user_id === user?.id;
 
+  // Photo navigation
+  const totalPhotos = listing.photo_urls.length;
+  const prevPhoto = () => setPhotoIndex(i => Math.max(i - 1, 0));
+  const nextPhoto = () => setPhotoIndex(i => Math.min(i + 1, totalPhotos - 1));
+
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd   = (e: React.TouchEvent) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) diff > 0 ? nextPhoto() : prevPhoto();
+  };
+  const handleMouseDown  = (e: React.MouseEvent) => { isDragging.current = true; mouseStartX.current = e.clientX; };
+  const handleMouseUp    = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const diff = mouseStartX.current - e.clientX;
+    if (Math.abs(diff) > 40) diff > 0 ? nextPhoto() : prevPhoto();
+  };
+
+  // VIP theme helpers
+  const isVIP = listing.is_vip_listing;
+  const theme  = listing.listing_theme ?? '';
+
+  // Thin 2px accent bar color below the photo (VIP only)
+  const vipAccentBar =
+    theme === 'dark-luxury'   ? 'bg-gradient-to-r from-purple-900 via-purple-500 to-purple-900' :
+    theme === 'soft-gradient' ? 'bg-gradient-to-r from-pink-200 via-purple-200 to-pink-100'     :
+    theme === 'minimal'       ? 'bg-gradient-to-r from-rose-200 to-rose-100'                    :
+                                'bg-gradient-to-r from-primary/50 to-lavender/50';
+
+  // Subtle photo overlay gradient for depth (VIP only)
+  const vipPhotoOverlay =
+    theme === 'dark-luxury'   ? 'absolute inset-0 bg-gradient-to-t from-[#1a1025]/60 via-transparent to-transparent pointer-events-none' :
+    theme === 'soft-gradient' ? 'absolute inset-0 bg-gradient-to-t from-pink-200/30 via-transparent to-transparent pointer-events-none'  :
+    theme === 'minimal'       ? 'absolute inset-0 bg-gradient-to-t from-rose-50/40 via-transparent to-transparent pointer-events-none'    :
+                                'absolute inset-0 bg-gradient-to-t from-plum/15 via-transparent to-transparent pointer-events-none';
+
+  // Title color tweak for dark-luxury VIP
+  const titleColorClass   = (isVIP && theme === 'dark-luxury') ? 'text-white'    : 'text-plum';
+  const designerColorClass = (isVIP && theme === 'dark-luxury') ? 'text-white/50' : 'text-plum/50';
+  const titleBgClass      =
+    (isVIP && theme === 'dark-luxury')   ? 'bg-[#1a1025] px-4 pt-5 pb-1' :
+    (isVIP && theme === 'soft-gradient') ? 'bg-gradient-to-b from-pink-50 to-cream px-4 pt-5 pb-1' :
+    'px-4 pt-4';
+
   // Helper: render ship + meetup buttons for a given transaction type
   const renderTransactionButtons = (transType: TransType) => {
     const cents  = transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
@@ -209,44 +258,113 @@ export function ListingDetail() {
   return (
     <div className="min-h-screen bg-cream pb-32">
 
-      {/* ── Photo gallery ── */}
-      <div className="relative">
-        <div className="w-full aspect-[4/5] bg-gradient-to-br from-blush to-lavender flex items-center justify-center overflow-hidden">
-          {listing.photo_urls.length > 0 ? (
-            <img src={listing.photo_urls[photoIndex]} alt={listing.title} className="w-full h-full object-cover"/>
-          ) : (
+      {/* ── Photo carousel ── */}
+      <div
+        className="relative overflow-hidden select-none cursor-grab active:cursor-grabbing"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => { isDragging.current = false; }}
+      >
+        {totalPhotos > 0 ? (
+          <div
+            className="flex transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${photoIndex * 100}%)` }}
+          >
+            {listing.photo_urls.map((url, i) => (
+              <div key={i} className="w-full flex-shrink-0 aspect-[4/5] bg-gradient-to-br from-blush to-lavender relative">
+                <img
+                  src={url}
+                  alt={`Photo ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+                {/* VIP photo overlay gradient */}
+                {isVIP && <div className={vipPhotoOverlay} />}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="w-full aspect-[4/5] bg-gradient-to-br from-blush to-lavender flex items-center justify-center">
             <ShoppingBag size={64} className="text-primary/30"/>
-          )}
-        </div>
+          </div>
+        )}
 
+        {/* Back button */}
         <button type="button" aria-label="Go back" onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft">
+          className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft z-10">
           <ArrowLeft size={18} className="text-plum"/>
         </button>
 
+        {/* Wishlist button */}
         <button type="button" aria-label="Add to wishlist"
-          className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft">
+          className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft z-10">
           <Heart size={18} className="text-primary"/>
         </button>
 
-        {listing.photo_urls.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+        {/* VIP label — top center */}
+        {isVIP && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+            <div className={`rounded-full px-3 py-1 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase ${
+              theme === 'dark-luxury' ? 'bg-purple-950/80 text-purple-200 border border-purple-700/50' :
+              theme === 'minimal'     ? 'bg-white/85 text-rose-400 border border-rose-200'            :
+                                       'bg-white/80 text-plum/70 border border-primary/20'
+            }`}>VIP</div>
+          </div>
+        )}
+
+        {/* Dot indicators */}
+        {totalPhotos > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {listing.photo_urls.map((_, i) => (
-              <button key={i} type="button" aria-label={`Photo ${i + 1}`}
-                onClick={() => setPhotoIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIndex ? 'bg-white w-4' : 'bg-white/50'}`}
+              <button
+                key={i}
+                type="button"
+                aria-label={`Photo ${i + 1}`}
+                onClick={e => { e.stopPropagation(); setPhotoIndex(i); }}
+                className={`rounded-full transition-all duration-300 h-1.5 ${
+                  i === photoIndex ? 'bg-white w-4' : 'bg-white/50 w-1.5'
+                }`}
               />
             ))}
           </div>
         )}
+
+        {/* Photo counter badge — top right corner (if >1 photo) */}
+        {totalPhotos > 1 && (
+          <div className="absolute bottom-4 right-4 bg-plum/55 backdrop-blur-sm rounded-full px-2 py-0.5 z-10">
+            <span className="text-white text-[10px] font-semibold">{photoIndex + 1}/{totalPhotos}</span>
+          </div>
+        )}
       </div>
 
-      <div className="px-4 pt-4">
+      {/* VIP accent bar */}
+      {isVIP && <div className={`h-0.5 w-full ${vipAccentBar}`} />}
+
+      {/* ── Video section (VIP Story Mode) ── */}
+      {listing.video_url && (
+        <div className="px-4 pt-5 pb-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-plum/35 mb-3">Dress in Motion</p>
+          <div className="rounded-3xl overflow-hidden bg-plum/5 relative shadow-medium">
+            <video
+              src={listing.video_url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full max-h-72 object-cover rounded-3xl"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className={titleBgClass}>
 
         {/* ── Title + price pills ── */}
         <div className="mb-4">
-          <h2 className="font-display text-xl font-bold text-plum mb-1">{listing.title}</h2>
-          {listing.designer && <p className="text-plum/50 text-sm mb-2">{listing.designer}</p>}
+          <h2 className={`font-display text-xl font-bold mb-1 ${titleColorClass}`}>{listing.title}</h2>
+          {listing.designer && <p className={`text-sm mb-2 ${designerColorClass}`}>{listing.designer}</p>}
           <div className="flex items-center gap-3 flex-wrap">
             {canRent && (
               <div className="bg-lavender rounded-xl px-3 py-1.5">
