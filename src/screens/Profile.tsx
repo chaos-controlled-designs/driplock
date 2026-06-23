@@ -323,7 +323,7 @@ export function Profile() {
           <div>
             <label className="label">Event Type <span className="text-plum/35 font-normal">(optional)</span></label>
             <div className="flex gap-2">
-              {['Prom', 'Homecoming', 'Other'].map(t => (
+              {['Prom', 'Homecoming'].map(t => (
                 <button
                   key={t}
                   type="button"

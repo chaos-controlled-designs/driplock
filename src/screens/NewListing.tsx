@@ -6,9 +6,14 @@ import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star, Sparkl
 import { VIPModal } from '../components/VIPModal';
 
 const THEMES = [
-  { id: 'minimal',       label: 'Minimal',  desc: 'Clean white · rose border'      },
-  { id: 'soft-gradient', label: 'Soft',     desc: 'Blush gradient · dreamy shimmer' },
-  { id: 'dark-luxury',   label: 'Luxe',     desc: 'Deep plum · editorial feel'      },
+  { id: 'blush-dream',  label: 'Blush Dream',  desc: 'Soft rose · romantic',      swatch: 'bg-[linear-gradient(135deg,#ffdde1,#ffc2c7)]', dark: false },
+  { id: 'soft-glow',    label: 'Soft Glow',    desc: 'Lavender · dreamy mist',    swatch: 'bg-[linear-gradient(135deg,#f5e6ff,#e9d5f5)]', dark: false },
+  { id: 'luxe-rose',    label: 'Luxe Rose',    desc: 'Pearl white · rose gold',   swatch: 'bg-[linear-gradient(135deg,#fff0f3,#ffd6da)]', dark: false },
+  { id: 'midnight',     label: 'Midnight',     desc: 'Deep plum · editorial',     swatch: 'bg-[linear-gradient(135deg,#2d1b3d,#1a1025)]', dark: true  },
+  { id: 'champagne',    label: 'Champagne',    desc: 'Warm gold · luxe glow',     swatch: 'bg-[linear-gradient(135deg,#fef9e7,#f5e6c8)]', dark: false },
+  { id: 'sage',         label: 'Sage',         desc: 'Garden fresh · clean',      swatch: 'bg-[linear-gradient(135deg,#e8f5e9,#c8e6c9)]', dark: false },
+  { id: 'ice-blue',     label: 'Ice Blue',     desc: 'Winter glam · crisp',       swatch: 'bg-[linear-gradient(135deg,#e3f2fd,#bbdefb)]', dark: false },
+  { id: 'peach-glow',   label: 'Peach Glow',   desc: 'Sunset warmth · glam',      swatch: 'bg-[linear-gradient(135deg,#fff3e0,#ffccbc)]', dark: false },
 ];
 const DRESS_SIZES = ['00','0','2','4','6','8','10','12','14','16','18','20'];
 const SILHOUETTES = [
@@ -657,31 +662,44 @@ export function NewListing() {
         {/* ── VIP: Listing Theme ──────────────────────────────── */}
         {isVIP && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Sparkles size={13} className="text-primary" />
               <label className="label mb-0">Listing Theme</label>
               <span className="bg-primary/20 text-plum text-[9px] font-bold px-2 py-0.5 rounded-full">VIP</span>
             </div>
-            <p className="text-plum/45 text-[11px] mb-3">Choose how your card looks in The Vault. Leave blank for the default.</p>
-            <div className="flex flex-col gap-2">
-              {THEMES.map(t => (
-                <button
-                  type="button"
-                  key={t.id}
-                  onClick={() => setListingTheme(listingTheme === t.id ? '' : t.id)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-2xl border transition-all ${
-                    listingTheme === t.id
-                      ? 'border-primary bg-primary/10 text-plum'
-                      : 'border-primary/15 bg-white text-plum/70'
-                  }`}
-                >
-                  <div className="text-left">
-                    <p className="font-semibold text-xs">{t.label}</p>
-                    <p className="text-[11px] opacity-60">{t.desc}</p>
-                  </div>
-                  {listingTheme === t.id && <Check size={16} className="text-primary flex-shrink-0" />}
-                </button>
-              ))}
+            <p className="text-plum/45 text-[11px] mb-3">Pick a vibe for your listing card in The Vault. Tap again to deselect.</p>
+            <div className="grid grid-cols-2 gap-3">
+              {THEMES.map(t => {
+                const active = listingTheme === t.id;
+                return (
+                  <button
+                    type="button"
+                    key={t.id}
+                    onClick={() => setListingTheme(active ? '' : t.id)}
+                    className={`relative rounded-2xl overflow-hidden transition-all active:scale-95 text-left ${
+                      active ? 'ring-2 ring-plum shadow-medium' : 'ring-1 ring-plum/10 shadow-soft'
+                    }`}
+                  >
+                    {/* Gradient swatch */}
+                    <div className={`w-full h-[72px] ${t.swatch}`} />
+                    {/* Label */}
+                    <div className={`px-3 py-2 ${t.dark ? 'bg-[#1a1025]' : 'bg-white'}`}>
+                      <p className={`font-bold text-[11px] leading-tight ${t.dark ? 'text-white' : 'text-plum'}`}>
+                        {t.label}
+                      </p>
+                      <p className={`text-[10px] leading-snug mt-0.5 ${t.dark ? 'text-white/40' : 'text-plum/40'}`}>
+                        {t.desc}
+                      </p>
+                    </div>
+                    {/* Check mark */}
+                    {active && (
+                      <div className="absolute top-2 right-2 w-5 h-5 bg-plum rounded-full flex items-center justify-center shadow-soft">
+                        <Check size={11} className="text-white" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

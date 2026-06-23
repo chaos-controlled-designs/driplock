@@ -9,20 +9,31 @@ const FILTERS = ['All', 'Rent', 'Buy', 'Ships', 'Local'];
 // Card background + border based on VIP status and theme
 function cardBgClass(isVip: boolean, theme?: string | null): string {
   if (isVip) {
-    if (theme === 'minimal')       return 'bg-white border border-rose-200';
-    if (theme === 'soft-gradient') return 'bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-pink-100';
-    if (theme === 'dark-luxury')   return 'bg-gradient-to-br from-[#2d1b3d] to-[#1a1025] border border-purple-800/50';
-    // VIP, no specific theme — clean elevated treatment
-    return 'bg-white border border-primary/25';
+    switch (theme) {
+      case 'blush-dream':   return 'bg-[linear-gradient(135deg,#ffdde1,#ffc2c7)] border border-pink-200';
+      case 'soft-glow':     return 'bg-[linear-gradient(135deg,#f5e6ff,#e9d5f5)] border border-purple-200';
+      case 'luxe-rose':     return 'bg-[linear-gradient(135deg,#fff0f3,#ffd6da)] border border-rose-200';
+      case 'midnight':      return 'bg-[linear-gradient(135deg,#2d1b3d,#1a1025)] border border-purple-900/50';
+      case 'champagne':     return 'bg-[linear-gradient(135deg,#fef9e7,#f5e6c8)] border border-yellow-200';
+      case 'sage':          return 'bg-[linear-gradient(135deg,#e8f5e9,#c8e6c9)] border border-green-200';
+      case 'ice-blue':      return 'bg-[linear-gradient(135deg,#e3f2fd,#bbdefb)] border border-blue-200';
+      case 'peach-glow':    return 'bg-[linear-gradient(135deg,#fff3e0,#ffccbc)] border border-orange-200';
+      // legacy theme ids (backward compat)
+      case 'minimal':       return 'bg-white border border-rose-200';
+      case 'soft-gradient': return 'bg-[linear-gradient(135deg,#fdf0ff,#e9d5f5)] border border-pink-100';
+      case 'dark-luxury':   return 'bg-[linear-gradient(135deg,#2d1b3d,#1a1025)] border border-purple-800/50';
+      default:              return 'bg-white border border-primary/25';
+    }
   }
   return 'bg-white border border-transparent';
 }
 function cardShadowClass(isVip: boolean): string {
   return isVip ? 'shadow-[0_4px_24px_rgba(255,193,184,0.35)]' : 'shadow-medium';
 }
-function themeTextClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-white'    : 'text-plum'; }
-function themeMutedClass(theme?: string | null) { return theme === 'dark-luxury' ? 'text-white/45' : 'text-plum/35'; }
-function themePriceClass(theme?: string | null) { return theme === 'dark-luxury' ? 'text-pink-300' : 'text-primary'; }
+const DARK_THEMES = new Set(['midnight', 'dark-luxury']);
+function themeTextClass(theme?: string | null)  { return DARK_THEMES.has(theme ?? '') ? 'text-white'    : 'text-plum'; }
+function themeMutedClass(theme?: string | null) { return DARK_THEMES.has(theme ?? '') ? 'text-white/45' : 'text-plum/35'; }
+function themePriceClass(theme?: string | null) { return DARK_THEMES.has(theme ?? '') ? 'text-pink-300' : 'text-primary'; }
 
 interface WishItem {
   listing_id: string;

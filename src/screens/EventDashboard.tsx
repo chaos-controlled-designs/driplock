@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
-const EVENT_TYPES = ['Prom', 'Homecoming', 'Other'] as const;
+const EVENT_TYPES = ['Prom', 'Homecoming'] as const;
 
 interface EventLock {
   id: string;
