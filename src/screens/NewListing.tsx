@@ -34,14 +34,8 @@ const CONDITIONS = [
   { value: 'fair',             label: 'Fair — visible wear, priced accordingly' },
 ];
 const CATEGORIES = [
-  { value: 'prom',         label: 'Prom',         emoji: '👗', grad: 'from-rose-100 to-pink-200'       },
-  { value: 'homecoming',   label: 'Homecoming',   emoji: '🌙', grad: 'from-amber-100 to-orange-200'    },
-  { value: 'formal',       label: 'Formal',       emoji: '🥀', grad: 'from-violet-100 to-purple-200'   },
-  { value: 'cocktail',     label: 'Cocktail',     emoji: '🫧', grad: 'from-sky-100 to-blue-200'        },
-  { value: 'semi_formal',  label: 'Semi-Formal',  emoji: '🌸', grad: 'from-pink-50 to-fuchsia-200'     },
-  { value: 'sweet_16',     label: 'Sweet 16',     emoji: '🎂', grad: 'from-yellow-100 to-amber-200'    },
-  { value: 'wedding_guest',label: 'Wedding',      emoji: '💐', grad: 'from-emerald-50 to-teal-200'     },
-  { value: 'masquerade',   label: 'Masquerade',   emoji: '🎭', grad: 'from-slate-100 to-slate-300'     },
+  { value: 'prom',       label: 'Prom',       emoji: '👗', grad: 'from-rose-100 to-pink-200'    },
+  { value: 'homecoming', label: 'Homecoming', emoji: '🌙', grad: 'from-amber-100 to-orange-200' },
 ];
 
 const ACTIVE_PILL  = 'bg-gradient-to-r from-primary to-lavender text-plum border-transparent shadow-soft';
@@ -439,7 +433,7 @@ export function NewListing() {
         {/* ── Category ────────────────────────────────────────── */}
         <div>
           <label className="label">Category <span className="text-primary">*</span></label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             {CATEGORIES.map(c => {
               const active = category === c.value;
               return (
@@ -453,10 +447,10 @@ export function NewListing() {
                       : 'ring-1 ring-plum/10'
                   }`}
                 >
-                  <div className={`w-full aspect-square bg-gradient-to-br ${c.grad} flex items-center justify-center`}>
-                    <span className="text-2xl leading-none">{c.emoji}</span>
+                  <div className={`w-full aspect-[4/3] bg-gradient-to-br ${c.grad} flex items-center justify-center`}>
+                    <span className="text-4xl leading-none">{c.emoji}</span>
                   </div>
-                  <div className={`w-full py-1.5 text-center text-[9px] font-bold leading-tight transition-colors ${
+                  <div className={`w-full py-2.5 text-center text-xs font-bold leading-tight transition-colors ${
                     active ? 'bg-plum text-white' : 'bg-white text-plum/65'
                   }`}>
                     {c.label}
