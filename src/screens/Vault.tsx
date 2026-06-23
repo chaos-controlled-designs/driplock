@@ -2,20 +2,27 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Listing } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Heart, Truck, ShoppingBag, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, Heart, Truck, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 
 const FILTERS = ['All', 'Rent', 'Buy', 'Ships', 'Local'];
 
-// Returns extra Tailwind classes for the outer card based on theme
-function themeCardClass(theme?: string | null): string {
-  if (theme === 'minimal')       return 'border-2 border-rose-200 bg-white';
-  if (theme === 'soft-gradient') return 'bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-pink-100';
-  if (theme === 'dark-luxury')   return 'bg-gradient-to-br from-[#2d1b3d] to-[#1a1025] border border-purple-900/40';
-  return 'bg-white';
+// Card background + border based on VIP status and theme
+function cardBgClass(isVip: boolean, theme?: string | null): string {
+  if (isVip) {
+    if (theme === 'minimal')       return 'bg-white border border-rose-200';
+    if (theme === 'soft-gradient') return 'bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-pink-100';
+    if (theme === 'dark-luxury')   return 'bg-gradient-to-br from-[#2d1b3d] to-[#1a1025] border border-purple-800/50';
+    // VIP, no specific theme — clean elevated treatment
+    return 'bg-white border border-primary/25';
+  }
+  return 'bg-white border border-transparent';
 }
-function themeTextClass(theme?: string | null)   { return theme === 'dark-luxury' ? 'text-white'     : 'text-plum'; }
-function themeMutedClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-white/45'  : 'text-plum/35'; }
-function themePriceClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-pink-300'  : 'text-primary'; }
+function cardShadowClass(isVip: boolean): string {
+  return isVip ? 'shadow-[0_4px_24px_rgba(255,193,184,0.35)]' : 'shadow-medium';
+}
+function themeTextClass(theme?: string | null)  { return theme === 'dark-luxury' ? 'text-white'    : 'text-plum'; }
+function themeMutedClass(theme?: string | null) { return theme === 'dark-luxury' ? 'text-white/45' : 'text-plum/35'; }
+function themePriceClass(theme?: string | null) { return theme === 'dark-luxury' ? 'text-pink-300' : 'text-primary'; }
 
 interface WishItem {
   listing_id: string;
@@ -179,12 +186,13 @@ export function Vault() {
           <div className="grid grid-cols-2 gap-4">
             {filtered.map(listing => {
               const isFav  = favorites.has(listing.id);
+              const isVip  = !!listing.is_vip_listing;
               const theme  = listing.listing_theme ?? null;
               return (
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  className={`rounded-3xl overflow-hidden shadow-medium active:scale-[0.97] transition-all duration-200 cursor-pointer hover:shadow-strong hover:-translate-y-1 ${themeCardClass(theme)}`}
+                  className={`rounded-3xl overflow-hidden active:scale-[0.97] transition-all duration-200 cursor-pointer hover:-translate-y-0.5 ${cardBgClass(isVip, theme)} ${cardShadowClass(isVip)}`}
                 >
                   {/* Full-bleed photo — taller aspect */}
                   <div className="w-full aspect-[3/4] bg-gradient-to-br from-blush to-lavender relative overflow-hidden">
@@ -201,10 +209,9 @@ export function Vault() {
                     )}
 
                     {/* VIP badge — top left (overrides ships badge placement) */}
-                    {listing.is_vip_listing ? (
-                      <div className="absolute top-2.5 left-2.5 bg-plum/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-                        <Sparkles size={9} className="text-primary"/>
-                        <span className="text-[9px] font-bold text-white">VIP</span>
+                    {isVip ? (
+                      <div className="absolute top-2.5 left-2.5 bg-plum/75 backdrop-blur-sm rounded-full px-2.5 py-1">
+                        <span className="text-[9px] font-bold text-white tracking-widest uppercase">VIP</span>
                       </div>
                     ) : listing.ships ? (
                       <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
@@ -214,7 +221,7 @@ export function Vault() {
                     ) : null}
 
                     {/* Ships badge below VIP badge if both apply */}
-                    {listing.is_vip_listing && listing.ships && (
+                    {isVip && listing.ships && (
                       <div className="absolute top-9 left-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
                         <Truck size={9} className="text-primary"/>
                         <span className="text-[9px] font-bold text-plum">Ships</span>
