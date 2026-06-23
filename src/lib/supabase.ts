@@ -52,6 +52,9 @@ export type Listing = {
   local_meetup: boolean;
   description?: string;
   photo_urls: string[];
+  video_url?: string;
+  listing_theme?: string;
+  is_vip_listing?: boolean;
   is_available: boolean;
   created_at: string;
   profiles?: Profile;
