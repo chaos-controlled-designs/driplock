@@ -433,7 +433,7 @@ export function NewListing() {
         {/* ── Category ────────────────────────────────────────── */}
         <div>
           <label className="label">Category <span className="text-primary">*</span></label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex gap-3">
             {CATEGORIES.map(c => {
               const active = category === c.value;
               return (
@@ -441,20 +441,13 @@ export function NewListing() {
                   type="button"
                   key={c.value}
                   onClick={() => setCategory(c.value)}
-                  className={`flex flex-col items-center rounded-2xl overflow-hidden transition-all active:scale-95 ${
+                  className={`flex-1 py-3 rounded-2xl text-sm font-bold border transition-all active:scale-95 ${
                     active
-                      ? 'ring-2 ring-plum shadow-soft'
-                      : 'ring-1 ring-plum/10'
+                      ? 'bg-gradient-to-r from-primary to-lavender text-plum border-transparent shadow-soft'
+                      : 'bg-white text-plum/60 border-primary/20'
                   }`}
                 >
-                  <div className={`w-full aspect-[4/3] bg-gradient-to-br ${c.grad} flex items-center justify-center`}>
-                    <span className="text-4xl leading-none">{c.emoji}</span>
-                  </div>
-                  <div className={`w-full py-2.5 text-center text-xs font-bold leading-tight transition-colors ${
-                    active ? 'bg-plum text-white' : 'bg-white text-plum/65'
-                  }`}>
-                    {c.label}
-                  </div>
+                  {c.label}
                 </button>
               );
             })}
