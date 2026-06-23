@@ -262,14 +262,21 @@ export function NewListing() {
 
         {/* ── Photo Upload ─────────────────────────────────────── */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1">
             <label className="label mb-0">Photos</label>
-            <span className="text-plum/35 text-[10px] font-semibold">
-              {photos.length}/{MAX_PHOTOS} added
+            <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+              photos.length >= MAX_PHOTOS
+                ? 'bg-sage/60 text-plum'
+                : 'bg-primary/15 text-plum/60'
+            }`}>
+              {photos.length}/{MAX_PHOTOS}
             </span>
           </div>
+          <p className="text-plum/40 text-[11px] mb-3">
+            First photo is your cover · Add up to {MAX_PHOTOS} photos
+          </p>
 
-          {/* Hidden file input — multiple, images only */}
+          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -281,86 +288,71 @@ export function NewListing() {
           />
 
           {photos.length === 0 ? (
-            /* Empty state — full tap-to-add area */
+            /* Empty state */
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full aspect-[4/3] bg-gradient-to-br from-blush via-cream to-lavender rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-primary/25 active:scale-[0.98] transition-all"
+              className="w-full aspect-[4/3] bg-gradient-to-br from-blush via-cream to-lavender rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-primary/20 active:scale-[0.98] transition-all"
             >
               <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mb-3 shadow-soft">
-                <Camera size={28} className="text-primary/70"/>
+                <Camera size={28} className="text-primary/60"/>
               </div>
-              <p className="text-plum/70 text-sm font-semibold">Add up to {MAX_PHOTOS} photos</p>
-              <p className="text-plum/35 text-xs mt-1">Tap to browse your camera roll</p>
-              <p className="text-primary/50 text-[10px] mt-3 font-medium">Great photos = way more interest!</p>
+              <p className="text-plum font-semibold text-sm mb-0.5">Add your photos</p>
+              <p className="text-plum/40 text-xs">Tap to browse your camera roll</p>
+              <div className="mt-4 bg-white/60 backdrop-blur-sm rounded-full px-4 py-1.5">
+                <p className="text-primary/70 text-[11px] font-semibold">Great photos = way more interest</p>
+              </div>
             </button>
           ) : (
-            <div className="flex flex-col gap-3">
-
-              {/* Primary / cover photo */}
-              <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-medium">
-                <img
-                  src={previews[0]}
-                  alt="Cover photo"
-                  className="w-full h-full object-cover"
-                />
-                {/* Cover badge */}
-                <div className="absolute bottom-3 left-3 bg-plum/65 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
-                  <Star size={10} fill="#ffd4c4" color="#ffd4c4"/>
-                  <span className="text-white text-[10px] font-bold tracking-wide">Cover</span>
-                </div>
-                {/* Remove button */}
-                <button
-                  type="button"
-                  onClick={() => removePhoto(0)}
-                  aria-label="Remove cover photo"
-                  className="absolute top-2.5 right-2.5 w-8 h-8 bg-plum/65 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
-                >
-                  <X size={14} className="text-white"/>
-                </button>
-              </div>
-
-              {/* Additional photos + add button */}
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-0.5">
-                {previews.slice(1).map((url, idx) => (
-                  <div
-                    key={idx + 1}
-                    className="relative flex-shrink-0 w-[88px] h-[88px] rounded-2xl overflow-hidden shadow-soft"
-                  >
+            <>
+              {/* 3-column Instagram-style grid */}
+              <div className="grid grid-cols-3 gap-2">
+                {previews.map((url, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-soft">
                     <img
                       src={url}
-                      alt={`Photo ${idx + 2}`}
+                      alt={`Photo ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
+                    {/* Cover gradient + badge on first photo */}
+                    {idx === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-plum/60 to-transparent pt-6 pb-1.5 px-2 flex items-center gap-1">
+                        <Star size={8} fill="#ffd4c4" color="#ffd4c4"/>
+                        <span className="text-white text-[9px] font-bold tracking-wide">Cover</span>
+                      </div>
+                    )}
+                    {/* Remove button */}
                     <button
                       type="button"
-                      onClick={() => removePhoto(idx + 1)}
-                      aria-label={`Remove photo ${idx + 2}`}
-                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-plum/65 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
+                      onClick={() => removePhoto(idx)}
+                      aria-label={`Remove photo ${idx + 1}`}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-plum/70 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
                     >
                       <X size={11} className="text-white"/>
                     </button>
                   </div>
                 ))}
 
-                {/* Add more slot */}
+                {/* Add slot */}
                 {photos.length < MAX_PHOTOS && (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Add more photos"
-                    className="flex-shrink-0 w-[88px] h-[88px] rounded-2xl border-2 border-dashed border-primary/30 bg-blush/50 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
+                    className="aspect-square rounded-2xl border-2 border-dashed border-primary/25 bg-blush/30 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
                   >
-                    <ImagePlus size={20} className="text-primary/60"/>
-                    <span className="text-[9px] font-bold text-plum/45 uppercase tracking-wide">Add More</span>
+                    <div className="w-8 h-8 rounded-xl bg-white/70 flex items-center justify-center">
+                      <ImagePlus size={17} className="text-primary/60"/>
+                    </div>
+                    <span className="text-[9px] font-bold text-plum/40 uppercase tracking-wide">Add</span>
                   </button>
                 )}
               </div>
 
-              <p className="text-plum/35 text-[10px] font-medium">
-                First photo is the cover. Tap <X size={9} className="inline"/> to remove any photo.
+              <p className="text-plum/30 text-[10px] mt-2">
+                Tap <X size={9} className="inline mb-px"/> to remove · drag to reorder coming soon
               </p>
-            </div>
+            </>
           )}
         </div>
 
@@ -667,8 +659,36 @@ export function NewListing() {
               <label className="label mb-0">Listing Theme</label>
               <span className="bg-primary/20 text-plum text-[9px] font-bold px-2 py-0.5 rounded-full">VIP</span>
             </div>
-            <p className="text-plum/45 text-[11px] mb-3">Pick a vibe for your listing card in The Vault. Tap again to deselect.</p>
+            <p className="text-plum/45 text-[11px] mb-3">Choose a vibe for your card in The Vault. Tap to select, tap again to clear.</p>
+
             <div className="grid grid-cols-2 gap-3">
+              {/* Default / no-theme option */}
+              <button
+                type="button"
+                onClick={() => setListingTheme('')}
+                className={`relative rounded-2xl overflow-hidden transition-all active:scale-95 text-left ${
+                  !listingTheme ? 'ring-2 ring-plum shadow-medium' : 'ring-1 ring-plum/10 shadow-soft'
+                }`}
+              >
+                <div className="w-full h-24 bg-white flex items-center justify-center">
+                  <div className="grid grid-cols-3 gap-1 opacity-20">
+                    {[...Array(9)].map((_, i) => (
+                      <div key={i} className="w-4 h-4 rounded-sm bg-plum" />
+                    ))}
+                  </div>
+                </div>
+                <div className="px-3 py-2 bg-white border-t border-plum/5">
+                  <p className="font-bold text-[11px] text-plum leading-tight">Default</p>
+                  <p className="text-[10px] text-plum/40 mt-0.5">Clean white card</p>
+                </div>
+                {!listingTheme && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-plum rounded-full flex items-center justify-center shadow-soft">
+                    <Check size={11} className="text-white" />
+                  </div>
+                )}
+              </button>
+
+              {/* Theme options */}
               {THEMES.map(t => {
                 const active = listingTheme === t.id;
                 return (
@@ -680,18 +700,23 @@ export function NewListing() {
                       active ? 'ring-2 ring-plum shadow-medium' : 'ring-1 ring-plum/10 shadow-soft'
                     }`}
                   >
-                    {/* Gradient swatch */}
-                    <div className={`w-full h-[72px] ${t.swatch}`} />
-                    {/* Label */}
-                    <div className={`px-3 py-2 ${t.dark ? 'bg-[#1a1025]' : 'bg-white'}`}>
+                    {/* Swatch — taller for visual impact */}
+                    <div className={`w-full h-24 ${t.swatch} relative`}>
+                      {/* Subtle center dot accent */}
+                      <div className={`absolute inset-0 flex items-center justify-center`}>
+                        <div className={`w-8 h-8 rounded-full border-2 ${t.dark ? 'border-white/20' : 'border-white/60'} backdrop-blur-sm`} />
+                      </div>
+                    </div>
+                    {/* Label bar */}
+                    <div className={`px-3 py-2.5 border-t ${t.dark ? 'bg-[#1a1025] border-white/5' : 'bg-white border-plum/5'}`}>
                       <p className={`font-bold text-[11px] leading-tight ${t.dark ? 'text-white' : 'text-plum'}`}>
                         {t.label}
                       </p>
-                      <p className={`text-[10px] leading-snug mt-0.5 ${t.dark ? 'text-white/40' : 'text-plum/40'}`}>
+                      <p className={`text-[10px] mt-0.5 ${t.dark ? 'text-white/35' : 'text-plum/38'}`}>
                         {t.desc}
                       </p>
                     </div>
-                    {/* Check mark */}
+                    {/* Selected checkmark */}
                     {active && (
                       <div className="absolute top-2 right-2 w-5 h-5 bg-plum rounded-full flex items-center justify-center shadow-soft">
                         <Check size={11} className="text-white" />
