@@ -151,18 +151,15 @@ export function SchoolFeed() {
           Preview — unlock to see your school
         </p>
         {[
-          { color: 'Blush Pink', sil: 'A-Line',    t: '2h ago' },
-          { color: 'Navy',       sil: 'Mermaid',   t: '5h ago' },
-          { color: 'Gold',       sil: 'Ball Gown', t: '1d ago' },
+          { color: 'Blush Pink', sil: 'A-Line',    t: '2h ago', swatch: 'bg-[linear-gradient(135deg,#f0a8b8cc_0%,#f0a8b888_100%)]' },
+          { color: 'Navy',       sil: 'Mermaid',   t: '5h ago', swatch: 'bg-[linear-gradient(135deg,#081848cc_0%,#08184888_100%)]' },
+          { color: 'Gold',       sil: 'Ball Gown', t: '1d ago', swatch: 'bg-[linear-gradient(135deg,#c8a040cc_0%,#c8a04088_100%)]' },
         ].map((look, i) => (
           <div
             key={i}
             className="flex items-center gap-3 bg-white rounded-2xl shadow-soft px-4 py-3.5 blur-[2.5px] opacity-55 select-none"
           >
-            <div
-              className="w-11 h-11 rounded-xl flex-shrink-0 shadow-soft"
-              style={{ background: colorToGradient(look.color) }}
-            />
+            <div className={`w-11 h-11 rounded-xl flex-shrink-0 shadow-soft ${look.swatch}`} />
             <div className="flex-1 text-left">
               <p className="text-plum font-semibold text-sm">{look.color} {look.sil}</p>
               <p className="text-plum/40 text-xs mt-0.5">Locked {look.t} · Anonymous</p>
