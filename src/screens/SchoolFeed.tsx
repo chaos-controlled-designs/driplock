@@ -57,6 +57,25 @@ interface SchoolLock {
   created_at: string;
 }
 
+interface Trends {
+  total: number;
+  topColors: [string, number][];
+  topSilhouettes: [string, number][];
+}
+
+function computeTrends(locks: SchoolLock[]): Trends | null {
+  if (locks.length === 0) return null;
+  const colors: Record<string, number> = {};
+  const silhouettes: Record<string, number> = {};
+  for (const lock of locks) {
+    colors[lock.color] = (colors[lock.color] ?? 0) + 1;
+    silhouettes[lock.silhouette] = (silhouettes[lock.silhouette] ?? 0) + 1;
+  }
+  const topColors     = Object.entries(colors).sort(([, a], [, b]) => b - a).slice(0, 3) as [string, number][];
+  const topSilhouettes = Object.entries(silhouettes).sort(([, a], [, b]) => b - a).slice(0, 3) as [string, number][];
+  return { total: locks.length, topColors, topSilhouettes };
+}
+
 export function SchoolFeed() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -184,11 +203,7 @@ export function SchoolFeed() {
     <div className="min-h-screen bg-cream pb-28">
 
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(150deg, #fff0eb 0%, #ffd4c4 55%, #ffc1b8 100%)',
-        padding: '20px 20px 28px',
-        borderRadius: '0 0 28px 28px',
-      }}>
+      <div className="bg-[linear-gradient(150deg,#fff0eb_0%,#ffd4c4_55%,#ffc1b8_100%)] px-5 pt-5 pb-7 rounded-b-[28px]">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles size={16} className="text-plum/60" />
           <p className="text-[10px] font-bold uppercase tracking-widest text-plum/50">VIP Exclusive</p>
@@ -197,43 +212,169 @@ export function SchoolFeed() {
           {schoolName.split(' ')[0]}'s Looks
         </h1>
         <p className="text-plum/55 text-sm mt-0.5">
-          Anonymized locked looks from your school
+          Anonymized locked looks · School Trend Radar
         </p>
       </div>
 
       <div className="px-5 pt-5">
 
+        {/* ── Loading skeleton ── */}
         {loading && (
           <div className="flex flex-col gap-3 mt-2">
+            {/* Radar skeleton */}
+            <div className="bg-white rounded-3xl shadow-medium p-4 animate-pulse">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-primary/15" />
+                <div className="h-3 w-32 bg-plum/10 rounded-full" />
+              </div>
+              <div className="flex gap-2 mb-4">
+                <div className="flex-1 h-16 bg-cream rounded-2xl" />
+                <div className="flex-1 h-16 bg-cream rounded-2xl" />
+                <div className="flex-1 h-16 bg-cream rounded-2xl" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-5 bg-plum/5 rounded-full w-4/5" />
+                <div className="h-5 bg-plum/5 rounded-full w-1/2" />
+                <div className="h-5 bg-plum/5 rounded-full w-1/3" />
+              </div>
+            </div>
+            {/* Feed skeletons */}
             {[1, 2, 3].map(i => (
               <div key={i} className="bg-white rounded-2xl h-[72px] animate-pulse shadow-soft" />
             ))}
           </div>
         )}
 
+        {/* ── Error state ── */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 text-xs font-medium">
-            {error}
+          <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <span className="text-base mt-px">⚠️</span>
+            <div>
+              <p className="text-red-700 text-xs font-bold mb-0.5">Couldn't load school data</p>
+              <p className="text-red-600/70 text-[11px] leading-relaxed">{error}</p>
+            </div>
           </div>
         )}
 
+        {/* ── Empty state ── */}
         {!loading && !error && locks.length === 0 && (
-          <div className="flex flex-col items-center justify-center pt-16 text-center">
+          <div className="flex flex-col items-center justify-center pt-12 text-center">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <Lock size={24} className="text-primary/50" />
             </div>
             <p className="font-semibold text-plum text-base mb-1">No looks locked yet</p>
             <p className="text-plum/45 text-sm leading-relaxed max-w-[240px]">
-              Be the first! Once other girls at {schoolName} lock in their looks, they'll appear here.
+              Be the first! Once girls at {schoolName} start locking in, their looks will show up here.
             </p>
+            <div className="mt-4 bg-white rounded-2xl shadow-soft px-4 py-3 text-center max-w-[260px]">
+              <p className="text-plum/40 text-[11px] leading-relaxed">
+                Trend Radar will light up with color stats and silhouette breakdowns as more locks come in.
+              </p>
+            </div>
           </div>
         )}
 
-        {!loading && !error && locks.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <p className="text-plum/40 text-xs font-semibold">
-              {locks.length} look{locks.length !== 1 ? 's' : ''} locked at your school
-            </p>
+        {!loading && !error && locks.length > 0 && (() => {
+          const trends = computeTrends(locks);
+
+          return (
+            <div className="flex flex-col gap-3">
+
+              {/* ── School Trend Radar card ── */}
+              {trends && (
+                <div className="bg-white rounded-3xl shadow-medium overflow-hidden">
+                  {/* Card header */}
+                  <div className="bg-[linear-gradient(135deg,#fff0eb_0%,#f5e6ff_100%)] px-4 pt-4 pb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center shadow-soft">
+                        <Sparkles size={14} className="text-plum" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-plum text-sm leading-tight">School Trend Radar</p>
+                        <p className="text-plum/40 text-[10px]">This season at {schoolName.split(' ')[0]}</p>
+                      </div>
+                    </div>
+                    <div className="bg-plum/8 rounded-full px-2.5 py-1">
+                      <span className="text-plum/50 text-[10px] font-bold">LIVE</span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 pb-4 pt-3">
+                    {/* Stat pills */}
+                    <div className="flex gap-2 mb-4">
+                      <div className="flex-1 bg-cream rounded-2xl px-3 py-2.5 text-center">
+                        <p className="font-bold text-plum text-xl leading-tight">{trends.total}</p>
+                        <p className="text-plum/40 text-[10px] mt-0.5">Looks locked</p>
+                      </div>
+                      <div className="flex-1 bg-cream rounded-2xl px-3 py-2.5 text-center">
+                        <p className="font-bold text-plum text-sm leading-tight truncate">{trends.topSilhouettes[0]?.[0] ?? '—'}</p>
+                        <p className="text-plum/40 text-[10px] mt-0.5">Top silhouette</p>
+                      </div>
+                      <div className="flex-1 bg-cream rounded-2xl px-3 py-2.5 text-center">
+                        <p className="font-bold text-plum text-sm leading-tight truncate">{trends.topColors[0]?.[0] ?? '—'}</p>
+                        <p className="text-plum/40 text-[10px] mt-0.5">Trending color</p>
+                      </div>
+                    </div>
+
+                    {/* Top Colors breakdown */}
+                    <p className="text-plum/40 text-[10px] font-bold uppercase tracking-wider mb-2.5">Top Colors This Week</p>
+                    <div className="flex flex-col gap-2.5">
+                      {trends.topColors.map(([color, count], i) => {
+                        const pct = Math.round((count / trends.total) * 100);
+                        return (
+                          <div key={color} className="flex items-center gap-2.5">
+                            <span className="text-plum/25 text-[10px] font-bold w-3 flex-shrink-0">{i + 1}</span>
+                            <div
+                              className="w-5 h-5 rounded-md flex-shrink-0 shadow-soft"
+                              style={{ background: colorToGradient(color) }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-plum text-xs font-semibold truncate">{color}</span>
+                                <span className="text-plum/40 text-[10px] ml-2 flex-shrink-0">{pct}%</span>
+                              </div>
+                              <div className="h-1.5 bg-cream rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-primary to-lavender transition-all"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Silhouette breakdown */}
+                    {trends.topSilhouettes.length > 1 && (
+                      <>
+                        <div className="h-px bg-plum/6 my-3" />
+                        <p className="text-plum/40 text-[10px] font-bold uppercase tracking-wider mb-2.5">Silhouette Breakdown</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {trends.topSilhouettes.map(([sil, count]) => {
+                            const pct = Math.round((count / trends.total) * 100);
+                            return (
+                              <div key={sil} className="bg-lavender/20 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                                <span className="text-plum text-[11px] font-semibold">{sil}</span>
+                                <span className="text-plum/40 text-[10px]">{pct}%</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    <p className="text-plum/25 text-[10px] mt-3 leading-relaxed">
+                      Anonymized · updates as more girls lock in their looks
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Individual locks feed ── */}
+              <p className="text-plum/40 text-[11px] font-bold uppercase tracking-wider mt-1">
+                All Locked Looks ({locks.length})
+              </p>
 
             {locks.map((lock, i) => (
               <div
@@ -273,7 +414,8 @@ export function SchoolFeed() {
               Usernames, sizes, and photos are never shown. Anonymized for everyone's privacy.
             </p>
           </div>
-        )}
+        );
+        })()}
       </div>
     </div>
   );
