@@ -49,6 +49,8 @@ export function BottomNav({
           </button>
         );
 
+        const isVIPSchool = tab.id === 'school' && isVIP;
+
         return (
           <button
             type="button"
@@ -56,40 +58,66 @@ export function BottomNav({
             onClick={() => onChange(tab.id)}
             className="flex-1 flex flex-col items-center gap-1 py-0.5 transition-all active:scale-90"
           >
-            {/* Icon with optional lock badge for non-VIP school tab */}
+            {/* Icon area */}
             <div className="relative">
+              {/* VIP school tab: glowing swatch behind the icon */}
+              {isVIPSchool && (
+                <div className={`absolute inset-0 -m-1.5 rounded-xl ${
+                  isActive
+                    ? 'bg-gradient-to-br from-primary/40 to-lavender/40'
+                    : 'bg-gradient-to-br from-primary/15 to-lavender/15'
+                }`} />
+              )}
+
               {tab.Icon && (
                 <tab.Icon
                   size={20}
                   color={
-                    isActive
+                    isActive && isVIPSchool
+                      ? '#b060a0'
+                      : isActive
                       ? '#d06050'
                       : isLockedSchool
                       ? 'rgba(63,42,42,0.18)'
+                      : isVIPSchool
+                      ? '#c070b0'
                       : 'rgba(63,42,42,0.30)'
                   }
                   strokeWidth={isActive ? 2.5 : 1.8}
                 />
               )}
+
+              {/* Non-VIP lock badge */}
               {isLockedSchool && (
                 <div className="absolute -top-1 -right-1.5 w-3.5 h-3.5 rounded-full bg-plum/20 flex items-center justify-center">
                   <Lock size={7} color="rgba(63,42,42,0.45)" />
                 </div>
               )}
+
+              {/* VIP dot — signals premium content available */}
+              {isVIPSchool && !isActive && (
+                <div className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-gradient-to-br from-primary to-lavender" />
+              )}
             </div>
 
             <span className={`text-[9px] font-semibold tracking-tight ${
-              isActive
+              isActive && isVIPSchool
+                ? 'text-[#b060a0]'
+                : isActive
                 ? 'text-[#d06050]'
                 : isLockedSchool
                 ? 'text-plum/20'
+                : isVIPSchool
+                ? 'text-[#c070b0]'
                 : 'text-plum/35'
             }`}>
-              {tab.label}
+              {isVIPSchool ? 'My School' : tab.label}
             </span>
 
             {isActive && !isLockedSchool && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#d06050] -mt-0.5" />
+              <span className={`w-1.5 h-1.5 rounded-full -mt-0.5 ${
+                isVIPSchool ? 'bg-[#b060a0]' : 'bg-[#d06050]'
+              }`} />
             )}
           </button>
         );

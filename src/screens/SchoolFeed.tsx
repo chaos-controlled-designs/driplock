@@ -110,51 +110,70 @@ export function SchoolFeed() {
 
   // ── Non-VIP gate ────────────────────────────────────────────────
   if (!isVIP) return (
-    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center pb-24">
-      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-5 shadow-glow">
-        <Lock size={32} className="text-plum" />
+    <div className="min-h-screen bg-cream flex flex-col pb-28">
+      {/* Hero header */}
+      <div className="px-6 pt-8 pb-10 rounded-b-[32px] text-center bg-[linear-gradient(150deg,#fff0eb_0%,#ffd4c4_55%,#e8c8f0_100%)]">
+        <div className="w-20 h-20 rounded-full bg-white/60 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-glow border border-white/80">
+          <Sparkles size={34} className="text-plum" />
+        </div>
+        <h2 className="font-display text-2xl font-bold text-plum mb-1.5">My School's Looks</h2>
+        <p className="text-plum/60 text-sm leading-relaxed max-w-[270px] mx-auto">
+          See every dress already locked in at <strong>{schoolName}</strong> — anonymized so you know what's taken.
+        </p>
+        <div className="mt-3 inline-flex items-center gap-1.5 bg-plum/10 rounded-full px-3 py-1.5">
+          <Lock size={10} className="text-plum/50" />
+          <span className="text-plum/60 text-[11px] font-semibold">VIP exclusive</span>
+        </div>
       </div>
-      <h2 className="font-display text-2xl font-bold text-plum mb-2">My School's Looks</h2>
-      <p className="text-plum/55 text-sm mb-1 leading-relaxed max-w-[280px]">
-        See every dress locked in at <strong>{schoolName}</strong> — anonymized, so you know what's already taken.
-      </p>
-      <p className="text-plum/40 text-xs mb-8">VIP members only ✨</p>
 
-      <div className="w-full max-w-[320px] flex flex-col gap-3 mb-6">
-        {['Blush Pink A-Line', 'Navy Mermaid', 'Gold Ball Gown'].map((look, i) => (
+      {/* Blurred preview */}
+      <div className="px-5 pt-5 flex flex-col gap-3">
+        <p className="text-plum/40 text-[11px] font-semibold uppercase tracking-wider text-center mb-1">
+          Preview — unlock to see your school
+        </p>
+        {[
+          { color: 'Blush Pink', sil: 'A-Line',    t: '2h ago' },
+          { color: 'Navy',       sil: 'Mermaid',   t: '5h ago' },
+          { color: 'Gold',       sil: 'Ball Gown', t: '1d ago' },
+        ].map((look, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 bg-white rounded-2xl shadow-soft px-4 py-3 blur-[2px] opacity-60 select-none"
+            className="flex items-center gap-3 bg-white rounded-2xl shadow-soft px-4 py-3.5 blur-[2.5px] opacity-55 select-none"
           >
             <div
-              className="w-10 h-10 rounded-xl flex-shrink-0"
-              style={{ background: colorToGradient(look.split(' ')[0]) }}
+              className="w-11 h-11 rounded-xl flex-shrink-0 shadow-soft"
+              style={{ background: colorToGradient(look.color) }}
             />
-            <div className="text-left">
-              <p className="text-plum font-semibold text-sm">{look}</p>
-              <p className="text-plum/40 text-xs">Locked 2h ago · Anonymous</p>
+            <div className="flex-1 text-left">
+              <p className="text-plum font-semibold text-sm">{look.color} {look.sil}</p>
+              <p className="text-plum/40 text-xs mt-0.5">Locked {look.t} · Anonymous</p>
             </div>
-            <div className="ml-auto">
-              <Lock size={14} className="text-plum/30" />
-            </div>
+            <Lock size={13} className="text-plum/25 flex-shrink-0" />
           </div>
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setShowVIPModal(true)}
-        className="btn-primary mb-3"
-      >
-        Unlock VIP — from $6.99
-      </button>
-      <button
-        type="button"
-        onClick={() => navigate('/event')}
-        className="btn-secondary"
-      >
-        Maybe Later
-      </button>
+      {/* CTA */}
+      <div className="px-5 pt-5 flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() => setShowVIPModal(true)}
+          className="w-full py-4 rounded-2xl font-bold text-plum text-base active:scale-[0.98] transition-all bg-[linear-gradient(135deg,#ffc1b8_0%,#e8c0f0_100%)] shadow-[0_6px_28px_rgba(255,193,184,0.50)]"
+        >
+          <Sparkles size={16} className="inline mr-2 -mt-0.5" />
+          Unlock My School's Looks — from $6.99
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/event')}
+          className="btn-secondary"
+        >
+          Maybe Later
+        </button>
+        <p className="text-plum/30 text-[10px] text-center leading-relaxed">
+          Secure checkout via Stripe · Looks are fully anonymized
+        </p>
+      </div>
 
       <VIPModal open={showVIPModal} onClose={() => setShowVIPModal(false)} userId={user?.id} />
     </div>
