@@ -697,92 +697,115 @@ export function ListingDetail() {
               const feeIsMin      = platformFee === PLATFORM_FEE_MIN;
               const suffix        = checkout.transType === 'rent' ? '/wknd' : '';
               const inPersonTotal = dressPrice + depositPrice;
-              const link         = getStripeLink(listing, checkout.transType);
+              const link          = getStripeLink(listing, checkout.transType);
 
               return (
                 <>
-                  {/* Two-part payment breakdown */}
-                  <div className="flex flex-col gap-3 mb-4">
-                    {/* Stripe portion — platform fee only */}
-                    <div className="bg-cream rounded-2xl p-4">
-                      <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-2.5">Pay now via Stripe</p>
-                      <div className="flex justify-between items-center mb-3">
-                        <div>
-                          <p className="text-plum/60 text-sm">Platform fee</p>
-                          <p className="text-plum/35 text-[10px]">
-                            {feeIsMin
-                              ? 'Min fee · confirms your transaction on DripLock'
-                              : `10% of $${dressPrice.toFixed(2)} · confirms your transaction`}
-                          </p>
-                        </div>
-                        <span className="text-plum font-semibold text-sm">${platformFee.toFixed(2)}</span>
+                  {/* ① Pay now via Stripe */}
+                  <div className="bg-cream rounded-2xl p-4 mb-3">
+                    <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-3">
+                      Step 1 — Pay Now via Stripe
+                    </p>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-plum font-semibold text-sm">Platform fee</p>
+                        <p className="text-plum/40 text-[10px] mt-0.5">
+                          {feeIsMin
+                            ? 'Min fee · secures your spot on DripLock'
+                            : `10% of $${dressPrice.toFixed(2)} · secures your spot`}
+                        </p>
                       </div>
-                      <div className="h-px bg-plum/10 mb-3"/>
-                      <div className="flex justify-between items-center">
-                        <span className="text-plum font-bold text-sm">Stripe charge</span>
-                        <span className="text-plum font-bold text-xl">${platformFee.toFixed(2)}</span>
-                      </div>
+                      <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">${platformFee.toFixed(2)}</span>
                     </div>
-
-                    {/* In-person portion — dress price + deposit (rentals) */}
-                    <div className="bg-white border border-plum/10 rounded-2xl p-4">
-                      <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-2.5">Pay seller in person at meetup</p>
-                      <div className="flex flex-col gap-2.5 mb-3">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-plum/60 text-sm">
-                              {checkout.transType === 'rent' ? 'Rental price' : 'Dress price'}
-                            </p>
-                            <p className="text-plum/35 text-[10px]">Cash or agreed method directly to seller</p>
-                          </div>
-                          <span className="text-plum font-semibold text-sm">{formatPrice(dressCents)}{suffix}</span>
-                        </div>
-                        {/* Security deposit — rentals only, hidden for buy */}
-                        {depositCents > 0 && (
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="text-plum/60 text-sm">Security deposit</p>
-                              <p className="text-plum/35 text-[10px]">Returned when dress is back in good condition</p>
-                            </div>
-                            <span className="text-plum font-semibold text-sm">${depositPrice.toFixed(2)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="h-px bg-plum/10 mb-3"/>
-                      <div className="flex justify-between items-center">
-                        <span className="text-plum font-bold text-sm">At meetup total</span>
-                        <span className="text-plum font-bold text-xl">${inPersonTotal.toFixed(2)}{depositCents > 0 ? '' : suffix}</span>
-                      </div>
+                    <div className="h-px bg-plum/10 mb-3"/>
+                    <div className="flex justify-between items-center">
+                      <span className="text-plum font-bold text-sm">Charged to card now</span>
+                      <span className="text-plum font-bold text-2xl">${platformFee.toFixed(2)}</span>
                     </div>
                   </div>
 
-                  {/* Safety reminders */}
-                  <div className="bg-white border border-primary/20 rounded-2xl px-4 py-3 mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Shield size={14} className="text-primary"/>
-                      <p className="text-plum text-xs font-bold">Meetup Safety Rules</p>
+                  {/* ② Pay seller in person */}
+                  <div className="bg-white border border-plum/10 rounded-2xl p-4 mb-4">
+                    <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-3">
+                      Step 2 — Pay Seller in Person at Meetup
+                    </p>
+                    <div className="flex flex-col gap-3 mb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-plum font-semibold text-sm">
+                            {checkout.transType === 'rent' ? 'Rental price' : 'Dress price'}
+                          </p>
+                          <p className="text-plum/40 text-[10px] mt-0.5">
+                            Cash or Venmo directly to seller
+                          </p>
+                        </div>
+                        <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">
+                          ${dressPrice.toFixed(2)}{suffix}
+                        </span>
+                      </div>
+
+                      {depositCents > 0 && (
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-plum font-semibold text-sm">Security deposit</p>
+                            <p className="text-plum/40 text-[10px] mt-0.5">
+                              Returned when dress is back in good condition
+                            </p>
+                          </div>
+                          <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">
+                            ${depositPrice.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <ul className="text-plum/60 text-[11px] space-y-1 leading-relaxed">
-                      <li>· Meet in a busy public place — mall, coffee shop, school</li>
-                      <li>· Always bring a friend — never go alone</li>
-                      <li>· Do not share your home address</li>
-                      <li>· Inspect the dress before handing over any payment</li>
-                    </ul>
+                    <div className="h-px bg-plum/10 mb-3"/>
+                    <div className="flex justify-between items-center">
+                      <span className="text-plum font-bold text-sm">At meetup total</span>
+                      <span className="text-plum font-bold text-2xl">${inPersonTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Safety rules */}
+                  <div className="bg-white border border-primary/20 rounded-2xl px-4 py-3 mb-4">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <Shield size={14} className="text-primary flex-shrink-0"/>
+                      <p className="text-plum text-xs font-bold">Meetup Safety — Read Before You Go</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {[
+                        { icon: '📍', text: 'Meet in a busy public place — mall, coffee shop, or school' },
+                        { icon: '👯', text: 'Always bring a friend — never go alone' },
+                        { icon: '🚫', text: 'Do not share your home address' },
+                        { icon: '👗', text: 'Inspect the dress carefully before handing over any money' },
+                      ].map((r, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-[13px] leading-none mt-px flex-shrink-0">{r.icon}</span>
+                          <p className="text-plum/65 text-[11px] leading-relaxed">{r.text}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {checkoutDone ? (
                     <div className="flex flex-col gap-3">
                       <div className="bg-sage/40 rounded-2xl px-4 py-3 text-center">
-                        <p className="font-bold text-plum text-base">Platform Fee Paid! ✅</p>
+                        <p className="font-bold text-plum text-base">Platform Fee Paid ✅</p>
                         <p className="text-plum/55 text-xs mt-1">Now coordinate your meetup in chat.</p>
                       </div>
                       <div className="bg-lavender/50 rounded-2xl px-4 py-3">
-                        <p className="font-bold text-plum text-xs mb-1">🤝 Next Steps</p>
-                        <ul className="text-plum/65 text-[11px] leading-relaxed space-y-1">
-                          <li>· Message the seller to agree on time &amp; location</li>
-                          <li>· Choose a busy public spot — mall, coffee shop, etc.</li>
-                          <li>· Bring a friend, inspect dress, then hand over ${inPersonTotal.toFixed(2)} to seller</li>
-                        </ul>
+                        <p className="font-bold text-plum text-xs mb-2">Next Steps</p>
+                        <div className="flex flex-col gap-1.5">
+                          {[
+                            'Message the seller to agree on a time and public location',
+                            'Bring a friend and inspect the dress before paying',
+                            `Hand over $${inPersonTotal.toFixed(2)} to the seller at the meetup`,
+                          ].map((s, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="text-primary font-bold text-xs flex-shrink-0 mt-px">{i + 1}.</span>
+                              <p className="text-plum/70 text-[11px] leading-relaxed">{s}</p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <button type="button" onClick={() => { setCheckout(null); handleMessage(); }} className="btn-primary">
                         Message Seller to Arrange Meetup →
@@ -794,10 +817,10 @@ export function ListingDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={handleCheckoutConfirm}
-                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all border border-primary/30"
-                      style={{ background: '#fff8f0' }}
+                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all"
+                      style={{ background: 'linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%)', boxShadow: '0 6px 24px rgba(255,193,184,0.45)' }}
                     >
-                      Pay Platform Fee ${platformFee.toFixed(2)} →
+                      Pay ${platformFee.toFixed(2)} Platform Fee →
                     </a>
                   )}
                 </>
