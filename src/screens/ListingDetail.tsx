@@ -4,11 +4,12 @@ import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowLeft, Truck, MessageCircle, Heart, Shield,
-  ShoppingBag, X, Lock, Users,
+  ShoppingBag, X, Lock, Users, Check,
 } from 'lucide-react';
 
-const PLATFORM_FEE_RATE = 0.10;
-const SHIPPING_FEE = 2.99;
+const PLATFORM_FEE_RATE   = 0.10;
+const SHIPPING_FEE        = 2.99;
+const INSURANCE_500_COST  = 4.99;
 
 type TransType = 'rent' | 'buy';
 type CheckoutMethod = 'ship' | 'meetup';
@@ -71,9 +72,10 @@ export function ListingDetail() {
   const touchStartX = useRef(0);
   const mouseStartX = useRef(0);
   const isDragging  = useRef(false);
-  const [showSafety,    setShowSafety]    = useState(false);
-  const [checkout,      setCheckout]      = useState<CheckoutConfig | null>(null);
-  const [checkoutDone,  setCheckoutDone]  = useState(false);
+  const [showSafety,      setShowSafety]      = useState(false);
+  const [checkout,        setCheckout]        = useState<CheckoutConfig | null>(null);
+  const [checkoutDone,    setCheckoutDone]    = useState(false);
+  const [insuranceUpgrade, setInsuranceUpgrade] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -516,78 +518,111 @@ export function ListingDetail() {
 
             {/* ── SHIP breakdown ── */}
             {checkout.method === 'ship' && (() => {
-              const dressCents   = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice   = dressCents / 100;
-              // Deposit only applies to rentals; buy flow always 0
-              const depositCents = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
-              const depositPrice = depositCents / 100;
-              // Platform fee is 10% of the dress/rental price (deposit is a returnable security, not part of the fee base)
-              const platformFee  = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
-              const total        = dressPrice + depositPrice + platformFee + SHIPPING_FEE;
-              const suffix       = checkout.transType === 'rent' ? '/wknd' : '';
-              const link         = getStripeLink(listing, checkout.transType);
+              const dressCents    = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice    = dressCents / 100;
+              const depositCents  = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
+              const depositPrice  = depositCents / 100;
+              const platformFee   = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
+              const insuranceCost = checkout.transType === 'rent' && insuranceUpgrade ? INSURANCE_500_COST : 0;
+              const total         = dressPrice + depositPrice + platformFee + SHIPPING_FEE + insuranceCost;
+              const suffix        = checkout.transType === 'rent' ? '/wknd' : '';
+              const link          = getStripeLink(listing, checkout.transType);
 
               return (
                 <>
                   <div className="bg-cream rounded-2xl p-4 mb-4">
-                    <div className="flex flex-col gap-2.5 mb-3">
+                    <div className="flex flex-col gap-3 mb-4">
 
                       {/* Dress / rental price */}
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-plum/60 text-sm">
+                          <p className="text-plum font-semibold text-sm">
                             {checkout.transType === 'rent' ? 'Rental price' : 'Dress price'}
                           </p>
-                          <p className="text-plum/35 text-[10px]">Released to seller after you confirm delivery</p>
+                          <p className="text-plum/40 text-[10px] mt-0.5">Goes to seller after you confirm delivery</p>
                         </div>
-                        <span className="text-plum font-semibold text-sm">{formatPrice(dressCents)}{suffix}</span>
+                        <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">{formatPrice(dressCents)}{suffix}</span>
                       </div>
 
-                      {/* Security deposit — rentals only, hidden for buy */}
+                      {/* Security deposit — rentals only */}
                       {depositCents > 0 && (
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-start">
                           <div>
-                            <p className="text-plum/60 text-sm">Security deposit</p>
-                            <p className="text-plum/35 text-[10px]">Refunded when dress is returned in good condition</p>
+                            <p className="text-plum font-semibold text-sm">Security deposit</p>
+                            <p className="text-plum/40 text-[10px] mt-0.5">Refunded when dress is returned in good condition</p>
                           </div>
-                          <span className="text-plum font-semibold text-sm">${depositPrice.toFixed(2)}</span>
+                          <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">${depositPrice.toFixed(2)}</span>
                         </div>
                       )}
 
                       {/* Platform fee */}
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-plum/60 text-sm">Platform fee (10%)</p>
-                          <p className="text-plum/35 text-[10px]">Escrow &amp; buyer protection</p>
+                          <p className="text-plum font-semibold text-sm">Platform fee</p>
+                          <p className="text-plum/40 text-[10px] mt-0.5">10% · covers escrow &amp; buyer protection</p>
                         </div>
-                        <span className="text-plum font-semibold text-sm">${platformFee.toFixed(2)}</span>
+                        <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">${platformFee.toFixed(2)}</span>
                       </div>
 
-                      {/* Shipping */}
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="text-plum/60 text-sm">Shipping</p>
-                          <p className="text-plum/35 text-[10px]">Your address is only shared after payment</p>
+                      {/* Shipping + insurance block */}
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-plum font-semibold text-sm">Shipping + Insurance</p>
+                            <p className="text-plum/40 text-[10px] mt-0.5">
+                              USPS tracked · $100 damage coverage included
+                            </p>
+                          </div>
+                          <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">
+                            ${(SHIPPING_FEE + insuranceCost).toFixed(2)}
+                          </span>
                         </div>
-                        <span className="text-plum font-semibold text-sm">${SHIPPING_FEE.toFixed(2)}</span>
+
+                        {/* $500 upgrade toggle — rentals only */}
+                        {checkout.transType === 'rent' && (
+                          <button
+                            type="button"
+                            onClick={() => setInsuranceUpgrade(v => !v)}
+                            className={`w-full flex items-center justify-between rounded-xl px-3 py-2.5 mt-2 border transition-all active:scale-[0.98] ${
+                              insuranceUpgrade
+                                ? 'bg-sage/25 border-sage/60'
+                                : 'bg-white border-plum/12'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-4 h-4 rounded flex items-center justify-center border-2 flex-shrink-0 transition-all ${
+                                insuranceUpgrade ? 'bg-plum border-plum' : 'border-plum/30 bg-white'
+                              }`}>
+                                {insuranceUpgrade && <Check size={9} className="text-white"/>}
+                              </div>
+                              <div className="text-left">
+                                <p className="text-plum text-xs font-semibold">Upgrade to $500 coverage</p>
+                                <p className="text-plum/40 text-[10px]">Recommended for dresses over $100</p>
+                              </div>
+                            </div>
+                            <span className="text-plum font-bold text-xs ml-2 flex-shrink-0">+$4.99</span>
+                          </button>
+                        )}
                       </div>
                     </div>
+
+                    {/* Divider + total */}
                     <div className="h-px bg-plum/10 mb-3"/>
                     <div className="flex justify-between items-center">
                       <span className="text-plum font-bold text-sm">Total Due</span>
-                      <span className="text-plum font-bold text-2xl">${total.toFixed(2)}</span>
+                      <span className="text-plum font-bold text-3xl">${total.toFixed(2)}</span>
                     </div>
                   </div>
 
-                  {/* Escrow explanation */}
+                  {/* Escrow note */}
                   <div className="bg-white border border-primary/20 rounded-2xl px-4 py-3 mb-4 flex gap-3 items-start">
                     <Lock size={15} className="text-primary mt-0.5 flex-shrink-0"/>
                     <div>
-                      <p className="text-plum text-xs font-bold mb-0.5">Secure Escrow — Seller Protected Too</p>
+                      <p className="text-plum text-xs font-bold mb-0.5">Secure Escrow — You &amp; the Seller Are Both Protected</p>
                       <p className="text-plum/55 text-[11px] leading-relaxed">
-                        Your full payment goes to DripLock, not the seller.
-                        Seller ships only after DripLock confirms payment.
-                        We release the dress price to the seller after you confirm safe delivery.
+                        Your payment goes to DripLock, not the seller.
+                        The seller only ships after we confirm payment cleared.
+                        We release the funds after you confirm safe delivery.
                       </p>
                     </div>
                   </div>
@@ -608,8 +643,8 @@ export function ListingDetail() {
                       <div className="bg-primary/10 rounded-2xl px-4 py-3">
                         <p className="font-bold text-plum text-xs mb-1">📍 For You (Buyer)</p>
                         <p className="text-plum/65 text-[11px] leading-relaxed">
-                          Send your shipping address in chat. Once you receive the dress and confirm it's in good condition,
-                          DripLock will release payment to the seller.
+                          Send your shipping address in chat. Once you receive the dress and it's in good condition,
+                          let us know — DripLock will release payment to the seller.
                         </p>
                       </div>
                       <button type="button" onClick={() => { setCheckout(null); handleMessage(); }} className="btn-primary">
