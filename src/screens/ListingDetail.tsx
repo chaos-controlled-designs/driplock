@@ -8,8 +8,13 @@ import {
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE   = 0.10;
+const PLATFORM_FEE_MIN    = 8.99;
 const SHIPPING_FEE        = 2.99;
 const INSURANCE_500_COST  = 4.99;
+
+function calcPlatformFee(dressPrice: number): number {
+  return Math.max(PLATFORM_FEE_MIN, Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100);
+}
 
 type TransType = 'rent' | 'buy';
 type CheckoutMethod = 'ship' | 'meetup';
@@ -522,9 +527,10 @@ export function ListingDetail() {
               const dressPrice    = dressCents / 100;
               const depositCents  = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
               const depositPrice  = depositCents / 100;
-              const platformFee   = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
+              const platformFee   = calcPlatformFee(dressPrice);
               const insuranceCost = checkout.transType === 'rent' && insuranceUpgrade ? INSURANCE_500_COST : 0;
               const total         = dressPrice + depositPrice + platformFee + SHIPPING_FEE + insuranceCost;
+              const feeIsMin      = platformFee === PLATFORM_FEE_MIN;
               const suffix        = checkout.transType === 'rent' ? '/wknd' : '';
               const link          = getStripeLink(listing, checkout.transType);
 
@@ -559,7 +565,11 @@ export function ListingDetail() {
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="text-plum font-semibold text-sm">Platform fee</p>
-                          <p className="text-plum/40 text-[10px] mt-0.5">10% · covers escrow &amp; buyer protection</p>
+                          <p className="text-plum/40 text-[10px] mt-0.5">
+                            {feeIsMin
+                              ? `Min fee · covers escrow & buyer protection`
+                              : `10% of $${dressPrice.toFixed(2)} · escrow & buyer protection`}
+                          </p>
                         </div>
                         <span className="text-plum font-semibold text-sm ml-4 flex-shrink-0">${platformFee.toFixed(2)}</span>
                       </div>
@@ -679,13 +689,13 @@ export function ListingDetail() {
 
             {/* ── MEETUP breakdown ── */}
             {checkout.method === 'meetup' && (() => {
-              const dressCents   = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
-              const dressPrice   = dressCents / 100;
-              // Deposit only applies to rentals; buy flow always 0
-              const depositCents = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
-              const depositPrice = depositCents / 100;
-              const platformFee  = Math.round(dressPrice * PLATFORM_FEE_RATE * 100) / 100;
-              const suffix       = checkout.transType === 'rent' ? '/wknd' : '';
+              const dressCents    = checkout.transType === 'rent' ? listing.rental_price_cents! : listing.price_cents!;
+              const dressPrice    = dressCents / 100;
+              const depositCents  = checkout.transType === 'rent' ? (listing.deposit_cents ?? 0) : 0;
+              const depositPrice  = depositCents / 100;
+              const platformFee   = calcPlatformFee(dressPrice);
+              const feeIsMin      = platformFee === PLATFORM_FEE_MIN;
+              const suffix        = checkout.transType === 'rent' ? '/wknd' : '';
               const inPersonTotal = dressPrice + depositPrice;
               const link         = getStripeLink(listing, checkout.transType);
 
@@ -698,8 +708,12 @@ export function ListingDetail() {
                       <p className="text-plum/40 text-[10px] font-bold uppercase tracking-widest mb-2.5">Pay now via Stripe</p>
                       <div className="flex justify-between items-center mb-3">
                         <div>
-                          <p className="text-plum/60 text-sm">Platform fee (10%)</p>
-                          <p className="text-plum/35 text-[10px]">Confirms the transaction on DripLock</p>
+                          <p className="text-plum/60 text-sm">Platform fee</p>
+                          <p className="text-plum/35 text-[10px]">
+                            {feeIsMin
+                              ? 'Min fee · confirms your transaction on DripLock'
+                              : `10% of $${dressPrice.toFixed(2)} · confirms your transaction`}
+                          </p>
                         </div>
                         <span className="text-plum font-semibold text-sm">${platformFee.toFixed(2)}</span>
                       </div>
