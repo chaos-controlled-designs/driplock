@@ -667,8 +667,7 @@ export function ListingDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={handleCheckoutConfirm}
-                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all"
-                      style={{ background: 'linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%)', boxShadow: '0 6px 24px rgba(255,193,184,0.45)' }}
+                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all bg-[linear-gradient(135deg,#ffc1b8_0%,#ffd4c4_100%)] shadow-[0_6px_24px_rgba(255,193,184,0.45)]"
                     >
                       Pay ${total.toFixed(2)} Securely →
                     </a>
@@ -817,8 +816,7 @@ export function ListingDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={handleCheckoutConfirm}
-                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all"
-                      style={{ background: 'linear-gradient(135deg, #ffc1b8 0%, #ffd4c4 100%)', boxShadow: '0 6px 24px rgba(255,193,184,0.45)' }}
+                      className="block w-full py-4 rounded-2xl text-center font-bold text-sm text-plum active:scale-95 transition-all bg-[linear-gradient(135deg,#ffc1b8_0%,#ffd4c4_100%)] shadow-[0_6px_24px_rgba(255,193,184,0.45)]"
                     >
                       Pay ${platformFee.toFixed(2)} Platform Fee →
                     </a>

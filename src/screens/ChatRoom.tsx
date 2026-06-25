@@ -114,8 +114,7 @@ export function ChatRoom() {
 
       {/* Payment bar — shown when a listing is attached to this chat */}
       {listing && (
-        <div className="px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0 border-b border-primary/10"
-          style={{ background: 'linear-gradient(135deg, #fff0eb 0%, #ffd4c4 60%)' }}>
+        <div className="px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0 border-b border-primary/10 bg-[linear-gradient(135deg,#fff0eb_0%,#ffd4c4_60%)]">
           <div className="flex-1 min-w-0">
             <p className="text-plum font-semibold text-xs leading-tight line-clamp-1">{listing.title}</p>
             <p className="text-plum/50 text-[10px] mt-0.5">
@@ -132,8 +131,7 @@ export function ChatRoom() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setPaid(true)}
-              className="flex-shrink-0 px-4 py-2 rounded-xl text-plum text-xs font-bold active:scale-95 transition-all shadow-soft whitespace-nowrap"
-              style={{ background: '#ffc1b8' }}
+              className="flex-shrink-0 px-4 py-2 rounded-xl text-plum text-xs font-bold active:scale-95 transition-all shadow-soft whitespace-nowrap bg-[#ffc1b8]"
             >
               Pay Fee →
             </a>

@@ -89,7 +89,7 @@ export function Favorites() {
             <p className="text-plum/50 text-sm mb-6">
               Tap the heart on any dress in The Vault to save it here!
             </p>
-            <button type="button" onClick={() => navigate('/vault')} className="btn-primary mx-auto" style={{ maxWidth: 200 }}>
+            <button type="button" onClick={() => navigate('/vault')} className="btn-primary mx-auto max-w-[200px]">
               Browse The Vault
             </button>
           </div>
