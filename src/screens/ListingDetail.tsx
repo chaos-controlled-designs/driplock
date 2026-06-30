@@ -4,7 +4,7 @@ import { supabase, Listing, CONDITIONS } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowLeft, Truck, MessageCircle, Heart, Shield,
-  ShoppingBag, X, Lock, Users, Check,
+  ShoppingBag, X, Lock, Users, Check, Edit2,
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE   = 0.10;
@@ -304,11 +304,18 @@ export function ListingDetail() {
           <ArrowLeft size={18} className="text-plum"/>
         </button>
 
-        {/* Wishlist button */}
-        <button type="button" aria-label="Add to wishlist"
-          className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft z-10">
-          <Heart size={18} className="text-primary"/>
-        </button>
+        {/* Owner: edit button · Buyer: wishlist button */}
+        {isOwner ? (
+          <button type="button" aria-label="Edit listing" onClick={() => navigate(`/edit-listing/${listing.id}`)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft z-10">
+            <Edit2 size={16} className="text-plum"/>
+          </button>
+        ) : (
+          <button type="button" aria-label="Add to wishlist"
+            className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-soft z-10">
+            <Heart size={18} className="text-primary"/>
+          </button>
+        )}
 
         {/* VIP label — top center */}
         {isVIP && (

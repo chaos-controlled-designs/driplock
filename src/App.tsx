@@ -100,6 +100,7 @@ function AppRoutes() {
       <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
       <Route path="/listing/:id" element={<ProtectedRoute><ListingDetail /></ProtectedRoute>} />
       <Route path="/new-listing" element={<ProtectedRoute><NewListing /></ProtectedRoute>} />
+      <Route path="/edit-listing/:id" element={<ProtectedRoute><NewListing /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute requireProfile={false}><Profile /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />

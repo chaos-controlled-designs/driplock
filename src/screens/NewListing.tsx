@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase, isVIPActive } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ChevronDown, ArrowLeft, Camera, ImagePlus, ShoppingBag, X, Star, Sparkles, Video, Check } from 'lucide-react';
@@ -43,6 +43,8 @@ const INACTIVE_PILL = 'bg-white text-plum border-primary/20';
 
 export function NewListing() {
   const navigate  = useNavigate();
+  const { id: listingId } = useParams();
+  const isEditMode = !!listingId;
   const { user, profile } = useAuth();
   const isVIP      = isVIPActive(profile);
   const MAX_PHOTOS = isVIP ? 10 : 4;
@@ -50,11 +52,14 @@ export function NewListing() {
   const fileInputRef  = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // Photos
+  // Photos — existing (already uploaded, edit mode) + new (pending upload)
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   const [photos,       setPhotos]       = useState<File[]>([]);
   const [previews,     setPreviews]     = useState<string[]>([]);
+  const totalPhotoCount = existingPhotos.length + photos.length;
 
-  // Video (VIP only)
+  // Video (VIP only) — existing (edit mode) + new (pending upload)
+  const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [video,        setVideo]        = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState('');
 
@@ -85,6 +90,8 @@ export function NewListing() {
   const [uploadProgress,  setUploadProgress]  = useState('');
   const [error,           setError]           = useState('');
   const [success,         setSuccess]         = useState(false);
+  const [loadingListing,  setLoadingListing]  = useState(isEditMode);
+  const [loadError,       setLoadError]       = useState('');
 
   // Revoke object URLs on unmount to avoid memory leaks
   useEffect(() => {
@@ -94,9 +101,52 @@ export function NewListing() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Edit mode: load existing listing and prefill the form
+  useEffect(() => {
+    if (!listingId || !user) return;
+    const loadListing = async () => {
+      const { data, error: loadErr } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', listingId)
+        .single();
+
+      if (loadErr || !data) { setLoadError('Listing not found.'); setLoadingListing(false); return; }
+      if (data.user_id !== user.id) { setLoadError("You don't have permission to edit this listing."); setLoadingListing(false); return; }
+
+      setTitle(data.title ?? '');
+      setDescription(data.description ?? '');
+      setCategory(data.category ?? '');
+      if (data.designer && POPULAR_DESIGNERS.includes(data.designer)) {
+        setDesigner(data.designer);
+      } else if (data.designer) {
+        setDesigner('Other');
+        setCustomDesigner(data.designer);
+      }
+      setColor(data.color ?? '');
+      setSilhouette(data.silhouette ?? '');
+      setDressSize(data.dress_size ?? '');
+      setBust(data.bust_inches != null ? String(data.bust_inches) : '');
+      setWaist(data.waist_inches != null ? String(data.waist_inches) : '');
+      setHips(data.hips_inches != null ? String(data.hips_inches) : '');
+      setCondition(data.condition ?? '');
+      setListingType(data.listing_type ?? 'rent');
+      setPrice(data.price_cents != null ? String(data.price_cents / 100) : '');
+      setRentalPrice(data.rental_price_cents != null ? String(data.rental_price_cents / 100) : '');
+      setDeposit(data.deposit_cents != null ? String(data.deposit_cents / 100) : '');
+      setShips(!!data.ships);
+      setLocalMeetup(!!data.local_meetup);
+      setExistingPhotos(data.photo_urls ?? []);
+      setExistingVideoUrl(data.video_url ?? null);
+      setListingTheme(data.listing_theme ?? '');
+      setLoadingListing(false);
+    };
+    loadListing();
+  }, [listingId, user]);
+
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    const slots  = MAX_PHOTOS - photos.length;
+    const slots  = MAX_PHOTOS - totalPhotoCount;
     const toAdd  = files.slice(0, slots);
     if (!toAdd.length) return;
 
@@ -110,6 +160,10 @@ export function NewListing() {
     URL.revokeObjectURL(previews[index]);
     setPhotos(prev => prev.filter((_, i) => i !== index));
     setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingPhoto = (index: number) => {
+    setExistingPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,8 +213,8 @@ export function NewListing() {
       }
     }
 
-    // Upload video (VIP only)
-    let uploadedVideoUrl: string | null = null;
+    // Upload video (VIP only) — only if a new video was selected
+    let uploadedVideoUrl: string | null = isEditMode ? existingVideoUrl : null;
     if (isVIP && video) {
       setUploadProgress('Uploading your Story Mode video…');
       const ext  = video.name.split('.').pop()?.toLowerCase() ?? 'mp4';
@@ -183,10 +237,11 @@ export function NewListing() {
       uploadedVideoUrl = publicUrl;
     }
 
-    setUploadProgress('Saving your listing…');
+    setUploadProgress(isEditMode ? 'Saving your changes…' : 'Saving your listing…');
 
-    const { error: err } = await supabase.from('listings').insert({
-      user_id:             user!.id,
+    const finalPhotoUrls = isEditMode ? [...existingPhotos, ...uploadedUrls] : uploadedUrls;
+
+    const payload = {
       title:               title.trim(),
       description:         description.trim() || null,
       category,
@@ -204,16 +259,39 @@ export function NewListing() {
       deposit_cents:       deposit     ? Math.round(parseFloat(deposit)     * 100) : null,
       ships,
       local_meetup:        localMeetup,
-      photo_urls:          uploadedUrls,
+      photo_urls:          finalPhotoUrls,
       video_url:           uploadedVideoUrl,
       listing_theme:       isVIP && listingTheme ? listingTheme : null,
       is_vip_listing:      isVIP,
-    });
+    };
+
+    const { error: err } = isEditMode
+      ? await supabase.from('listings').update(payload).eq('id', listingId)
+      : await supabase.from('listings').insert({ ...payload, user_id: user!.id });
 
     setUploadProgress('');
     if (err) { setError(err.message); setLoading(false); return; }
     setSuccess(true); setLoading(false);
   };
+
+  // ── Edit mode: loading existing listing ───────────────────────────
+  if (loadingListing) return (
+    <div className="min-h-screen bg-cream flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-lavender animate-pulse"/>
+    </div>
+  );
+
+  // ── Edit mode: load error (not found / not owner) ─────────────────
+  if (loadError) return (
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+        <X size={24} className="text-red-400"/>
+      </div>
+      <h2 className="font-display text-xl font-bold text-plum mb-2">Can't Edit This Listing</h2>
+      <p className="text-plum/60 text-sm mb-8">{loadError}</p>
+      <button type="button" onClick={() => navigate('/market')} className="btn-primary">Back to My Listings</button>
+    </div>
+  );
 
   // ── Success screen ──────────────────────────────────────────────
   if (success) return (
@@ -221,8 +299,14 @@ export function NewListing() {
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-lavender flex items-center justify-center mb-5 shadow-glow">
         <ShoppingBag size={36} className="text-plum"/>
       </div>
-      <h2 className="font-display text-2xl font-bold text-plum mb-2">Listing Posted!</h2>
-      <p className="text-plum/60 text-sm mb-8">Your dress is now visible to girls across your school in The Vault.</p>
+      <h2 className="font-display text-2xl font-bold text-plum mb-2">
+        {isEditMode ? 'Listing Updated!' : 'Listing Posted!'}
+      </h2>
+      <p className="text-plum/60 text-sm mb-8">
+        {isEditMode
+          ? 'Your changes are now live in The Vault.'
+          : 'Your dress is now visible to girls across your school in The Vault.'}
+      </p>
       <button type="button" onClick={() => navigate('/market')} className="btn-primary mb-3">View My Listings</button>
       <button type="button" onClick={() => navigate('/vault')}  className="btn-secondary">Browse The Vault</button>
     </div>
@@ -242,8 +326,12 @@ export function NewListing() {
         >
           <ArrowLeft size={16}/> Back
         </button>
-        <h2 className="font-display text-2xl font-bold text-plum mb-1">List Your Dress</h2>
-        <p className="text-plum/60 text-sm">Earn cash on your closet — safe, simple, girl-to-girl</p>
+        <h2 className="font-display text-2xl font-bold text-plum mb-1">
+          {isEditMode ? 'Edit Your Listing' : 'List Your Dress'}
+        </h2>
+        <p className="text-plum/60 text-sm">
+          {isEditMode ? 'Update photos, pricing, and details' : 'Earn cash on your closet — safe, simple, girl-to-girl'}
+        </p>
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-5">
@@ -259,11 +347,11 @@ export function NewListing() {
           <div className="flex items-center justify-between mb-1">
             <label className="label mb-0">Photos</label>
             <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-              photos.length >= MAX_PHOTOS
+              totalPhotoCount >= MAX_PHOTOS
                 ? 'bg-sage/60 text-plum'
                 : 'bg-primary/15 text-plum/60'
             }`}>
-              {photos.length}/{MAX_PHOTOS}
+              {totalPhotoCount}/{MAX_PHOTOS}
             </span>
           </div>
           <p className="text-plum/40 text-[11px] mb-3">
@@ -281,7 +369,7 @@ export function NewListing() {
             onChange={handlePhotoSelect}
           />
 
-          {photos.length === 0 ? (
+          {totalPhotoCount === 0 ? (
             /* Empty state */
             <button
               type="button"
@@ -299,26 +387,24 @@ export function NewListing() {
             </button>
           ) : (
             <>
-              {/* 3-column Instagram-style grid */}
+              {/* 3-column Instagram-style grid — existing photos first, then new */}
               <div className="grid grid-cols-3 gap-2">
-                {previews.map((url, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-soft">
+                {existingPhotos.map((url, idx) => (
+                  <div key={`existing-${idx}`} className="relative aspect-square rounded-2xl overflow-hidden shadow-soft">
                     <img
                       src={url}
                       alt={`Photo ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
-                    {/* Cover gradient + badge on first photo */}
                     {idx === 0 && (
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-plum/60 to-transparent pt-6 pb-1.5 px-2 flex items-center gap-1">
                         <Star size={8} fill="#ffd4c4" color="#ffd4c4"/>
                         <span className="text-white text-[9px] font-bold tracking-wide">Cover</span>
                       </div>
                     )}
-                    {/* Remove button */}
                     <button
                       type="button"
-                      onClick={() => removePhoto(idx)}
+                      onClick={() => removeExistingPhoto(idx)}
                       aria-label={`Remove photo ${idx + 1}`}
                       className="absolute top-1.5 right-1.5 w-6 h-6 bg-plum/70 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
                     >
@@ -327,8 +413,32 @@ export function NewListing() {
                   </div>
                 ))}
 
+                {previews.map((url, idx) => (
+                  <div key={`new-${idx}`} className="relative aspect-square rounded-2xl overflow-hidden shadow-soft">
+                    <img
+                      src={url}
+                      alt={`New photo ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {existingPhotos.length === 0 && idx === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-plum/60 to-transparent pt-6 pb-1.5 px-2 flex items-center gap-1">
+                        <Star size={8} fill="#ffd4c4" color="#ffd4c4"/>
+                        <span className="text-white text-[9px] font-bold tracking-wide">Cover</span>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      aria-label={`Remove new photo ${idx + 1}`}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-plum/70 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-90 transition-all"
+                    >
+                      <X size={11} className="text-white"/>
+                    </button>
+                  </div>
+                ))}
+
                 {/* Add slot */}
-                {photos.length < MAX_PHOTOS && (
+                {totalPhotoCount < MAX_PHOTOS && (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -389,7 +499,7 @@ export function NewListing() {
               onChange={handleVideoSelect}
             />
 
-            {!video ? (
+            {!video && !existingVideoUrl ? (
               <button
                 type="button"
                 onClick={() => videoInputRef.current?.click()}
@@ -401,13 +511,16 @@ export function NewListing() {
             ) : (
               <div className="relative rounded-2xl overflow-hidden">
                 <video
-                  src={videoPreview}
+                  src={video ? videoPreview : existingVideoUrl ?? undefined}
                   controls
                   className="w-full rounded-2xl max-h-48 object-cover"
                 />
                 <button
                   type="button"
-                  onClick={() => { URL.revokeObjectURL(videoPreview); setVideo(null); setVideoPreview(''); }}
+                  onClick={() => {
+                    if (videoPreview) URL.revokeObjectURL(videoPreview);
+                    setVideo(null); setVideoPreview(''); setExistingVideoUrl(null);
+                  }}
                   aria-label="Remove video"
                   className="absolute top-2 right-2 w-7 h-7 bg-plum/70 rounded-full flex items-center justify-center"
                 >
@@ -730,7 +843,11 @@ export function NewListing() {
           disabled={loading}
           className="btn-primary"
         >
-          {loading ? 'Posting…' : `Post My Listing${photos.length > 0 ? ` · ${photos.length} photo${photos.length > 1 ? 's' : ''}` : ''}`}
+          {loading
+            ? (isEditMode ? 'Saving…' : 'Posting…')
+            : isEditMode
+              ? 'Save Changes'
+              : `Post My Listing${photos.length > 0 ? ` · ${photos.length} photo${photos.length > 1 ? 's' : ''}` : ''}`}
         </button>
 
       </div>
