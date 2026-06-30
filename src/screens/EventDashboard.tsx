@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, isVIPActive } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Lock, ShoppingBag, Plus, Users, MapPin, Shield, AlertCircle,
-  Calendar, ChevronRight, Edit2, X, Save, Check,
+  Calendar, ChevronRight, Edit2, X, Save, Check, Sparkles,
 } from 'lucide-react';
 
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
@@ -128,6 +128,7 @@ export function EventDashboard() {
     return `${Math.floor(mins / 1440)}d ago`;
   };
 
+  const isVIP = isVIPActive(profile);
   const eventType = profile?.event_type || 'Prom';
   const displayEventName = schoolName
     ? `${schoolName} ${eventType}`
@@ -308,6 +309,26 @@ export function EventDashboard() {
             <span className="text-plum font-semibold text-sm">List a Dress</span>
           </button>
         </div>
+
+        {/* VIP upsell — only for free users */}
+        {!isVIP && (
+          <button
+            type="button"
+            onClick={() => navigate('/vip')}
+            className="w-full text-left bg-[linear-gradient(135deg,#ffd4c4_0%,#f5e6ff_100%)] rounded-3xl px-4 py-4 flex items-center gap-4 shadow-soft active:scale-[0.98] transition-all"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/70 flex items-center justify-center flex-shrink-0 shadow-soft">
+              <Sparkles size={22} className="text-plum" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-plum text-sm leading-tight">Go VIP ✨</p>
+              <p className="text-plum/55 text-xs mt-0.5 leading-snug">
+                See every look locked in at your school — before anyone else. From $6.99
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-plum/35 flex-shrink-0" />
+          </button>
+        )}
 
         {/* Safety note */}
         <div className="bg-sage/50 rounded-3xl px-5 py-4 flex items-center gap-3 shadow-soft">
